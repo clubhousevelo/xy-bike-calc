@@ -240,6 +240,7 @@ button:disabled {
     background-color: white;
     height: 26px;
     font-size: 13px;
+    text-align: center;
 }
 
 .geometry-section,
@@ -339,6 +340,16 @@ button:disabled {
 .add-buttons button {
     font-size: 12px;
     padding: 4px 10px;
+}
+
+.clear-button {
+    background-color: transparent !important;
+    color: var(--error-color) !important;
+    border: 1px solid var(--error-color) !important;
+}
+
+.clear-button:hover {
+    background-color: rgba(255, 59, 48, 0.1) !important;
 }
 
 @keyframes fadeIn {
@@ -466,11 +477,12 @@ button:disabled {
     display: flex;
     align-items: center;
     gap: 6px;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .manual-inputs .input-group label {
     min-width: 45px;
+    text-align: right;
 }
 
 .manual-inputs .input-group input {
@@ -480,6 +492,7 @@ button:disabled {
     border-radius: 4px;
     height: 26px;
     font-size: 13px;
+    text-align: center;
 }
 
 .bike-card-placeholder {
@@ -506,10 +519,17 @@ button:disabled {
 
 .calculator-title {
     text-align: center;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     color: var(--text-color);
     font-size: 24px;
     font-weight: 600;
+}
+
+.calculator-description {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 14px;
 }
 
 .main-nav {
@@ -579,4 +599,138 @@ button:disabled {
     box-shadow: 0 2px 4px var(--shadow-color);
     color: var(--text-secondary);
     font-size: 16px;
+}
+
+.input-section {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0;
+    margin: 1rem auto;
+    align-items: center;
+    justify-content: center;
+    max-width: 650px;
+}
+
+.input-section .input-group {
+    flex: 1;
+    background: var(--card-background);
+    padding: 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-width: 280px;
+    align-items: stretch;
+    height: 235px;
+}
+
+.input-section .results-group {
+    width: 280px;
+    background: var(--card-background);
+    padding: 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 235px;
+}
+
+.input-section .results-group h2 {
+    margin-bottom: 1rem;
+}
+
+.input-section h2 {
+    margin: 0;
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.input-field {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.input-field label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    flex: 1;
+    text-align: left;
+}
+
+.input-field input {
+    width: 55px;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    text-align: center;
+    font-size: 0.9rem;
+    height: 26px;
+    /* Hide spinner buttons */
+    -moz-appearance: textfield;
+}
+
+/* Hide spinner for Chrome, Safari, Edge, Opera */
+.input-field input::-webkit-outer-spin-button,
+.input-field input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-field span {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    width: 20px;
+}
+
+.input-field input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.result-field {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.result-field label {
+    color: var(--text-secondary);
+    font-size: 22px;
+    text-align: center;
+}
+
+.result-field span {
+    font-size: 22px;
+    color: var(--text-color);
+    font-weight: 500;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .input-section {
+        flex-direction: column;
+        margin: 0.5rem;
+        gap: 1rem;
+    }
+
+    .input-section .input-group {
+        max-width: none;
+    }
+
+    .input-section .results-group {
+        width: 100%;
+    }
+
+    .input-field {
+        grid-template-columns: 1fr 100px;
+    }
 }

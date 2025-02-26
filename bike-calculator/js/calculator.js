@@ -7,11 +7,35 @@ class BikeCalculator {
         // Initialize event listeners
         this.initializeEventListeners();
         
-        // Add two regular bikes and one manual bike automatically
-        for (let i = 0; i < 2; i++) {
-            this.addBike();
+        // Check if there's saved data from the current session
+        const savedData = localStorage.getItem('xyCalculatorData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            const sessionStart = sessionStorage.getItem('calculatorSession');
+            
+            // Only load data if it's from the current session
+            if (sessionStart && data.sessionTimestamp === sessionStart) {
+                this.loadSavedData();
+            } else {
+                // Start fresh with default bikes
+                for (let i = 0; i < 2; i++) {
+                    this.addBike();
+                }
+                this.addManualBike();
+                
+                // Set new session timestamp
+                sessionStorage.setItem('calculatorSession', Date.now().toString());
+            }
+        } else {
+            // Start fresh with default bikes
+            for (let i = 0; i < 2; i++) {
+                this.addBike();
+            }
+            this.addManualBike();
+            
+            // Set new session timestamp
+            sessionStorage.setItem('calculatorSession', Date.now().toString());
         }
-        this.addManualBike();
     }
 
     initializeEventListeners() {
@@ -19,10 +43,41 @@ class BikeCalculator {
         document.getElementById('addBike').addEventListener('click', () => this.addBike());
         document.getElementById('addManualBike').addEventListener('click', () => this.addManualBike());
 
+        // Clear all data button
+        document.getElementById('clearAllData').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset the XY Calculator? This will clear all bike data and measurements.')) {
+                // Clear only XY calculator data from localStorage and sessionStorage
+                localStorage.removeItem('xyCalculatorData');
+                sessionStorage.removeItem('calculatorSession');
+                
+                // Clear input fields
+                document.getElementById('clientName').value = '';
+                document.getElementById('targetSaddleX').value = '';
+                document.getElementById('targetSaddleY').value = '';
+                document.getElementById('targetHandlebarX').value = '';
+                document.getElementById('targetHandlebarY').value = '';
+                document.getElementById('handlebarReachUsed').value = '';
+                
+                // Clear bikes container
+                document.getElementById('bikes-container').innerHTML = '';
+                this.bikes = [];
+                
+                // Add default bikes
+                for (let i = 0; i < 2; i++) {
+                    this.addBike();
+                }
+                this.addManualBike();
+                
+                // Disable save button
+                document.getElementById('saveButton').disabled = true;
+            }
+        });
+
         // Client name input
         const clientNameInput = document.getElementById('clientName');
         clientNameInput.addEventListener('input', () => {
             document.getElementById('saveButton').disabled = !clientNameInput.value.trim();
+            this.saveData();
         });
 
         // Save/Load buttons
@@ -35,6 +90,7 @@ class BikeCalculator {
                 document.getElementById(id).addEventListener('input', () => {
                     // When target positions change, update ALL bike cards
                     this.updateCalculations();
+                    this.saveData();
                 });
             });
         
@@ -210,7 +266,7 @@ class BikeCalculator {
         const bikeData = {
             id: `manual-bike-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
             isManual: true,
-            brand: 'Manual Entry',
+            brand: '',
             model: '',
             size: '',
             reach: '',
@@ -278,12 +334,12 @@ class BikeCalculator {
                 <h4>Stem Configuration</h4>
                 <div class="input-group">
                     <label>Stem Height:</label>
-                    <input type="number" class="stem-height" value="40">
+                    <input type="number" class="stem-height" value="40" min="0">
                     <span>mm</span>
                 </div>
                 <div class="input-group">
                     <label>Stem Length:</label>
-                    <input type="number" class="stem-length" value="100">
+                    <input type="number" class="stem-length" value="100" min="0">
                     <span>mm</span>
                 </div>
                 <div class="input-group">
@@ -293,7 +349,7 @@ class BikeCalculator {
                 </div>
                 <div class="input-group">
                     <label>Spacer Height:</label>
-                    <input type="number" class="spacer-height" value="20">
+                    <input type="number" class="spacer-height" value="20" min="0">
                     <span>mm</span>
                 </div>
             </div>
@@ -356,7 +412,7 @@ class BikeCalculator {
             <div class="manual-inputs">
                 <div class="input-group">
                     <label>Brand:</label>
-                    <input type="text" class="brand-input">
+                    <input type="text" class="brand-input" placeholder="Manual Entry">
                 </div>
                 <div class="input-group">
                     <label>Model:</label>
@@ -436,6 +492,7 @@ class BikeCalculator {
         const bikeIndex = this.bikes.findIndex(b => b.id === bikeId);
         if (bikeIndex !== -1) {
             this.updateCalculationsForBike(bikeId);
+            this.saveData(); // Save data after any bike update
         }
     }
 
@@ -570,6 +627,32 @@ class BikeCalculator {
         bike.saddleSetback = 0;
         bike.saddleHeight = 0;
         
+        // Reset dropdown menus if not a manual bike
+        if (!bike.isManual) {
+            bike.brand = '';
+            bike.model = '';
+            bike.size = '';
+            
+            const brandSelect = card.querySelector('.brand-select');
+            const modelSelect = card.querySelector('.model-select');
+            const sizeSelect = card.querySelector('.size-select');
+            
+            brandSelect.value = '';
+            modelSelect.innerHTML = '<option value="">Select Model</option>';
+            sizeSelect.innerHTML = '<option value="">Select Size</option>';
+            modelSelect.disabled = true;
+            sizeSelect.disabled = true;
+        } else {
+            // For manual bikes, clear all fields
+            bike.brand = '';
+            bike.model = '';
+            bike.size = '';
+            
+            card.querySelector('.brand-input').value = '';
+            card.querySelector('.model-input').value = '';
+            card.querySelector('.size-input').value = '';
+        }
+        
         // Update input fields
         card.querySelector('.reach').value = bike.reach;
         card.querySelector('.stack').value = bike.stack;
@@ -579,25 +662,21 @@ class BikeCalculator {
         card.querySelector('.stem-length').value = bike.stemLength;
         card.querySelector('.stem-angle').value = bike.stemAngle;
         card.querySelector('.spacer-height').value = bike.spacersHeight;
-        card.querySelector('.handlebar-reach').value = bike.handlebarReach;
-        card.querySelector('.saddle-setback').value = bike.saddleSetback;
-        card.querySelector('.saddle-height').value = bike.saddleHeight;
         
-        // If it's a manual bike, reset brand/model/size fields
-        if (bike.isManual) {
-            bike.brand = 'Manual Entry';
-            bike.model = '';
-            bike.size = '';
-            
-            card.querySelector('.brand-input').value = bike.brand;
-            card.querySelector('.model-input').value = bike.model;
-            card.querySelector('.size-input').value = bike.size;
-        }
+        // Clear results section
+        card.querySelector('.handlebar-x').textContent = '-- mm';
+        card.querySelector('.handlebar-y').textContent = '-- mm';
+        card.querySelector('.bar-reach-needed').textContent = '-- mm';
+        card.querySelector('.setback-sta').textContent = '-- mm';
+        card.querySelector('.effective-sta').textContent = '-- °';
+        card.querySelector('.bb-rail').textContent = '-- mm';
+        card.querySelector('.exposed-seatpost').textContent = '-- mm';
         
         // Find the index of the bike in the array
         const bikeIndex = this.bikes.findIndex(b => b.id === bikeId);
         if (bikeIndex !== -1) {
             this.updateCalculationsForBike(bikeId);
+            this.saveData(); // Save data after reset
         }
     }
 
@@ -613,6 +692,7 @@ class BikeCalculator {
         
         // Remove from array
         this.bikes.splice(bikeIndex, 1);
+        this.saveData(); // Save data after deletion
     }
 
     async setupBikeSelectors(bikeId) {
@@ -620,6 +700,7 @@ class BikeCalculator {
         const brandSelect = card.querySelector('.brand-select');
         const modelSelect = card.querySelector('.model-select');
         const sizeSelect = card.querySelector('.size-select');
+        const bike = this.bikes.find(b => b.id === bikeId);
 
         // Populate brands
         const brands = await this.database.getBrands();
@@ -630,6 +711,37 @@ class BikeCalculator {
             option.textContent = brand;
             brandSelect.appendChild(option);
         });
+
+        // If we have saved brand data, restore it and its dependent selections
+        if (bike.brand) {
+            brandSelect.value = bike.brand;
+            const models = await this.database.getModels(bike.brand);
+            modelSelect.innerHTML = '<option value="">Select Model</option>';
+            models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                modelSelect.appendChild(option);
+            });
+            modelSelect.disabled = false;
+
+            if (bike.model) {
+                modelSelect.value = bike.model;
+                const sizes = await this.database.getSizes(bike.brand, bike.model);
+                sizeSelect.innerHTML = '<option value="">Select Size</option>';
+                sizes.forEach(size => {
+                    const option = document.createElement('option');
+                    option.value = size;
+                    option.textContent = size;
+                    sizeSelect.appendChild(option);
+                });
+                sizeSelect.disabled = false;
+
+                if (bike.size) {
+                    sizeSelect.value = bike.size;
+                }
+            }
+        }
 
         // Setup change handlers
         brandSelect.addEventListener('change', async () => {
@@ -706,6 +818,65 @@ class BikeCalculator {
             }
             this.updateBikeData(bikeId);
         });
+    }
+
+    saveData() {
+        const data = {
+            sessionTimestamp: sessionStorage.getItem('calculatorSession'),
+            clientName: document.getElementById('clientName').value,
+            targetSaddleX: document.getElementById('targetSaddleX').value,
+            targetSaddleY: document.getElementById('targetSaddleY').value,
+            targetHandlebarX: document.getElementById('targetHandlebarX').value,
+            targetHandlebarY: document.getElementById('targetHandlebarY').value,
+            handlebarReachUsed: document.getElementById('handlebarReachUsed').value,
+            bikes: this.bikes
+        };
+        localStorage.setItem('xyCalculatorData', JSON.stringify(data));
+    }
+
+    loadSavedData() {
+        const savedData = localStorage.getItem('xyCalculatorData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            
+            // Restore target positions
+            document.getElementById('clientName').value = data.clientName || '';
+            document.getElementById('targetSaddleX').value = data.targetSaddleX || '';
+            document.getElementById('targetSaddleY').value = data.targetSaddleY || '';
+            document.getElementById('targetHandlebarX').value = data.targetHandlebarX || '';
+            document.getElementById('targetHandlebarY').value = data.targetHandlebarY || '';
+            document.getElementById('handlebarReachUsed').value = data.handlebarReachUsed || '';
+            
+            // Enable/disable save button based on client name
+            document.getElementById('saveButton').disabled = !data.clientName;
+
+            // Restore bikes
+            if (data.bikes && data.bikes.length > 0) {
+                this.bikes = data.bikes;
+                // Clear existing bike cards
+                document.getElementById('bikes-container').innerHTML = '';
+                // Render saved bikes
+                this.bikes.forEach((bikeData, index) => {
+                    this.renderBikeCard(bikeData, index);
+                    if (!bikeData.isManual) {
+                        this.setupBikeSelectors(bikeData.id);
+                    }
+                });
+                this.updateCalculations();
+            } else {
+                // Add default bikes if no saved data
+                for (let i = 0; i < 2; i++) {
+                    this.addBike();
+                }
+                this.addManualBike();
+            }
+        } else {
+            // Add default bikes if no saved data
+            for (let i = 0; i < 2; i++) {
+                this.addBike();
+            }
+            this.addManualBike();
+        }
     }
 }
 

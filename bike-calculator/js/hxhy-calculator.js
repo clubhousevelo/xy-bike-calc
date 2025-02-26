@@ -1,49 +1,128 @@
 class HXHYCalculator {
     constructor() {
+        this.handlebarX = document.getElementById('handlebarX');
+        this.handlebarY = document.getElementById('handlebarY');
+        this.headTubeAngle = document.getElementById('headTubeAngle');
+        this.stemHeight = document.getElementById('stemHeight');
+        this.stemLength = document.getElementById('stemLength');
+        this.stemAngle = document.getElementById('stemAngle');
+        this.spacerHeight = document.getElementById('spacerHeight');
+        this.frameReach = document.getElementById('frameReach');
+        this.frameStack = document.getElementById('frameStack');
+
+        // Check if there's saved data and a valid session
+        const savedData = localStorage.getItem('hxhyCalculatorData');
+        const sessionStart = sessionStorage.getItem('calculatorSession');
+        
+        if (savedData && sessionStart) {
+            const data = JSON.parse(savedData);
+            // Only load data if it's from the current session
+            if (data.sessionTimestamp === sessionStart) {
+                this.loadSavedData();
+            }
+        } else if (!sessionStart) {
+            // Only set a new session if there isn't one at all
+            sessionStorage.setItem('calculatorSession', Date.now().toString());
+        }
+
         this.initializeEventListeners();
     }
 
     initializeEventListeners() {
-        // Input fields for X/Y coordinates
-        document.getElementById('handlebarX').addEventListener('input', () => this.calculate());
-        document.getElementById('handlebarY').addEventListener('input', () => this.calculate());
-        document.getElementById('headTubeAngle').addEventListener('input', () => this.calculate());
-        document.getElementById('stemLength').addEventListener('input', () => this.calculate());
-        document.getElementById('stemAngle').addEventListener('input', () => this.calculate());
-        document.getElementById('spacerHeight').addEventListener('input', () => this.calculate());
+        const inputs = [
+            this.handlebarX,
+            this.handlebarY,
+            this.headTubeAngle,
+            this.stemHeight,
+            this.stemLength,
+            this.stemAngle,
+            this.spacerHeight
+        ];
+
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                this.calculate();
+                this.saveData();
+            });
+        });
+    }
+
+    saveData() {
+        const data = {
+            sessionTimestamp: sessionStorage.getItem('calculatorSession'),
+            handlebarX: this.handlebarX.value,
+            handlebarY: this.handlebarY.value,
+            headTubeAngle: this.headTubeAngle.value,
+            stemHeight: this.stemHeight.value,
+            stemLength: this.stemLength.value,
+            stemAngle: this.stemAngle.value,
+            spacerHeight: this.spacerHeight.value
+        };
+        localStorage.setItem('hxhyCalculatorData', JSON.stringify(data));
+    }
+
+    loadSavedData() {
+        const savedData = localStorage.getItem('hxhyCalculatorData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            this.handlebarX.value = data.handlebarX || '469';
+            this.handlebarY.value = data.handlebarY || '618';
+            this.headTubeAngle.value = data.headTubeAngle || '72.4';
+            this.stemHeight.value = data.stemHeight || '40';
+            this.stemLength.value = data.stemLength || '100';
+            this.stemAngle.value = data.stemAngle || '-6';
+            this.spacerHeight.value = data.spacerHeight || '28';
+            this.calculate();
+        }
     }
 
     calculate() {
-        const handlebarX = parseFloat(document.getElementById('handlebarX').value) || 0;
-        const handlebarY = parseFloat(document.getElementById('handlebarY').value) || 0;
-        const headTubeAngle = parseFloat(document.getElementById('headTubeAngle').value) || 73;
-        const stemLength = parseFloat(document.getElementById('stemLength').value) || 100;
-        const stemAngle = parseFloat(document.getElementById('stemAngle').value) || -6;
-        const spacerHeight = parseFloat(document.getElementById('spacerHeight').value) || 20;
+        // Check if handlebar coordinates are empty
+        if (!this.handlebarX.value || !this.handlebarY.value) {
+            this.frameReach.textContent = '-- mm';
+            this.frameStack.textContent = '-- mm';
+            return;
+        }
 
-        // Convert head tube angle to radians
-        const htaRad = (180 - headTubeAngle) * Math.PI / 180;
-        const stemRad = (90 - headTubeAngle + stemAngle) * Math.PI / 180;
+        // Get all input values
+        const handlebarX = parseFloat(this.handlebarX.value);
+        const handlebarY = parseFloat(this.handlebarY.value);
+        const hta = parseFloat(this.headTubeAngle.value);
+        const stemHeight = parseFloat(this.stemHeight.value);
+        const stemLength = parseFloat(this.stemLength.value);
+        const stemAngle = parseFloat(this.stemAngle.value);
+        const spacerHeight = parseFloat(this.spacerHeight.value);
 
-        // Calculate stem center position
-        const stemCenterX = (spacerHeight + 20) * Math.cos(htaRad); // 20mm is default stem height
-        const stemCenterY = (spacerHeight + 20) * Math.sin(htaRad);
+        // Check if any value is NaN
+        if ([handlebarX, handlebarY, hta, stemLength, stemAngle, stemHeight, spacerHeight].some(isNaN)) {
+            this.frameReach.textContent = '-- mm';
+            this.frameStack.textContent = '-- mm';
+            return;
+        }
+
+        // Convert angles to radians - matching Swift's calculations exactly
+        const htaRad = (180 - hta) * Math.PI / 180;
+        const stemRad = (90 - hta + stemAngle) * Math.PI / 180;
+
+        // Calculate stem center position (where stem meets steerer)
+        const stemCenterX = (spacerHeight + stemHeight/2) * Math.cos(htaRad);
+        const stemCenterY = (spacerHeight + stemHeight/2) * Math.sin(htaRad);
 
         // Calculate stem clamp position
         const clampX = stemLength * Math.cos(stemRad);
         const clampY = stemLength * Math.sin(stemRad);
 
-        // Calculate frame reach and stack
-        const frameReach = handlebarX - stemCenterX - clampX;
-        const frameStack = handlebarY - stemCenterY - clampY;
+        // Calculate frame coordinates by subtracting stem and steerer vectors from handlebar position
+        const frameReachValue = Math.round(handlebarX - (stemCenterX + clampX));
+        const frameStackValue = Math.round(handlebarY - (stemCenterY + clampY));
 
-        // Update results
-        document.getElementById('frameReach').textContent = `${Math.round(frameReach)} mm`;
-        document.getElementById('frameStack').textContent = `${Math.round(frameStack)} mm`;
+        // Update display
+        this.frameReach.textContent = `${frameReachValue} mm`;
+        this.frameStack.textContent = `${frameStackValue} mm`;
     }
 }
 
-// Initialize calculator when the page loads
+// Initialize calculator when page loads
 document.addEventListener('DOMContentLoaded', () => {
     new HXHYCalculator();
 }); 

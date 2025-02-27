@@ -32,9 +32,10 @@ body {
 
 .calculator-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 100%;
     padding: 1rem 2rem;
     margin-left: 200px;
+    overflow-x: hidden;
 }
 
 .top-controls {
@@ -46,6 +47,11 @@ body {
     margin-bottom: 10px;
     align-items: center;
     gap: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 900px;
+    max-width: 1000px;
+    box-sizing: border-box;
 }
 
 .client-info {
@@ -54,7 +60,7 @@ body {
     gap: 6px;
     min-width: 380px;
     flex-shrink: 0;
-    margin-right: 15px;
+    margin-left: 10px;
 }
 
 .client-info input {
@@ -91,7 +97,7 @@ button:disabled {
     gap: 15px;
     flex: 1;
     margin-left: 0;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .position-group {
@@ -136,16 +142,25 @@ button:disabled {
     font-size: 13px;
 }
 
+.bikes-container-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 12px;
+    position: relative;
+}
+
 #bikes-container {
     display: flex;
     gap: 12px;
-    margin-bottom: 12px;
     overflow-x: auto;
-    padding-bottom: 8px;
-    padding-top: 5px;
+    padding: 8px 12px;
     flex-wrap: nowrap;
-    width: 100%;
     scrollbar-width: thin;
+    margin: 0 auto;
+    max-width: 100%;
+    width: 100%;
 }
 
 /* Styling for webkit scrollbars (Chrome, Safari, Edge) */
@@ -298,12 +313,6 @@ button:disabled {
     font-weight: 600;
 }
 
-.result-group.with-divider {
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 6px;
-    margin-bottom: 8px;
-}
-
 .button-group {
     display: flex;
     justify-content: space-between;
@@ -398,11 +407,16 @@ button:disabled {
     .calculator-container {
         margin-left: 60px;
         padding: 0.5rem 1rem;
+        overflow-x: hidden;
     }
     
     .top-controls {
         flex-direction: column;
         align-items: stretch;
+        margin-left: 10px;
+        margin-right: 10px;
+        width: calc(100% - 20px);
+        max-width: calc(100% - 20px);
     }
     
     .target-positions {
@@ -463,6 +477,14 @@ button:disabled {
         margin-left: 0;
         margin-top: 50px;
         padding: 0.25rem 0.5rem;
+        overflow-x: hidden;
+    }
+    
+    .top-controls {
+        margin-left: 5px;
+        margin-right: 5px;
+        width: calc(100% - 10px);
+        max-width: calc(100% - 10px);
     }
 }
 
@@ -523,6 +545,11 @@ button:disabled {
     color: var(--text-color);
     font-size: 24px;
     font-weight: 600;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .calculator-description {
@@ -530,6 +557,9 @@ button:disabled {
     margin-bottom: 1.5rem;
     color: var(--text-secondary);
     font-size: 14px;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .main-nav {
@@ -620,7 +650,7 @@ button:disabled {
     display: flex;
     flex-direction: column;
     gap: 3px;
-    max-width: 280px;
+    max-width: 500px;
     align-items: stretch;
     height: 235px;
 }
@@ -699,17 +729,17 @@ button:disabled {
 .result-field {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 15px;;
 }
 
 .result-field label {
     color: var(--text-secondary);
-    font-size: 22px;
+    font-size: 20px;
     text-align: center;
 }
 
 .result-field span {
-    font-size: 22px;
+    font-size: 20px;
     color: var(--text-color);
     font-weight: 500;
     text-align: center;

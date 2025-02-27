@@ -9,7 +9,7 @@
 <body>
     <nav class="main-nav">
         <div class="nav-header">
-            <h2>XY Calc</h2>
+            <h2>XY Bike Calc</h2>
         </div>
         <ul>
             <li><a href="index.html" class="active">X/Y Bike Calculator</a></li>
@@ -19,6 +19,7 @@
     </nav>
     <div class="calculator-container">
         <h1 class="calculator-title">X/Y Bike Calculator</h1>
+        <p class="calculator-description">This tool is designed to help you prescribe bikes based on handlebar position (HX/HY).</p>
         <div class="top-controls">
             <div class="client-info">
                 <label for="clientName">Client Name:</label>
@@ -66,7 +67,9 @@
             </div>
         </div>
 
-        <div id="bikes-container"></div>
+        <div class="bikes-container-wrapper">
+            <div id="bikes-container"></div>
+        </div>
 
         <div class="add-buttons">
             <button id="addBike">Add Bike</button>

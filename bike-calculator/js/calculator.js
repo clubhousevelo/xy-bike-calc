@@ -43,6 +43,9 @@ class BikeCalculator {
         document.getElementById('addBike').addEventListener('click', () => this.addBike());
         document.getElementById('addManualBike').addEventListener('click', () => this.addManualBike());
 
+        // Print button
+        document.getElementById('printButton').addEventListener('click', () => this.printBikeData());
+
         // Clear all data button
         document.getElementById('clearAllData').addEventListener('click', () => {
             if (confirm('Are you sure you want to reset the XY Calculator? This will clear all bike data and measurements.')) {
@@ -877,6 +880,277 @@ class BikeCalculator {
             }
             this.addManualBike();
         }
+    }
+
+    printBikeData() {
+        // Check if there are any bikes with data
+        if (this.bikes.length === 0) {
+            alert('No bike data to print.');
+            return;
+        }
+        
+        // Get client name
+        const clientName = document.getElementById('clientName').value.trim() || 'Client';
+        
+        // Get target positions
+        const targetSaddleX = document.getElementById('targetSaddleX').value || 'N/A';
+        const targetSaddleY = document.getElementById('targetSaddleY').value || 'N/A';
+        const targetHandlebarX = document.getElementById('targetHandlebarX').value || 'N/A';
+        const targetHandlebarY = document.getElementById('targetHandlebarY').value || 'N/A';
+        const handlebarReachUsed = document.getElementById('handlebarReachUsed').value || 'N/A';
+        
+        // Create a title for the print
+        const title = document.createElement('div');
+        title.innerHTML = `<h1 style="text-align: center; margin-bottom: 5px;">Bike Recommendations - ${clientName}</h1>
+                          <p style="text-align: center; margin-bottom: 20px;">Generated on ${new Date().toLocaleDateString()}</p>`;
+        
+        // Create a temporary print container
+        const printContainer = document.createElement('div');
+        printContainer.className = 'print-container';
+        printContainer.style.display = 'none';
+        document.body.appendChild(printContainer);
+        
+        // Add the title
+        printContainer.appendChild(title);
+        
+        // Add target positions section
+        const targetSection = document.createElement('div');
+        targetSection.innerHTML = `
+            <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; text-align: center;">
+                    <div>
+                        <h3>Target Saddle</h3>
+                        <p>X: ${targetSaddleX} mm</p>
+                        <p>Y: ${targetSaddleY} mm</p>
+                    </div>
+                    <div>
+                        <h3>Target Handlebar</h3>
+                        <p>X: ${targetHandlebarX} mm</p>
+                        <p>Y: ${targetHandlebarY} mm</p>
+                    </div>
+                    <div>
+                        <h3>Bar Reach Used</h3>
+                        <p>${handlebarReachUsed} mm</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        printContainer.appendChild(targetSection);
+        
+        // Add bike data section
+        const bikesSection = document.createElement('div');
+        
+        // Get all bike cards with data
+        const bikeCards = document.querySelectorAll('.bike-card');
+        let hasBikeData = false;
+        
+        bikeCards.forEach((card, index) => {
+            // Skip empty or placeholder cards
+            if (card.classList.contains('bike-card-placeholder')) return;
+            
+            // Check if the card has the required geometry data (stack, reach, and head tube angle)
+            const reachInput = card.querySelector('.reach');
+            const stackInput = card.querySelector('.stack');
+            const htaInput = card.querySelector('.hta');
+            
+            const hasReach = reachInput && reachInput.value && reachInput.value.trim() !== '';
+            const hasStack = stackInput && stackInput.value && stackInput.value.trim() !== '';
+            const hasHta = htaInput && htaInput.value && htaInput.value.trim() !== '';
+            
+            // Skip cards without required geometry
+            if (!hasReach || !hasStack || !hasHta) return;
+            
+            // Get bike name - construct from brand, model, and size if available
+            let bikeName = '';
+            
+            // For manual bikes, get values from input fields
+            if (card.querySelector('.manual-inputs')) {
+                const brandInput = card.querySelector('.brand-input');
+                const modelInput = card.querySelector('.model-input');
+                const sizeInput = card.querySelector('.size-input');
+                
+                const brand = brandInput && brandInput.value ? brandInput.value.trim() : '';
+                const model = modelInput && modelInput.value ? modelInput.value.trim() : '';
+                const size = sizeInput && sizeInput.value ? sizeInput.value.trim() : '';
+                
+                if (brand || model || size) {
+                    bikeName = [brand, model, size].filter(Boolean).join(' ');
+                    if (brand && (model || size)) {
+                        bikeName = brand + ' ' + [model, size].filter(Boolean).join(' - ');
+                    }
+                }
+            } 
+            // For database bikes, get values from selectors
+            else if (card.querySelector('.bike-selector')) {
+                const brandSelect = card.querySelector('.brand-select');
+                const modelSelect = card.querySelector('.model-select');
+                const sizeSelect = card.querySelector('.size-select');
+                
+                const brand = brandSelect && brandSelect.value ? brandSelect.value : '';
+                const model = modelSelect && modelSelect.value ? modelSelect.value : '';
+                const size = sizeSelect && sizeSelect.value ? sizeSelect.value : '';
+                
+                if (brand || model || size) {
+                    bikeName = [brand, model, size].filter(Boolean).join(' ');
+                    if (brand && (model || size)) {
+                        bikeName = brand + ' ' + [model, size].filter(Boolean).join(' - ');
+                    }
+                }
+            }
+            
+            // If we couldn't construct a name, use a default
+            if (!bikeName) {
+                bikeName = `Bike ${index + 1}`;
+            }
+            
+            // Get geometry data
+            const geometrySection = card.querySelector('.geometry-section');
+            let geometryData = '';
+            if (geometrySection) {
+                const geometryInputs = geometrySection.querySelectorAll('.input-group');
+                geometryInputs.forEach(group => {
+                    const label = group.querySelector('label')?.textContent || '';
+                    const value = group.querySelector('input')?.value || 'N/A';
+                    const unit = group.querySelector('span')?.textContent || '';
+                    if (label && value) {
+                        geometryData += `<p>${label} ${value}${unit}</p>`;
+                    }
+                });
+            }
+            
+            // Get stem data
+            const stemSection = card.querySelector('.stem-section');
+            let stemData = '';
+            if (stemSection) {
+                const stemInputs = stemSection.querySelectorAll('.input-group');
+                stemInputs.forEach(group => {
+                    const label = group.querySelector('label')?.textContent || '';
+                    const value = group.querySelector('input')?.value || 'N/A';
+                    const unit = group.querySelector('span')?.textContent || '';
+                    if (label && value) {
+                        stemData += `<p>${label} ${value}${unit}</p>`;
+                    }
+                });
+            }
+            
+            // Get results data
+            const resultsSection = card.querySelector('.results-section');
+            let resultsData = '';
+            if (resultsSection) {
+                const resultGroups = resultsSection.querySelectorAll('.result-group');
+                resultGroups.forEach(group => {
+                    const label = group.querySelector('label')?.textContent || '';
+                    const value = group.querySelector('span')?.textContent || 'N/A';
+                    if (label && value) {
+                        resultsData += `<p>${label} ${value}</p>`;
+                    }
+                });
+            }
+            
+            // Only add cards that have some data
+            if (geometryData || stemData || resultsData) {
+                hasBikeData = true;
+                
+                // Create bike card for print
+                const bikeCard = document.createElement('div');
+                bikeCard.style.cssText = 'margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; page-break-inside: avoid;';
+                bikeCard.innerHTML = `
+                    <h3 style="margin-bottom: 10px;">${bikeName}</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                        ${geometryData ? `
+                            <div style="flex: 1; min-width: 200px;">
+                                <h4 style="margin-bottom: 8px;">Geometry</h4>
+                                ${geometryData}
+                            </div>
+                        ` : ''}
+                        
+                        ${stemData ? `
+                            <div style="flex: 1; min-width: 200px;">
+                                <h4 style="margin-bottom: 8px;">Stem</h4>
+                                ${stemData}
+                            </div>
+                        ` : ''}
+                        
+                        ${resultsData ? `
+                            <div style="flex: 1; min-width: 200px;">
+                                <h4 style="margin-bottom: 8px;">Results</h4>
+                                ${resultsData}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                bikesSection.appendChild(bikeCard);
+            }
+        });
+        
+        if (!hasBikeData) {
+            bikesSection.innerHTML += '<p>No bike data available with complete geometry (stack, reach, and head tube angle).</p>';
+        }
+        
+        printContainer.appendChild(bikesSection);
+        
+        // Create a new window for printing
+        const printWindow = window.open('', '_blank');
+        
+        // Write content to the new window
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>XY Bike Calculator - ${clientName}</title>
+                <style>
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        line-height: 1.4;
+                        color: #1C1C1E;
+                        padding: 20px;
+                        max-width: 1000px;
+                        margin: 0 auto;
+                    }
+                    h1, h2, h3, h4 {
+                        margin-top: 0;
+                    }
+                    p {
+                        margin: 5px 0;
+                    }
+                    .print-button {
+                        background-color: #5856D6;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        padding: 8px 16px;
+                        font-size: 14px;
+                        cursor: pointer;
+                        margin: 20px auto;
+                        display: block;
+                    }
+                    .print-button:hover {
+                        opacity: 0.9;
+                    }
+                    @media print {
+                        body {
+                            padding: 0;
+                        }
+                        .print-button {
+                            display: none;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                ${printContainer.innerHTML}
+                <button class="print-button" onclick="window.print()">Print Report</button>
+            </body>
+            </html>
+        `);
+        
+        // Clean up
+        document.body.removeChild(printContainer);
+        
+        // Close the document and focus the window
+        printWindow.document.close();
+        printWindow.focus();
     }
 }
 

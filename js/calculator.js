@@ -1280,7 +1280,7 @@ class BikeDatabase {
     }
 
     async loadBikeData() {
-        const range = 'A1:I1000';  // Adjust range to include all necessary columns
+        const range = 'A1:I2000';  // Adjust range to include all necessary columns
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.SPREADSHEET_ID}/values/${range}?key=${this.API_KEY}`;
         
         try {

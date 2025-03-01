@@ -320,13 +320,13 @@ button:disabled {
     background-color: var(--card-bg);
     padding: 10px;
     border-radius: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .geometry-section h4,
 .stem-section h4,
 .results-section h4 {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     color: var(--text-color);
     font-size: 13px;
     font-weight: 600;
@@ -1279,4 +1279,16 @@ button:disabled {
 
 .toggle-icon {
     font-size: 16px;
+}
+
+/* Add more compact spacing for stem section */
+.stem-section {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+/* Add more compact spacing for results section */
+.results-section {
+    padding-top: 6px;
+    padding-bottom: 6px;
 }

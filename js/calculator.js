@@ -561,12 +561,12 @@ class BikeCalculator {
 
             // Calculate differences between target and actual handlebar positions
             if (targetHandlebarX) {
-                const xDiff = targetHandlebarX - Math.round(handlebarX);
+                const xDiff = Math.round(handlebarX) - targetHandlebarX;
                 handlebarXDiff = xDiff > 0 ? `+${xDiff}` : `${xDiff}`;
             }
             
             if (targetHandlebarY) {
-                const yDiff = targetHandlebarY - Math.round(handlebarY);
+                const yDiff = Math.round(handlebarY) - targetHandlebarY;
                 handlebarYDiff = yDiff > 0 ? `+${yDiff}` : `${yDiff}`;
             }
         }
@@ -597,12 +597,14 @@ class BikeCalculator {
         if (hasRequiredGeometry) {
             card.querySelector('.handlebar-x').textContent = `${Math.round(handlebarX)} mm`;
             if (handlebarXDiff) {
-                card.querySelector('.handlebar-x').innerHTML = `${Math.round(handlebarX)} mm <span class="diff ${parseInt(handlebarXDiff) < 0 ? 'negative' : 'positive'}">(${handlebarXDiff})</span>`;
+                const xArrow = parseInt(handlebarXDiff) > 0 ? '→' : '←';
+                card.querySelector('.handlebar-x').innerHTML = `${Math.round(handlebarX)} mm <span class="diff ${parseInt(handlebarXDiff) > 0 ? 'negative' : 'positive'}">(${handlebarXDiff} ${xArrow})</span>`;
             }
             
             card.querySelector('.handlebar-y').textContent = `${Math.round(handlebarY)} mm`;
             if (handlebarYDiff) {
-                card.querySelector('.handlebar-y').innerHTML = `${Math.round(handlebarY)} mm <span class="diff ${parseInt(handlebarYDiff) < 0 ? 'negative' : 'positive'}">(${handlebarYDiff})</span>`;
+                const yArrow = parseInt(handlebarYDiff) > 0 ? '↑' : '↓';
+                card.querySelector('.handlebar-y').innerHTML = `${Math.round(handlebarY)} mm <span class="diff ${parseInt(handlebarYDiff) > 0 ? 'positive' : 'negative'}">(${handlebarYDiff} ${yArrow})</span>`;
             }
             
             card.querySelector('.bar-reach-needed').textContent = 
@@ -1261,6 +1263,215 @@ class BikeCalculator {
         // Close the document and focus the window
         printWindow.document.close();
         printWindow.focus();
+    }
+
+    saveInstance() {
+        const clientName = document.getElementById('clientName').value.trim();
+        if (!clientName) return;
+
+        // Get bikes with calculated handlebar positions
+        const validBikes = this.bikes.filter(bike => {
+            const card = document.getElementById(bike.id);
+            if (!card) return false;
+            const handlebarX = card.querySelector('.handlebar-x').textContent;
+            return handlebarX && handlebarX !== '-- mm';
+        });
+
+        if (validBikes.length === 0) {
+            alert('No bikes with calculated handlebar positions to save.');
+            return;
+        }
+
+        const saveData = {
+            timestamp: new Date().toISOString(),
+            clientName: clientName,
+            targetSaddleX: document.getElementById('targetSaddleX').value,
+            targetSaddleY: document.getElementById('targetSaddleY').value,
+            targetHandlebarX: document.getElementById('targetHandlebarX').value,
+            targetHandlebarY: document.getElementById('targetHandlebarY').value,
+            handlebarReachUsed: document.getElementById('handlebarReachUsed').value,
+            bikes: validBikes
+        };
+
+        // Get existing saves from localStorage
+        let savedInstances = JSON.parse(localStorage.getItem('savedBikeInstances') || '[]');
+        
+        // Add new save
+        savedInstances.push(saveData);
+        
+        // Save back to localStorage
+        localStorage.setItem('savedBikeInstances', JSON.stringify(savedInstances));
+        alert('Bike configuration saved successfully!');
+    }
+
+    showLoadDialog() {
+        // Get saved instances
+        const savedInstances = JSON.parse(localStorage.getItem('savedBikeInstances') || '[]');
+        
+        if (savedInstances.length === 0) {
+            alert('No saved configurations found.');
+            return;
+        }
+
+        // Create dialog
+        const dialog = document.createElement('div');
+        dialog.className = 'load-dialog';
+        dialog.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+        `;
+
+        // Create overlay
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        `;
+
+        // Add close button
+        const closeButton = document.createElement('button');
+        closeButton.textContent = '×';
+        closeButton.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            border: none;
+            background: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        `;
+        closeButton.onclick = () => {
+            document.body.removeChild(dialog);
+            document.body.removeChild(overlay);
+        };
+        dialog.appendChild(closeButton);
+
+        // Add title
+        const title = document.createElement('h2');
+        title.textContent = 'Load Saved Configuration';
+        title.style.marginTop = '0';
+        dialog.appendChild(title);
+
+        // Create list of saved instances
+        savedInstances.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .forEach(instance => {
+                const item = document.createElement('div');
+                item.style.cssText = `
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    margin-bottom: 10px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                `;
+                
+                const date = new Date(instance.timestamp);
+                const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                
+                item.innerHTML = `
+                    <div>
+                        <strong>${instance.clientName}</strong><br>
+                        <small>${formattedDate}</small>
+                    </div>
+                    <button class="load-button">Load</button>
+                `;
+
+                const loadButton = item.querySelector('.load-button');
+                loadButton.style.cssText = `
+                    padding: 5px 10px;
+                    background: #007bff;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                `;
+                loadButton.onclick = (e) => {
+                    e.stopPropagation();
+                    this.loadSavedInstance(instance);
+                    document.body.removeChild(dialog);
+                    document.body.removeChild(overlay);
+                };
+
+                dialog.appendChild(item);
+            });
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(dialog);
+    }
+
+    loadSavedInstance(savedData) {
+        // Set client name and target positions
+        document.getElementById('clientName').value = savedData.clientName;
+        document.getElementById('targetSaddleX').value = savedData.targetSaddleX;
+        document.getElementById('targetSaddleY').value = savedData.targetSaddleY;
+        document.getElementById('targetHandlebarX').value = savedData.targetHandlebarX;
+        document.getElementById('targetHandlebarY').value = savedData.targetHandlebarY;
+        document.getElementById('handlebarReachUsed').value = savedData.handlebarReachUsed;
+
+        // Clear existing bikes
+        document.getElementById('bikes-container').innerHTML = '';
+        this.bikes = [];
+
+        // Load saved bikes
+        savedData.bikes.forEach((bikeData, index) => {
+            this.bikes.push(bikeData);
+            this.renderBikeCard(bikeData, index);
+            
+            const card = document.getElementById(bikeData.id);
+            if (card) {
+                // Set geometry values
+                card.querySelector('.reach').value = bikeData.reach || '';
+                card.querySelector('.stack').value = bikeData.stack || '';
+                card.querySelector('.hta').value = bikeData.hta || '';
+                card.querySelector('.sta').value = bikeData.sta || '';
+                card.querySelector('.stl').value = bikeData.stl || '';
+                
+                // Set stem configuration values
+                card.querySelector('.stem-length').value = bikeData.stemLength || 100;
+                card.querySelector('.stem-angle').value = bikeData.stemAngle || -6;
+                card.querySelector('.spacer-height').value = bikeData.spacersHeight || 20;
+                
+                // For manual bikes, set the brand/model/size
+                if (bikeData.isManual) {
+                    const brandInput = card.querySelector('.brand-input');
+                    const modelInput = card.querySelector('.model-input');
+                    const sizeInput = card.querySelector('.size-input');
+                    
+                    if (brandInput) brandInput.value = bikeData.brand || '';
+                    if (modelInput) modelInput.value = bikeData.model || '';
+                    if (sizeInput) sizeInput.value = bikeData.size || '';
+                } else {
+                    this.setupBikeSelectors(bikeData.id);
+                }
+            }
+        });
+
+        // Update calculations
+        this.updateCalculations();
+        
+        // Enable save button
+        document.getElementById('saveButton').disabled = false;
     }
 }
 

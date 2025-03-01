@@ -555,7 +555,7 @@ class BikeCalculator {
             handlebarY = bike.stack + stemCenterY + clampY;
 
             // Calculate bar reach needed
-            if (targetHandlebarX) {
+            if (targetHandlebarX && handlebarReachUsed) {
                 barReachNeeded = targetHandlebarX + handlebarReachUsed - Math.round(handlebarX);
             }
 
@@ -608,7 +608,7 @@ class BikeCalculator {
             }
             
             card.querySelector('.bar-reach-needed').textContent = 
-                targetHandlebarX ? `${barReachNeeded} mm` : '-- mm';
+                (targetHandlebarX && handlebarReachUsed) ? `${barReachNeeded} mm` : '-- mm';
         } else {
             // If we don't have required geometry, display placeholder values
             card.querySelector('.handlebar-x').textContent = '-- mm';

@@ -9,6 +9,54 @@
     --error-color: #FF3B30;
     --success-color: #34C759;
     --shadow-color: rgba(0, 0, 0, 0.1);
+    --bg-color: #ffffff;
+    --nav-bg: #f5f5f7;
+    --card-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #ccc;
+    --button-bg: #5856D6;
+    --button-text: #ffffff;
+    --hover-bg: #f0f0f0;
+    --table-bg: #ffffff;
+    --table-header-bg: #f5f5f7;
+    --table-hover-bg: rgba(0, 122, 255, 0.05);
+}
+
+[data-theme="dark"] {
+    --primary-color: #0A84FF;
+    --secondary-color: #5E5CE6;
+    --background-color: #1C1C1E;
+    --card-background: #2C2C2E;
+    --border-color: #3C3C3E;
+    --text-color: #FFFFFF;
+    --text-secondary: #98989D;
+    --error-color: #FF453A;
+    --success-color: #32D74B;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --bg-color: #1C1C1E;
+    --nav-bg: #2C2C2E;
+    --card-bg: #2C2C2E;
+    --input-bg: #3C3C3E;
+    --input-border: #48484A;
+    --button-bg: #5E5CE6;
+    --button-text: #FFFFFF;
+    --hover-bg: #3C3C3E;
+    --table-bg: #2C2C2E;
+    --table-header-bg: #3C3C3E;
+    --table-hover-bg: rgba(94, 92, 230, 0.1);
+}
+
+/* Add specific styling for select elements in dark mode */
+[data-theme="dark"] select {
+    background-color: #3C3C3E;
+    color: var(--text-color);
+}
+
+/* Ensure text inputs use the correct background and have good contrast */
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="number"] {
+    background-color: var(--input-bg);
+    color: var(--text-color);
 }
 
 * {
@@ -21,7 +69,7 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     line-height: 1.4;
     color: var(--text-color);
-    background-color: var(--background-color);
+    background-color: var(--bg-color);
     font-size: 14px;
     margin: 0;
     min-height: 100vh;
@@ -40,7 +88,7 @@ body {
 
 .top-controls {
     display: flex;
-    background-color: var(--card-background);
+    background-color: var(--card-bg);
     padding: 8px;
     border-radius: 8px;
     box-shadow: 0 2px 4px var(--shadow-color);
@@ -77,8 +125,8 @@ button {
     padding: 4px 12px;
     border-radius: 4px;
     border: none;
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--button-bg);
+    color: var(--button-text);
     font-weight: 500;
     cursor: pointer;
     transition: opacity 0.2s ease;
@@ -189,7 +237,7 @@ button:disabled {
 }
 
 .bike-card {
-    background-color: var(--card-background);
+    background-color: var(--card-bg);
     padding: 12px;
     padding-top: 16px;
     border-radius: 8px;
@@ -199,6 +247,7 @@ button:disabled {
     flex: 0 0 auto;
     position: relative;
     margin-top: 8px;
+    border: 1px solid var(--border-color);
 }
 
 .drag-handle {
@@ -258,16 +307,17 @@ button:disabled {
     padding: 4px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
-    background-color: white;
+    background-color: var(--input-bg);
     height: 26px;
     font-size: 13px;
     text-align: center;
+    color: var(--text-color);
 }
 
 .geometry-section,
 .stem-section,
 .results-section {
-    background-color: var(--background-color);
+    background-color: var(--card-bg);
     padding: 10px;
     border-radius: 6px;
     margin-bottom: 8px;
@@ -653,8 +703,8 @@ button:disabled {
     top: 0;
     left: 0;
     bottom: 0;
-    width: 200px;
-    background: var(--card-background);
+    width: 215px;
+    background: var(--nav-bg);
     box-shadow: 2px 0 4px var(--shadow-color);
     z-index: 100;
     display: flex;
@@ -698,13 +748,13 @@ button:disabled {
 
 .main-nav li a:hover {
     color: var(--primary-color);
-    background-color: var(--background-color);
+    background-color: var(--hover-bg);
 }
 
 .main-nav li a.active {
     color: var(--primary-color);
     border-left: 3px solid var(--primary-color);
-    background-color: var(--background-color);
+    background-color: var(--hover-bg);
 }
 
 .coming-soon {
@@ -865,7 +915,7 @@ button:disabled {
     max-width: 900px;
     margin: 2rem auto;
     padding: 1.5rem;
-    background: var(--card-background);
+    background: var(--card-bg);
     border-radius: 8px;
     border: 1px solid var(--border-color);
 }
@@ -879,7 +929,7 @@ button:disabled {
 }
 
 .filter-group {
-    background-color: var(--background-color);
+    background-color: var(--card-bg);
     padding: 1rem;
     border-radius: 6px;
     border: 1px solid var(--border-color);
@@ -921,9 +971,10 @@ button:disabled {
     padding: 4px 8px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
-    background-color: white;
+    background-color: var(--input-bg);
     height: 28px;
     font-size: 0.9rem;
+    color: var(--text-color);
 }
 
 .target-input label {
@@ -944,10 +995,11 @@ button:disabled {
     text-align: right;
     border: 1px solid var(--border-color);
     border-radius: 4px;
-    background: white;
+    background-color: var(--input-bg);
     height: 26px;
     /* Hide spinner buttons */
     -moz-appearance: textfield;
+    color: var(--text-color);
 }
 
 /* Hide spinner for Chrome, Safari, Edge, Opera */
@@ -975,7 +1027,7 @@ button:disabled {
 #resultsTable {
     width: 100%;
     border-collapse: collapse;
-    background: white;
+    background: var(--table-bg);
     font-size: 13px;
     table-layout: fixed;
 }
@@ -1023,7 +1075,7 @@ button:disabled {
 }
 
 #resultsTable th {
-    background: var(--background-color);
+    background-color: var(--table-header-bg);
     font-weight: 600;
     color: var(--text-color);
     padding: 8px 10px;
@@ -1037,7 +1089,7 @@ button:disabled {
 }
 
 #resultsTable th.sortable:hover {
-    background-color: rgba(0, 122, 255, 0.1);
+    background-color: var(--table-hover-bg);
 }
 
 #resultsTable th.sortable::after {
@@ -1067,7 +1119,7 @@ button:disabled {
 }
 
 #resultsTable tbody tr:hover {
-    background-color: rgba(0, 122, 255, 0.05);
+    background-color: var(--table-hover-bg);
 }
 
 #resultsTable td.diff-positive {
@@ -1110,10 +1162,12 @@ button:disabled {
 
 .load-dialog {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--card-bg);
+    color: var(--text-color);
 }
 
 .load-dialog h2 {
-    color: #333;
+    color: var(--text-color);
     margin-bottom: 20px;
 }
 
@@ -1126,5 +1180,37 @@ button:disabled {
 }
 
 .load-dialog > div:not(:first-child):hover {
-    background-color: #f8f9fa;
+    background-color: var(--hover-bg);
+}
+
+/* Theme Toggle Styles */
+.theme-toggle {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    padding: 0 20px;
+}
+
+.dark-mode-toggle {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.3s;
+}
+
+.dark-mode-toggle:hover {
+    opacity: 0.9;
+}
+
+.toggle-icon {
+    font-size: 16px;
 }

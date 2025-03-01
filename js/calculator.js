@@ -6,6 +6,55 @@ class BikeCalculator {
         
         // Initialize database and event listeners
         this.initialize();
+        
+        // Initialize dark mode
+        this.initializeDarkMode();
+    }
+
+    initializeDarkMode() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // Check for saved theme preference or use system preference
+        const savedTheme = localStorage.getItem('theme');
+        const theme = savedTheme || (prefersDarkScheme.matches ? 'dark' : 'light');
+        
+        // Set initial theme
+        document.documentElement.setAttribute('data-theme', theme);
+        this.updateDarkModeButton(theme);
+        
+        // Add click event listener
+        darkModeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            this.updateDarkModeButton(newTheme);
+        });
+        
+        // Listen for system theme changes
+        prefersDarkScheme.addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                const newTheme = e.matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                this.updateDarkModeButton(newTheme);
+            }
+        });
+    }
+
+    updateDarkModeButton(theme) {
+        const button = document.getElementById('darkModeToggle');
+        const icon = button.querySelector('.toggle-icon');
+        const text = button.querySelector('.toggle-text');
+        
+        if (theme === 'dark') {
+            icon.textContent = '🌙';
+            text.textContent = 'Dark Mode';
+        } else {
+            icon.textContent = '☀️';
+            text.textContent = 'Light Mode';
+        }
     }
 
     async initialize() {
@@ -13,18 +62,22 @@ class BikeCalculator {
             // Initialize the database first
             await this.database.initialize();
             
-        // Initialize event listeners
-        this.initializeEventListeners();
-        
-        // Check if there's saved data from the current session
-        const savedData = localStorage.getItem('xyCalculatorData');
-        if (savedData) {
-            const data = JSON.parse(savedData);
-            const sessionStart = sessionStorage.getItem('calculatorSession');
+            // Initialize event listeners
+            this.initializeEventListeners();
             
-            // Only load data if it's from the current session
-            if (sessionStart && data.sessionTimestamp === sessionStart) {
+            // Check if there's saved data from the current session
+            const savedData = localStorage.getItem('xyCalculatorData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                const sessionStart = sessionStorage.getItem('xyCalculatorSession');
+                
+                // Load data if we have it, regardless of session
                 this.loadSavedData();
+                
+                // Set new session timestamp if none exists
+                if (!sessionStart) {
+                    sessionStorage.setItem('xyCalculatorSession', Date.now().toString());
+                }
             } else {
                 // Start fresh with default bikes
                 for (let i = 0; i < 2; i++) {
@@ -33,17 +86,7 @@ class BikeCalculator {
                 this.addManualBike();
                 
                 // Set new session timestamp
-                sessionStorage.setItem('calculatorSession', Date.now().toString());
-            }
-        } else {
-            // Start fresh with default bikes
-            for (let i = 0; i < 2; i++) {
-                this.addBike();
-            }
-            this.addManualBike();
-            
-            // Set new session timestamp
-            sessionStorage.setItem('calculatorSession', Date.now().toString());
+                sessionStorage.setItem('xyCalculatorSession', Date.now().toString());
             }
         } catch (error) {
             console.error('Failed to initialize calculator:', error);
@@ -62,9 +105,8 @@ class BikeCalculator {
         // Clear all data button
         document.getElementById('clearAllData').addEventListener('click', () => {
             if (confirm('Are you sure you want to reset the XY Calculator? This will clear all bike data and measurements.')) {
-                // Clear only XY calculator data from localStorage and sessionStorage
+                // Clear only XY calculator data from localStorage
                 localStorage.removeItem('xyCalculatorData');
-                sessionStorage.removeItem('calculatorSession');
                 
                 // Clear input fields
                 document.getElementById('clientName').value = '';
@@ -86,6 +128,9 @@ class BikeCalculator {
                 
                 // Disable save button
                 document.getElementById('saveButton').disabled = true;
+                
+                // Set new session timestamp for XY Calculator only
+                sessionStorage.setItem('xyCalculatorSession', Date.now().toString());
             }
         });
 
@@ -843,7 +888,7 @@ class BikeCalculator {
 
     saveData() {
         const data = {
-            sessionTimestamp: sessionStorage.getItem('calculatorSession'),
+            sessionTimestamp: sessionStorage.getItem('xyCalculatorSession'),
             clientName: document.getElementById('clientName').value,
             targetSaddleX: document.getElementById('targetSaddleX').value,
             targetSaddleY: document.getElementById('targetSaddleY').value,
@@ -1536,10 +1581,10 @@ class BikeDatabase {
 
     async getSizes(brand, model) {
         if (!this.bikeData) await this.loadBikeData();
-        return [...new Set(this.bikeData
+        const bikes = this.bikeData
             .filter(bike => bike.brand === brand && bike.model === model)
-            .map(bike => bike.size))]
-            .sort();
+            .sort((a, b) => parseFloat(a.stack) - parseFloat(b.stack));
+        return [...new Set(bikes.map(bike => bike.size))];
     }
 
     async getBikeGeometry(brand, model, size) {

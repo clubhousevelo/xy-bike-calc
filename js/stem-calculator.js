@@ -71,6 +71,7 @@ function calculateStemDimensions(stemId) {
         for (let i = 1; i < stemCount; i++) {
             if (document.getElementById(`headTubeAngle-${i}`)) {
                 calculateStemDimensions(i);
+                highlightDifferences(i); // Highlight differences after recalculation
             }
         }
     } 
@@ -108,9 +109,66 @@ function calculateStemDimensions(stemId) {
         document.getElementById(`effectiveStack-${id}`).innerHTML = 
             `Rise (Y): ${totalY.toFixed(0)}mm${!diffYText ? '' : 
             `<br><span class="diff-text ${diffY > 0 ? 'positive' : 'negative'}">${diffYText}</span>`}`;
+        
+        // Highlight differences after calculation
+        highlightDifferences(id);
     }
     
     return { x: totalX, y: totalY };
+}
+
+// New function to highlight differences between stems
+function highlightDifferences(stemId) {
+    if (stemId === 0) return; // Don't highlight the first stem
+    
+    // Get values from the first stem (reference)
+    const refHeadTubeAngle = parseFloat(document.getElementById('headTubeAngle-0').value);
+    const refStemHeight = parseFloat(document.getElementById('stemHeight-0').value);
+    const refStemLength = parseFloat(document.getElementById('stemLength-0').value);
+    const refStemAngle = parseFloat(document.getElementById('stemAngle-0').value);
+    const refSpacerHeight = parseFloat(document.getElementById('spacerHeight-0').value);
+    
+    // Get values from the current stem
+    const headTubeAngle = parseFloat(document.getElementById(`headTubeAngle-${stemId}`).value);
+    const stemHeight = parseFloat(document.getElementById(`stemHeight-${stemId}`).value);
+    const stemLength = parseFloat(document.getElementById(`stemLength-${stemId}`).value);
+    const stemAngle = parseFloat(document.getElementById(`stemAngle-${stemId}`).value);
+    const spacerHeight = parseFloat(document.getElementById(`spacerHeight-${stemId}`).value);
+    
+    // Get the input fields for the current stem
+    const headTubeAngleField = document.getElementById(`headTubeAngle-${stemId}`).parentElement;
+    const stemHeightField = document.getElementById(`stemHeight-${stemId}`).parentElement;
+    const stemLengthField = document.getElementById(`stemLength-${stemId}`).parentElement;
+    const stemAngleField = document.getElementById(`stemAngle-${stemId}`).parentElement;
+    const spacerHeightField = document.getElementById(`spacerHeight-${stemId}`).parentElement;
+    
+    // Remove existing highlight classes
+    headTubeAngleField.classList.remove('highlight-different');
+    stemHeightField.classList.remove('highlight-different');
+    stemLengthField.classList.remove('highlight-different');
+    stemAngleField.classList.remove('highlight-different');
+    spacerHeightField.classList.remove('highlight-different');
+    
+    // Compare values and highlight differences
+    if (headTubeAngle !== refHeadTubeAngle) {
+        headTubeAngleField.classList.add('highlight-different');
+    }
+    
+    if (stemHeight !== refStemHeight) {
+        stemHeightField.classList.add('highlight-different');
+    }
+    
+    if (stemLength !== refStemLength) {
+        stemLengthField.classList.add('highlight-different');
+    }
+    
+    if (stemAngle !== refStemAngle) {
+        stemAngleField.classList.add('highlight-different');
+    }
+    
+    if (spacerHeight !== refSpacerHeight) {
+        spacerHeightField.classList.add('highlight-different');
+    }
 }
 
 function saveStemData() {
@@ -161,6 +219,15 @@ function loadStemData() {
     
     // Recalculate all stems
     calculateStemDimensions(0);
+    
+    // Apply highlighting to all stems
+    const updatedStemBoxes = document.querySelectorAll('.stem-box');
+    updatedStemBoxes.forEach((box, index) => {
+        if (index > 0) {
+            const stemId = parseInt(box.dataset.stemId.split('-')[1]);
+            highlightDifferences(stemId);
+        }
+    });
 }
 
 function addNewStem(initialData = null) {
@@ -255,12 +322,16 @@ function addNewStem(initialData = null) {
     newInputs.forEach(input => {
         input.addEventListener('input', function() {
             calculateStemDimensions(stemId);
+            highlightDifferences(stemId); // Highlight differences when input changes
             saveStemData(); // Save data when input changes
         });
     });
     
     // Calculate initial values
     calculateStemDimensions(stemId);
+    
+    // Highlight differences initially
+    highlightDifferences(stemId);
 }
 
 function deleteStem(stemId) {
@@ -268,15 +339,25 @@ function deleteStem(stemId) {
     if (stemBox) {
         stemBox.remove();
         updateStemNumbers();
+        
+        // Recalculate and rehighlight all remaining stems
+        calculateStemDimensions(0);
+        
+        // Apply highlighting to all remaining stems
+        const stemBoxes = document.querySelectorAll('.stem-box');
+        stemBoxes.forEach((box, index) => {
+            if (index > 0) {
+                const stemId = parseInt(box.dataset.stemId.split('-')[1]);
+                highlightDifferences(stemId);
+            }
+        });
+        
         saveStemData(); // Save data after deleting stem
     }
 }
 
 function updateStemNumbers() {
-    // Get all stem boxes
     const stemBoxes = document.querySelectorAll('.stem-box');
-    
-    // Update each stem title with the correct sequential number
     stemBoxes.forEach((box, index) => {
         const stemTitle = box.querySelector('.stem-title');
         if (stemTitle) {
@@ -284,32 +365,6 @@ function updateStemNumbers() {
         }
     });
 }
-
-// Initialize the calculator when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Add event listeners to all inputs in the first stem
-    const inputs = document.querySelectorAll('.stem-input');
-    inputs.forEach(input => {
-        input.addEventListener('input', function() {
-            calculateStemDimensions(parseInt(this.dataset.stemId));
-            saveStemData(); // Save data when input changes
-        });
-    });
-    
-    // Add event listener to the Add Stem button
-    document.getElementById('addStemBtn').addEventListener('click', () => {
-        addNewStem();
-        saveStemData(); // Save data after adding new stem
-    });
-    
-    // Load saved data
-    loadStemData();
-    
-    // If no saved data, do initial calculation
-    if (!localStorage.getItem('stemCalculatorData')) {
-        calculateStemDimensions(0);
-    }
-});
 
 // Add new functions for auto-save/load
 function autoSaveStemData() {
@@ -360,120 +415,35 @@ function autoLoadStemData() {
     
     // Recalculate all stems
     calculateStemDimensions(0);
-}
-
-// Modify addNewStem to include auto-save
-function addNewStem(initialData = null) {
-    const stemId = stemCount;
-    stemCount++;
     
-    const stemContainer = document.getElementById('stemContainer');
-    
-    // Create a new stem box
-    const stemBox = document.createElement('div');
-    stemBox.className = 'stem-box';
-    stemBox.dataset.stemId = `stem-${stemId}`;
-    
-    // Create title container with title and close button
-    const titleContainer = document.createElement('div');
-    titleContainer.className = 'title-container';
-    
-    // Add stem title
-    const stemTitle = document.createElement('h3');
-    stemTitle.className = 'stem-title';
-    // Get the current number of stems and add 1 for the new stem number
-    const currentStemCount = document.querySelectorAll('.stem-box').length + 1;
-    stemTitle.textContent = `Stem ${currentStemCount}`;
-    
-    // Add close button
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'title-close-btn';
-    closeBtn.innerHTML = '×';
-    closeBtn.onclick = function() { deleteStem(stemId); };
-    
-    // Add title and close button to container
-    titleContainer.appendChild(stemTitle);
-    titleContainer.appendChild(closeBtn);
-    
-    // Add title container to stem box
-    stemBox.appendChild(titleContainer);
-    
-    // Clone the input section from the first stem
-    const inputSection = document.querySelector('.input-section').cloneNode(true);
-    
-    // Update IDs and values
-    const inputs = inputSection.querySelectorAll('input');
-    inputs.forEach(input => {
-        const fieldName = input.id.split('-')[0];
-        input.id = `${fieldName}-${stemId}`;
-        input.dataset.stemId = stemId;
-        input.classList.add('stem-input');
+    // Apply highlighting to all stems
+    const updatedStemBoxes = document.querySelectorAll('.stem-box');
+    updatedStemBoxes.forEach((box, index) => {
+        if (index > 0) {
+            const stemId = parseInt(box.dataset.stemId.split('-')[1]);
+            highlightDifferences(stemId);
+        }
     });
-    
-    // Update input values if initial data is provided
-    if (initialData) {
-        inputs.forEach(input => {
-            const fieldName = input.id.split('-')[0];
-            input.value = initialData[fieldName];
-        });
-    }
-    
-    stemBox.appendChild(inputSection);
-    
-    // Create results section
-    const resultsDiv = document.createElement('div');
-    resultsDiv.style = 'display: flex; flex-direction: column; align-items: center;';
-    
-    const resultsGroup = document.createElement('div');
-    resultsGroup.className = 'results-group';
-    resultsGroup.style = 'margin-top: 10px; background-color: var(--card-background); padding: 16px; border-radius: 8px; box-shadow: 0 2px 4px var(--shadow-color); width: 260px; font-size: 16px; font-weight: bold; text-align: center;';
-    
-    const reachDiv = document.createElement('div');
-    reachDiv.id = `effectiveReach-${stemId}`;
-    reachDiv.innerHTML = 'Run (X): 0mm';
-    
-    const spacerDiv = document.createElement('div');
-    spacerDiv.style = 'height: 10px;';
-    
-    const stackDiv = document.createElement('div');
-    stackDiv.id = `effectiveStack-${stemId}`;
-    stackDiv.style = 'margin-top: 0px;';
-    stackDiv.innerHTML = 'Rise (Y): 0mm';
-    
-    resultsGroup.appendChild(reachDiv);
-    resultsGroup.appendChild(spacerDiv);
-    resultsGroup.appendChild(stackDiv);
-    resultsDiv.appendChild(resultsGroup);
-    
-    stemBox.appendChild(resultsDiv);
-    
-    // Add the new stem to the container
-    stemContainer.appendChild(stemBox);
-    
-    // Add event listeners to the new inputs
-    const newInputs = stemBox.querySelectorAll('input');
-    newInputs.forEach(input => {
-        input.addEventListener('input', function() {
-            calculateStemDimensions(stemId);
-            autoSaveStemData(); // Auto-save when input changes
-        });
-    });
-    
-    // Calculate initial values
-    calculateStemDimensions(stemId);
-}
-
-function deleteStem(stemId) {
-    const stemBox = document.querySelector(`[data-stem-id="stem-${stemId}"]`);
-    if (stemBox) {
-        stemBox.remove();
-        updateStemNumbers();
-        autoSaveStemData(); // Auto-save after deleting stem
-    }
 }
 
 // Modify the initialization code
 document.addEventListener('DOMContentLoaded', function() {
+    // Add CSS for highlighting different values
+    const style = document.createElement('style');
+    style.textContent = `
+        .highlight-different {
+            background-color: rgba(255, 204, 0, 0.2) !important;
+            border-left: 3px solid #FFC107 !important;
+            padding-left: 13px !important;
+        }
+        .input-field {
+            transition: background-color 0.3s ease, border-left 0.3s ease;
+            border-left: 3px solid transparent;
+            padding-left: 16px;
+        }
+    `;
+    document.head.appendChild(style);
+    
     // Add event listeners to all inputs in the first stem
     const inputs = document.querySelectorAll('.stem-input');
     inputs.forEach(input => {

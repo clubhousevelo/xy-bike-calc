@@ -90,7 +90,7 @@ class BikeCalculator {
             }
         } catch (error) {
             console.error('Failed to initialize calculator:', error);
-            alert('Failed to load bike database. Please check your internet connection and try again.');
+            this.showCustomAlert('Failed to load bike database. Please check your internet connection and try again.');
         }
     }
 
@@ -104,7 +104,106 @@ class BikeCalculator {
 
         // Clear all data button
         document.getElementById('clearAllData').addEventListener('click', () => {
-            if (confirm('Are you sure you want to reset the XY Calculator? This will clear all bike data and measurements.')) {
+            // Check if there's already a confirmation dialog open
+            if (document.querySelector('.confirm-dialog')) {
+                return; // Don't create multiple dialogs
+            }
+            
+            // Create custom confirmation dialog instead of using native confirm()
+            const confirmDialog = document.createElement('div');
+            confirmDialog.className = 'confirm-dialog';
+            confirmDialog.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--card-bg);
+                color: var(--text-color);
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+                max-width: 400px;
+                width: 90%;
+                text-align: center;
+                z-index: 1001;
+            `;
+            
+            confirmDialog.innerHTML = `
+                <h3 style="margin-top: 0;">Confirm Reset</h3>
+                <p>Are you sure you want to reset the XY Calculator? This will clear all bike data and measurements.</p>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                    <button class="cancel-button">Cancel</button>
+                    <button class="confirm-button">Reset</button>
+                </div>
+            `;
+            
+            // Create overlay for confirmation dialog
+            const confirmOverlay = document.createElement('div');
+            confirmOverlay.className = 'confirm-dialog-overlay';
+            confirmOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+            `;
+            
+            // Add to DOM
+            document.body.appendChild(confirmOverlay);
+            document.body.appendChild(confirmDialog);
+            
+            // Style buttons
+            const cancelButton = confirmDialog.querySelector('.cancel-button');
+            cancelButton.style.cssText = `
+                padding: 8px 16px;
+                background: transparent;
+                color: var(--text-color);
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: 500;
+            `;
+            
+            const confirmButton = confirmDialog.querySelector('.confirm-button');
+            confirmButton.style.cssText = `
+                padding: 8px 16px;
+                background: #FF3B30;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: 500;
+            `;
+            
+            // Function to close the dialog
+            const closeDialog = () => {
+                if (document.body.contains(confirmDialog)) {
+                    document.body.removeChild(confirmDialog);
+                }
+                if (document.body.contains(confirmOverlay)) {
+                    document.body.removeChild(confirmOverlay);
+                }
+                // Remove keyboard event listener
+                document.removeEventListener('keydown', handleKeyDown);
+            };
+            
+            // Handle keyboard events
+            const handleKeyDown = (e) => {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeDialog();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Perform reset operation
+                    resetCalculator();
+                    closeDialog();
+                }
+            };
+            
+            // Function to reset the calculator
+            const resetCalculator = () => {
                 // Clear only XY calculator data from localStorage
                 localStorage.removeItem('xyCalculatorData');
                 
@@ -128,10 +227,21 @@ class BikeCalculator {
                 
                 // Disable save button
                 document.getElementById('saveButton').disabled = true;
-                
-                // Set new session timestamp for XY Calculator only
-                sessionStorage.setItem('xyCalculatorSession', Date.now().toString());
-            }
+            };
+            
+            // Add keyboard event listener
+            document.addEventListener('keydown', handleKeyDown);
+            
+            // Add event listeners
+            cancelButton.onclick = closeDialog;
+            
+            confirmButton.onclick = () => {
+                resetCalculator();
+                closeDialog();
+            };
+            
+            // Focus the cancel button by default (safer option)
+            cancelButton.focus();
         });
 
         // Client name input
@@ -447,7 +557,8 @@ class BikeCalculator {
             </div>
             <div class="button-group">
                 <button class="reset-button">RESET</button>
-                <button class="delete-button">×</button>
+                <button class="duplicate-button">DUPLICATE</button>
+                <button class="delete-button">🗑️</button>
             </div>
         `;
     }
@@ -506,6 +617,9 @@ class BikeCalculator {
             });
 
             // Set initial values for manual bike
+            card.querySelector('.brand-input').value = bikeData.brand;
+            card.querySelector('.model-input').value = bikeData.model;
+            card.querySelector('.size-input').value = bikeData.size;
             card.querySelector('.reach').value = bikeData.reach;
             card.querySelector('.stack').value = bikeData.stack;
             card.querySelector('.hta').value = bikeData.hta;
@@ -519,6 +633,10 @@ class BikeCalculator {
         // Setup button listeners
         card.querySelector('.reset-button').addEventListener('click', () => {
             this.resetBike(bikeData.id);
+        });
+
+        card.querySelector('.duplicate-button').addEventListener('click', () => {
+            this.duplicateBike(bikeData.id);
         });
 
         card.querySelector('.delete-button').addEventListener('click', () => {
@@ -538,9 +656,15 @@ class BikeCalculator {
         bike.hta = parseFloat(card.querySelector('.hta').value) || '';
         bike.sta = parseFloat(card.querySelector('.sta').value) || '';
         bike.stl = parseFloat(card.querySelector('.stl').value) || '';
-        bike.stemLength = parseFloat(card.querySelector('.stem-length').value) || 100;
-        bike.stemAngle = parseFloat(card.querySelector('.stem-angle').value) || -6;
-        bike.spacersHeight = parseFloat(card.querySelector('.spacer-height').value) || 20;
+        
+        // Treat blank stem configuration fields as 0
+        const stemLengthValue = card.querySelector('.stem-length').value;
+        const stemAngleValue = card.querySelector('.stem-angle').value;
+        const spacerHeightValue = card.querySelector('.spacer-height').value;
+        
+        bike.stemLength = stemLengthValue === '' ? 0 : parseFloat(stemLengthValue);
+        bike.stemAngle = stemAngleValue === '' ? 0 : parseFloat(stemAngleValue);
+        bike.spacersHeight = spacerHeightValue === '' ? 0 : parseFloat(spacerHeightValue);
         
         // If it's a manual bike, update brand/model/size
         if (bike.isManual) {
@@ -588,13 +712,20 @@ class BikeCalculator {
         
         if (hasRequiredGeometry) {
             const htaRad = (180 - bike.hta) * Math.PI / 180;
-            const stemRad = (90 - bike.hta + bike.stemAngle) * Math.PI / 180;
             
-            const stemCenterX = (bike.spacersHeight + 20) * Math.cos(htaRad); // Using 20mm as default stem height
-            const stemCenterY = (bike.spacersHeight + 20) * Math.sin(htaRad);
+            // Ensure stemAngle is treated as a number (could be 0)
+            const stemAngle = bike.stemAngle !== undefined && bike.stemAngle !== '' ? bike.stemAngle : 0;
+            const stemRad = (90 - bike.hta + stemAngle) * Math.PI / 180;
             
-            const clampX = bike.stemLength * Math.cos(stemRad);
-            const clampY = bike.stemLength * Math.sin(stemRad);
+            // Ensure spacersHeight is treated as a number (could be 0)
+            const spacersHeight = bike.spacersHeight !== undefined && bike.spacersHeight !== '' ? bike.spacersHeight : 0;
+            const stemCenterX = (spacersHeight + 20) * Math.cos(htaRad); // Using 20mm as default stem height
+            const stemCenterY = (spacersHeight + 20) * Math.sin(htaRad);
+            
+            // Ensure stemLength is treated as a number (could be 0)
+            const stemLength = bike.stemLength !== undefined && bike.stemLength !== '' ? bike.stemLength : 0;
+            const clampX = stemLength * Math.cos(stemRad);
+            const clampY = stemLength * Math.sin(stemRad);
             
             handlebarX = bike.reach + stemCenterX + clampX;
             handlebarY = bike.stack + stemCenterY + clampY;
@@ -756,6 +887,35 @@ class BikeCalculator {
         // Remove from array
         this.bikes.splice(bikeIndex, 1);
         this.saveData(); // Save data after deletion
+    }
+
+    duplicateBike(bikeId) {
+        const originalBike = this.bikes.find(b => b.id === bikeId);
+        if (!originalBike) return;
+
+        // Create a deep copy of the bike data with a new ID
+        const duplicatedBike = {
+            ...JSON.parse(JSON.stringify(originalBike)),
+            id: `bike-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+        };
+
+        // Find the index of the original bike
+        const originalIndex = this.bikes.findIndex(b => b.id === bikeId);
+        
+        // Insert the duplicated bike after the original
+        this.bikes.splice(originalIndex + 1, 0, duplicatedBike);
+        
+        // Render the new bike card
+        this.renderBikeCard(duplicatedBike, originalIndex + 1);
+        
+        // Setup bike selectors if it's not a manual bike
+        if (!duplicatedBike.isManual) {
+            this.setupBikeSelectors(duplicatedBike.id);
+        }
+        
+        // Update calculations and save
+        this.updateCalculationsForBike(duplicatedBike.id);
+        this.saveData();
     }
 
     async setupBikeSelectors(bikeId) {
@@ -993,9 +1153,9 @@ class BikeCalculator {
     }
 
     printBikeData() {
-        // Check if there are any bikes with data
+        // Check if there are any bikes to print
         if (this.bikes.length === 0) {
-            alert('No bike data to print.');
+            this.showCustomAlert('No bike data to print.');
             return;
         }
         
@@ -1323,7 +1483,8 @@ class BikeCalculator {
         });
 
         if (validBikes.length === 0) {
-            alert('No bikes with calculated handlebar positions to save.');
+            // Replace alert with custom dialog
+            this.showCustomAlert('No bikes with calculated handlebar positions to save.');
             return;
         }
 
@@ -1346,15 +1507,109 @@ class BikeCalculator {
         
         // Save back to localStorage
         localStorage.setItem('savedBikeInstances', JSON.stringify(savedInstances));
-        alert('Bike configuration saved successfully!');
+        
+        // Replace alert with custom dialog
+        this.showCustomAlert('Bike configuration saved successfully!');
+    }
+    
+    // Add a new method for custom alerts
+    showCustomAlert(message) {
+        // Check if there's already an alert dialog open
+        if (document.querySelector('.alert-dialog')) {
+            return; // Don't create multiple dialogs
+        }
+        
+        // Create custom alert dialog
+        const alertDialog = document.createElement('div');
+        alertDialog.className = 'alert-dialog';
+        alertDialog.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            z-index: 1001;
+        `;
+        
+        alertDialog.innerHTML = `
+            <p style="margin-top: 0;">${message}</p>
+            <div style="display: flex; justify-content: center; margin-top: 20px;">
+                <button class="ok-button">OK</button>
+            </div>
+        `;
+        
+        // Create overlay
+        const alertOverlay = document.createElement('div');
+        alertOverlay.className = 'alert-overlay';
+        alertOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        `;
+        
+        // Add to DOM
+        document.body.appendChild(alertOverlay);
+        document.body.appendChild(alertDialog);
+        
+        // Style button
+        const okButton = alertDialog.querySelector('.ok-button');
+        okButton.style.cssText = `
+            padding: 8px 16px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        `;
+        
+        // Function to close the dialog
+        const closeDialog = () => {
+            if (document.body.contains(alertDialog)) {
+                document.body.removeChild(alertDialog);
+            }
+            if (document.body.contains(alertOverlay)) {
+                document.body.removeChild(alertOverlay);
+            }
+            // Remove the keyboard event listener
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+        
+        // Add event listener for the OK button
+        okButton.onclick = closeDialog;
+        
+        // Handle keyboard events
+        const handleKeyDown = (e) => {
+            if (e.key === 'Enter' || e.key === 'Escape') {
+                e.preventDefault(); // Prevent default action
+                closeDialog();
+            }
+        };
+        
+        // Add keyboard event listener
+        document.addEventListener('keydown', handleKeyDown);
+        
+        // Focus the OK button
+        okButton.focus();
     }
 
     showLoadDialog() {
         // Get saved instances
-        const savedInstances = JSON.parse(localStorage.getItem('savedBikeInstances') || '[]');
+        let savedInstances = JSON.parse(localStorage.getItem('savedBikeInstances') || '[]');
         
         if (savedInstances.length === 0) {
-            alert('No saved configurations found.');
+            this.showCustomAlert('No saved configurations found.');
             return;
         }
 
@@ -1366,19 +1621,22 @@ class BikeCalculator {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
+            background: var(--card-bg);
+            color: var(--text-color);
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            max-width: 900px;
             width: 90%;
             max-height: 80vh;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
             z-index: 1000;
         `;
 
         // Create overlay
         const overlay = document.createElement('div');
+        overlay.className = 'load-dialog-overlay';
         overlay.style.cssText = `
             position: fixed;
             top: 0;
@@ -1389,80 +1647,370 @@ class BikeCalculator {
             z-index: 999;
         `;
 
-        // Add close button
+        // Add header with title and close button
+        const header = document.createElement('div');
+        header.style.cssText = `
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        `;
+        
+        const title = document.createElement('h2');
+        title.textContent = 'Load Saved Configuration';
+        title.style.margin = '0';
+        
         const closeButton = document.createElement('button');
         closeButton.textContent = '×';
         closeButton.style.cssText = `
-            position: absolute;
-            top: 10px;
-            right: 10px;
             border: none;
             background: none;
+            color: var(--text-color);
             font-size: 24px;
             cursor: pointer;
             padding: 0;
             width: 30px;
             height: 30px;
         `;
-        closeButton.onclick = () => {
-            document.body.removeChild(dialog);
-            document.body.removeChild(overlay);
+        
+        // Function to close the load dialog
+        const closeLoadDialog = () => {
+            if (document.body.contains(dialog)) {
+                document.body.removeChild(dialog);
+            }
+            if (document.body.contains(overlay)) {
+                document.body.removeChild(overlay);
+            }
+            // Remove keyboard event listener
+            document.removeEventListener('keydown', handleKeyDown);
         };
-        dialog.appendChild(closeButton);
+        
+        closeButton.onclick = closeLoadDialog;
+        
+        header.appendChild(title);
+        header.appendChild(closeButton);
+        dialog.appendChild(header);
 
-        // Add title
-        const title = document.createElement('h2');
-        title.textContent = 'Load Saved Configuration';
-        title.style.marginTop = '0';
-        dialog.appendChild(title);
+        // Add search input
+        const searchContainer = document.createElement('div');
+        searchContainer.style.cssText = `
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        `;
+        
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Search by client name...';
+        searchInput.style.cssText = `
+            flex-grow: 1;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 14px;
+        `;
+        
+        searchContainer.appendChild(searchInput);
+        dialog.appendChild(searchContainer);
 
-        // Create list of saved instances
-        savedInstances.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-            .forEach(instance => {
+        // Create table header
+        const tableHeader = document.createElement('div');
+        tableHeader.style.cssText = `
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr 0.8fr 140px;
+            gap: 10px;
+            padding: 10px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            text-align: left;
+        `;
+        tableHeader.innerHTML = `
+            <div>Client Name</div>
+            <div>Date</div>
+            <div>Target Position</div>
+            <div>Bikes</div>
+            <div>Actions</div>
+        `;
+        dialog.appendChild(tableHeader);
+
+        // Create scrollable container for items
+        const itemsContainer = document.createElement('div');
+        itemsContainer.style.cssText = `
+            overflow-y: auto;
+            flex-grow: 1;
+        `;
+
+        // Function to update the list
+        const updateList = (searchTerm = '') => {
+            const filteredInstances = savedInstances
+                .filter(instance => {
+                    if (!searchTerm) return true;
+                    return instance.clientName.toLowerCase().startsWith(searchTerm.toLowerCase());
+                })
+                .sort((a, b) => a.clientName.toLowerCase().localeCompare(b.clientName.toLowerCase()));
+
+            itemsContainer.innerHTML = '';
+            
+            filteredInstances.forEach(instance => {
                 const item = document.createElement('div');
                 item.style.cssText = `
+                    display: grid;
+                    grid-template-columns: 2fr 1.5fr 1fr 0.8fr 140px;
+                    gap: 10px;
                     padding: 10px;
-                    border: 1px solid #ddd;
-                    margin-bottom: 10px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    display: flex;
-                    justify-content: space-between;
+                    border-bottom: 1px solid var(--border-color);
                     align-items: center;
                 `;
+                
+                // Remove hover effect CSS class and style tag
+                item.className = '';
                 
                 const date = new Date(instance.timestamp);
                 const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                 
+                const targetPosition = instance.targetHandlebarX && instance.targetHandlebarY
+                    ? `HX: ${instance.targetHandlebarX}, HY: ${instance.targetHandlebarY}`
+                    : 'Not set';
+                
+                const validBikes = instance.bikes.filter(bike => 
+                    bike.reach && bike.stack && bike.hta
+                ).length;
+                
                 item.innerHTML = `
-                    <div>
-                        <strong>${instance.clientName}</strong><br>
-                        <small>${formattedDate}</small>
+                    <div><strong>${instance.clientName}</strong></div>
+                    <div>${formattedDate}</div>
+                    <div>${targetPosition}</div>
+                    <div>${validBikes} bike${validBikes !== 1 ? 's' : ''}</div>
+                    <div style="display: flex; gap: 4px; justify-content: flex-start;">
+                        <button class="load-button">Load</button>
+                        <button class="delete-button">🗑️</button>
                     </div>
-                    <button class="load-button">Load</button>
                 `;
 
                 const loadButton = item.querySelector('.load-button');
                 loadButton.style.cssText = `
                     padding: 5px 10px;
-                    background: #007bff;
-                    color: white;
-                    border: none;
+                    background: transparent;
+                    color: #007AFF;
+                    border: 1px solid #007AFF;
                     border-radius: 4px;
                     cursor: pointer;
+                    font-weight: 500;
+                    min-width: 60px;
                 `;
-                loadButton.onclick = (e) => {
-                    e.stopPropagation();
+
+                const deleteButton = item.querySelector('.delete-button');
+                deleteButton.style.cssText = `
+                    padding: 5px 10px;
+                    background: transparent;
+                    color: #8E8E93;
+                    border: 1px solid #8E8E93;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-weight: 500;
+                    width: 32px;
+                    height: 28px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+
+                loadButton.onclick = () => {
                     this.loadSavedInstance(instance);
-                    document.body.removeChild(dialog);
-                    document.body.removeChild(overlay);
+                    closeLoadDialog();
                 };
 
-                dialog.appendChild(item);
-            });
+                deleteButton.onclick = () => {
+                    console.log('Delete button clicked');
+                    
+                    // Create custom confirmation dialog
+                    const confirmDialog = document.createElement('div');
+                    confirmDialog.className = 'confirm-dialog';
+                    confirmDialog.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: var(--card-bg);
+                        color: var(--text-color);
+                        padding: 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+                        max-width: 400px;
+                        width: 90%;
+                        text-align: center;
+                        z-index: 1001;
+                    `;
+                    
+                    confirmDialog.innerHTML = `
+                        <h3 style="margin-top: 0;">Confirm Deletion</h3>
+                        <p>Are you sure you want to delete this saved configuration?</p>
+                        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                            <button class="cancel-button">Cancel</button>
+                            <button class="confirm-button">Delete</button>
+                        </div>
+                    `;
+                    
+                    // Create overlay for confirmation dialog
+                    const confirmOverlay = document.createElement('div');
+                    confirmOverlay.className = 'confirm-dialog-overlay';
+                    confirmOverlay.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0, 0, 0, 0.5);
+                        z-index: 1000;
+                    `;
+                    
+                    // Add to DOM
+                    document.body.appendChild(confirmOverlay);
+                    document.body.appendChild(confirmDialog);
+                    
+                    // Style buttons
+                    const cancelButton = confirmDialog.querySelector('.cancel-button');
+                    cancelButton.style.cssText = `
+                        padding: 8px 16px;
+                        background: transparent;
+                        color: var(--text-color);
+                        border: 1px solid var(--border-color);
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-weight: 500;
+                    `;
+                    
+                    const confirmButton = confirmDialog.querySelector('.confirm-button');
+                    confirmButton.style.cssText = `
+                        padding: 8px 16px;
+                        background: #FF3B30;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-weight: 500;
+                    `;
+                    
+                    // Function to close the confirmation dialog
+                    const closeConfirmDialog = () => {
+                        if (document.body.contains(confirmDialog)) {
+                            document.body.removeChild(confirmDialog);
+                        }
+                        if (document.body.contains(confirmOverlay)) {
+                            document.body.removeChild(confirmOverlay);
+                        }
+                        // Remove keyboard event listener
+                        document.removeEventListener('keydown', handleConfirmKeyDown);
+                    };
+                    
+                    // Handle keyboard events for confirmation dialog
+                    const handleConfirmKeyDown = (e) => {
+                        if (e.key === 'Escape') {
+                            e.preventDefault();
+                            closeConfirmDialog();
+                            console.log('Delete cancelled via Escape key');
+                        } else if (e.key === 'Enter') {
+                            e.preventDefault();
+                            // Perform delete operation
+                            console.log('Delete confirmed via Enter key');
+                            const updatedInstances = savedInstances.filter(saved => 
+                                saved.timestamp !== instance.timestamp
+                            );
+                            console.log('Original instances:', savedInstances.length);
+                            console.log('Updated instances:', updatedInstances.length);
+                            localStorage.setItem('savedBikeInstances', JSON.stringify(updatedInstances));
+                            
+                            // Update the local savedInstances array to match localStorage
+                            savedInstances = updatedInstances;
+                            
+                            // Remove the item from the display
+                            item.remove();
+                            console.log('Item removed from display');
+                            
+                            closeConfirmDialog();
+                            
+                            // If no items left, close the main dialog
+                            console.log('Items remaining:', itemsContainer.children.length);
+                            if (itemsContainer.children.length === 0) {
+                                closeLoadDialog();
+                                console.log('Dialog closed - no items left');
+                            }
+                        }
+                    };
+                    
+                    // Add keyboard event listener for confirmation dialog
+                    document.addEventListener('keydown', handleConfirmKeyDown);
+                    
+                    // Add event listeners
+                    cancelButton.onclick = () => {
+                        closeConfirmDialog();
+                        console.log('Delete cancelled');
+                    };
+                    
+                    confirmButton.onclick = () => {
+                        console.log('Delete confirmed');
+                        const updatedInstances = savedInstances.filter(saved => 
+                            saved.timestamp !== instance.timestamp
+                        );
+                        console.log('Original instances:', savedInstances.length);
+                        console.log('Updated instances:', updatedInstances.length);
+                        localStorage.setItem('savedBikeInstances', JSON.stringify(updatedInstances));
+                        
+                        // Update the local savedInstances array to match localStorage
+                        savedInstances = updatedInstances;
+                        
+                        // Remove the item from the display
+                        item.remove();
+                        console.log('Item removed from display');
+                        
+                        closeConfirmDialog();
+                        
+                        // If no items left, close the main dialog
+                        console.log('Items remaining:', itemsContainer.children.length);
+                        if (itemsContainer.children.length === 0) {
+                            closeLoadDialog();
+                            console.log('Dialog closed - no items left');
+                        }
+                    };
+                    
+                    // Focus the cancel button by default (safer option)
+                    cancelButton.focus();
+                };
 
+                itemsContainer.appendChild(item);
+            });
+        };
+
+        // Add event listener for search input
+        searchInput.addEventListener('input', (e) => {
+            updateList(e.target.value);
+        });
+        
+        // Handle keyboard events for load dialog
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeLoadDialog();
+            }
+        };
+        
+        // Add keyboard event listener
+        document.addEventListener('keydown', handleKeyDown);
+
+        dialog.appendChild(itemsContainer);
         document.body.appendChild(overlay);
         document.body.appendChild(dialog);
+
+        // Initial list population
+        updateList();
+        
+        // Focus the search input
+        searchInput.focus();
     }
 
     loadSavedInstance(savedData) {
@@ -1606,3 +2154,4 @@ class BikeDatabase {
         };
     }
 }
+        

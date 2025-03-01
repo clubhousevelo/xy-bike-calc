@@ -1140,9 +1140,9 @@ class BikeCalculator {
                             if (Math.abs(diff) >= 1) {
                                 let diffText = '';
                                 if (diff > 0) {
-                                    diffText = `<span style="display: block; font-size: 12px; color: #FF3B30;">↑ ${diff}mm higher</span>`;
+                                    diffText = `<span style="display: block; font-size: 12px; color: #007AFF;">↑ ${diff}mm higher</span>`;
                                 } else if (diff < 0) {
-                                    diffText = `<span style="display: block; font-size: 12px; color: #007AFF;">↓ ${Math.abs(diff)}mm lower</span>`;
+                                    diffText = `<span style="display: block; font-size: 12px; color: #FF3B30;">↓ ${Math.abs(diff)}mm lower</span>`;
                                 }
                                 
                                 resultsData += `<p>${label} ${actualValue} mm ${diffText}</p>`;

@@ -319,6 +319,12 @@ button:disabled {
     font-weight: 600;
 }
 
+.result-group.with-divider {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+}
+
 .button-container {
     display: flex;
     justify-content: center;
@@ -326,7 +332,6 @@ button:disabled {
     margin-top: 20px;
     margin-bottom: 20px;
     width: 100%;
-    background-color: transparent;
 }
 
 .search-button {
@@ -1101,4 +1106,25 @@ button:disabled {
 
 .stem-box .input-field + .input-field {
     margin-top: 6px;
+}
+
+.load-dialog {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.load-dialog h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.load-dialog .load-button:hover {
+    background: #0056b3;
+}
+
+.load-dialog > div:not(:first-child) {
+    transition: background-color 0.2s;
+}
+
+.load-dialog > div:not(:first-child):hover {
+    background-color: #f8f9fa;
 }

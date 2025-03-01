@@ -1113,19 +1113,19 @@ class BikeCalculator {
                         const actualValue = parseInt(value);
                         if (!isNaN(actualValue)) {
                             const targetValue = parseInt(targetHandlebarX);
-                            const diff = targetValue - actualValue;
+                            const diff = actualValue - targetValue;
                             
                             if (Math.abs(diff) >= 1) {
                                 let diffText = '';
                                 if (diff > 0) {
-                                    diffText = `<span style="display: block; font-size: 12px; color: #007AFF;">→ ${diff}mm longer</span>`;
+                                    diffText = `<span style="display: block; font-size: 12px; color: #FF3B30;">→ ${diff}mm longer</span>`;
                                 } else if (diff < 0) {
-                                    diffText = `<span style="display: block; font-size: 12px; color: #FF3B30;">← ${Math.abs(diff)}mm shorter</span>`;
+                                    diffText = `<span style="display: block; font-size: 12px; color: #007AFF;">← ${Math.abs(diff)}mm shorter</span>`;
                                 }
                                 
-                                resultsData += `<p>${label} ${value} ${diffText}</p>`;
+                                resultsData += `<p>${label} ${actualValue} mm ${diffText}</p>`;
                             } else {
-                                resultsData += `<p>${label} ${value}</p>`;
+                                resultsData += `<p>${label} ${actualValue} mm</p>`;
                             }
                         } else {
                             resultsData += `<p>${label} ${value}</p>`;
@@ -1135,19 +1135,19 @@ class BikeCalculator {
                         const actualValue = parseInt(value);
                         if (!isNaN(actualValue)) {
                             const targetValue = parseInt(targetHandlebarY);
-                            const diff = targetValue - actualValue;
+                            const diff = actualValue - targetValue;
                             
                             if (Math.abs(diff) >= 1) {
                                 let diffText = '';
                                 if (diff > 0) {
-                                    diffText = `<span style="display: block; font-size: 12px; color: #007AFF;">↑ ${diff}mm higher</span>`;
+                                    diffText = `<span style="display: block; font-size: 12px; color: #FF3B30;">↑ ${diff}mm higher</span>`;
                                 } else if (diff < 0) {
-                                    diffText = `<span style="display: block; font-size: 12px; color: #FF3B30;">↓ ${Math.abs(diff)}mm lower</span>`;
+                                    diffText = `<span style="display: block; font-size: 12px; color: #007AFF;">↓ ${Math.abs(diff)}mm lower</span>`;
                                 }
                                 
-                                resultsData += `<p>${label} ${value} ${diffText}</p>`;
+                                resultsData += `<p>${label} ${actualValue} mm ${diffText}</p>`;
                             } else {
-                                resultsData += `<p>${label} ${value}</p>`;
+                                resultsData += `<p>${label} ${actualValue} mm</p>`;
                             }
                         } else {
                             resultsData += `<p>${label} ${value}</p>`;

@@ -1,0 +1,15 @@
+1.0 beta
+2/28/25
+
+1.1 beta
+3/1/25
+  - Added responsiveness and fine tuned mobile experience
+  - Added ability to hide description of calculator tools by clicking page title
+  - Added privacy policy
+  - Reorganized css
+
+1.1.1 beta
+3/1/25
+  - Fixed Bike Search table so the results table doesn't resize and cut off text
+  - Combined Target Reach/Stack and Acceptable Range inputs
+  - Added "About" page

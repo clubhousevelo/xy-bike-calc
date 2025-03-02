@@ -1,3 +1,12 @@
+// Define default values for stems
+const DEFAULT_VALUES = {
+    headTubeAngle: 73.0,
+    stemHeight: 40,
+    stemLength: 100,
+    stemAngle: -6,
+    spacerHeight: 20
+};
+
 let stemCount = 1; // Start with one stem
 let baseX = 0;
 let baseY = 0;
@@ -217,6 +226,11 @@ function loadStemData() {
         addNewStem(stems[i]);
     }
     
+    // If there's no Stem 2, add it with default values
+    if (stems.length === 1) {
+        addNewStem();
+    }
+    
     // Recalculate all stems
     calculateStemDimensions(0);
     
@@ -258,6 +272,11 @@ function addNewStem(initialData = null) {
     closeBtn.innerHTML = '×';
     closeBtn.onclick = function() { deleteStem(stemId); };
     
+    // Hide the delete button on Stem 2 (stemId = 1)
+    if (stemId === 1) {
+        closeBtn.style.visibility = 'hidden';
+    }
+    
     // Add title and close button to container
     titleContainer.appendChild(stemTitle);
     titleContainer.appendChild(closeBtn);
@@ -289,22 +308,21 @@ function addNewStem(initialData = null) {
     
     // Create results section
     const resultsDiv = document.createElement('div');
-    resultsDiv.style = 'display: flex; flex-direction: column; align-items: center;';
+    resultsDiv.className = 'results-container';
     
     const resultsGroup = document.createElement('div');
     resultsGroup.className = 'results-group';
-    resultsGroup.style = 'margin-top: 10px; background-color: var(--card-background); padding: 16px; border-radius: 8px; box-shadow: 0 2px 4px var(--shadow-color); width: 260px; font-size: 16px; font-weight: bold; text-align: center;';
     
     const reachDiv = document.createElement('div');
     reachDiv.id = `effectiveReach-${stemId}`;
     reachDiv.innerHTML = 'Run (X): 0mm';
     
     const spacerDiv = document.createElement('div');
-    spacerDiv.style = 'height: 10px;';
+    spacerDiv.className = 'results-spacer';
     
     const stackDiv = document.createElement('div');
     stackDiv.id = `effectiveStack-${stemId}`;
-    stackDiv.style = 'margin-top: 0px;';
+    stackDiv.className = 'stack-result';
     stackDiv.innerHTML = 'Rise (Y): 0mm';
     
     resultsGroup.appendChild(reachDiv);
@@ -335,6 +353,26 @@ function addNewStem(initialData = null) {
 }
 
 function deleteStem(stemId) {
+    const stemBoxes = document.querySelectorAll('.stem-box');
+    
+    // If this is Stem 2 (stemId = 1) and there are only 2 stems total, don't delete it
+    if (stemId === 1 && stemBoxes.length === 2) {
+        // Instead of deleting, just reset it to default values
+        document.getElementById('headTubeAngle-1').value = DEFAULT_VALUES.headTubeAngle;
+        document.getElementById('stemHeight-1').value = DEFAULT_VALUES.stemHeight;
+        document.getElementById('stemLength-1').value = DEFAULT_VALUES.stemLength;
+        document.getElementById('stemAngle-1').value = DEFAULT_VALUES.stemAngle;
+        document.getElementById('spacerHeight-1').value = DEFAULT_VALUES.spacerHeight;
+        
+        // Recalculate and highlight
+        calculateStemDimensions(1);
+        highlightDifferences(1);
+        
+        // Save data
+        saveStemData();
+        return;
+    }
+    
     const stemBox = document.querySelector(`[data-stem-id="stem-${stemId}"]`);
     if (stemBox) {
         stemBox.remove();
@@ -344,8 +382,8 @@ function deleteStem(stemId) {
         calculateStemDimensions(0);
         
         // Apply highlighting to all remaining stems
-        const stemBoxes = document.querySelectorAll('.stem-box');
-        stemBoxes.forEach((box, index) => {
+        const remainingStemBoxes = document.querySelectorAll('.stem-box');
+        remainingStemBoxes.forEach((box, index) => {
             if (index > 0) {
                 const stemId = parseInt(box.dataset.stemId.split('-')[1]);
                 highlightDifferences(stemId);
@@ -413,6 +451,11 @@ function autoLoadStemData() {
         addNewStem(stems[i]);
     }
     
+    // If there's no Stem 2, add it with default values
+    if (stems.length === 1) {
+        addNewStem();
+    }
+    
     // Recalculate all stems
     calculateStemDimensions(0);
     
@@ -424,6 +467,44 @@ function autoLoadStemData() {
             highlightDifferences(stemId);
         }
     });
+}
+
+function resetAllStems() {
+    // Remove all stems except the first two
+    const stemBoxes = document.querySelectorAll('.stem-box');
+    stemBoxes.forEach((box, index) => {
+        if (index > 1) box.remove();
+    });
+    
+    // Reset Stem 1 to default values
+    document.getElementById('headTubeAngle-0').value = DEFAULT_VALUES.headTubeAngle;
+    document.getElementById('stemHeight-0').value = DEFAULT_VALUES.stemHeight;
+    document.getElementById('stemLength-0').value = DEFAULT_VALUES.stemLength;
+    document.getElementById('stemAngle-0').value = DEFAULT_VALUES.stemAngle;
+    document.getElementById('spacerHeight-0').value = DEFAULT_VALUES.spacerHeight;
+    
+    // Reset Stem 2 to default values if it exists
+    if (document.getElementById('headTubeAngle-1')) {
+        document.getElementById('headTubeAngle-1').value = DEFAULT_VALUES.headTubeAngle;
+        document.getElementById('stemHeight-1').value = DEFAULT_VALUES.stemHeight;
+        document.getElementById('stemLength-1').value = DEFAULT_VALUES.stemLength;
+        document.getElementById('stemAngle-1').value = DEFAULT_VALUES.stemAngle;
+        document.getElementById('spacerHeight-1').value = DEFAULT_VALUES.spacerHeight;
+    }
+    
+    // Recalculate all stems
+    calculateStemDimensions(0);
+    
+    // Apply highlighting to Stem 2
+    if (document.getElementById('headTubeAngle-1')) {
+        highlightDifferences(1);
+    }
+    
+    // Update stem count
+    stemCount = 2;
+    
+    // Save data
+    autoSaveStemData();
 }
 
 // Modify the initialization code
@@ -440,6 +521,10 @@ document.addEventListener('DOMContentLoaded', function() {
             transition: background-color 0.3s ease, border-left 0.3s ease;
             border-left: 3px solid transparent;
             padding-left: 16px;
+        }
+        .reset-all-btn:hover {
+            background-color: var(--error-color) !important;
+            color: white !important;
         }
     `;
     document.head.appendChild(style);
@@ -459,6 +544,9 @@ document.addEventListener('DOMContentLoaded', function() {
         autoSaveStemData(); // Auto-save after adding new stem
     });
     
+    // Add event listener to the Reset All button
+    document.getElementById('resetAllBtn').addEventListener('click', resetAllStems);
+    
     // Add event listener for page visibility changes
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
@@ -474,9 +562,18 @@ document.addEventListener('DOMContentLoaded', function() {
         loadStemData();
     }
     
-    // If no saved data at all, do initial calculation
+    // If no saved data at all, do initial calculation and add Stem 2
     if (!localStorage.getItem('autoSavedStemData') && !localStorage.getItem('stemCalculatorData')) {
         calculateStemDimensions(0);
+        
+        // Add Stem 2 by default
+        addNewStem();
+    } else {
+        // Check if we need to add Stem 2 (if there's only Stem 1)
+        const stemBoxes = document.querySelectorAll('.stem-box');
+        if (stemBoxes.length === 1) {
+            addNewStem();
+        }
     }
 });
 

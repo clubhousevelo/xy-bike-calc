@@ -7,6 +7,30 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <button class="hamburger-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <nav class="mobile-nav">
+        <ul>
+            <li><a href="index.html">X/Y Position Calculator</a></li>
+            <li><a href="hxhy-frame-calculator.html">HX/HY to Frame Calculator</a></li>
+            <li><a href="stem-calculator.html">Stem Calculator</a></li>
+            <li><a href="bike-search.html">Bike Search</a></li>
+        </ul>
+        <div class="theme-toggle">
+            <button id="mobileDarkModeToggle" class="dark-mode-toggle">
+                <span class="toggle-icon">☀️</span>
+                <span class="toggle-text">Light Mode</span>
+            </button>
+        </div>
+        <div class="privacy-link">
+            <a href="privacy-policy.html">Privacy Policy</a>
+        </div>
+    </nav>
+
     <nav class="main-nav">
         <div class="nav-header">
             <h2>XY Bike Calc</h2>
@@ -23,10 +47,18 @@
                 <span class="toggle-text">Light Mode</span>
             </button>
         </div>
+        <div style="text-align: center; margin-top: 10px;">
+            <a href="privacy-policy.html" style="color: var(--text-secondary); font-size: 12px; text-decoration: none;">Privacy Policy</a>
+        </div>
     </nav>
     <div class="calculator-container">
-        <h1 class="calculator-title">HX/HY to Frame Calculator</h1>
-        <p class="calculator-description">Use this tool to calculate Frame Stack and Reach from a desired HX/HY and specific stem configuration.</p>
+        <div class="calculator-header">
+            <h1 class="calculator-title">
+                <span class="collapse-indicator">▼</span>
+                HX/HY to Frame Calculator
+            </h1>
+            <p class="calculator-description">Use this tool to calculate Frame Stack and Reach from a desired HX/HY and specific stem configuration.</p>
+        </div>
         <div class="input-section">
             <div class="input-group">
                 <div class="input-field">
@@ -79,5 +111,7 @@
     </div>
     <script src="js/hxhy-calculator.js"></script>
     <script src="js/dark-mode.js"></script>
+    <script src="js/mobile-menu.js"></script>
+    <script src="js/calculator-header.js"></script>
 </body>
 </html> 

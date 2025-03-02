@@ -454,12 +454,21 @@ button:disabled {
     max-width: 80px;
     font-size: 12px;
     height: 32px;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .reset-button:hover {
     background-color: var(--error-color);
     color: var(--button-text);
     opacity: 1;
+}
+
+.reset-button:active,
+.reset-button:focus {
+    background-color: transparent;
+    color: var(--error-color);
+    outline: none;
 }
 
 .duplicate-button {
@@ -470,12 +479,21 @@ button:disabled {
     max-width: 100px;
     font-size: 12px;
     height: 32px;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .duplicate-button:hover {
     background-color: var(--primary-color);
     color: var(--button-text);
     opacity: 1;
+}
+
+.duplicate-button:active,
+.duplicate-button:focus {
+    background-color: transparent;
+    color: var(--primary-color);
+    outline: none;
 }
 
 .button-group {
@@ -613,20 +631,75 @@ button:disabled {
     }
     
     .top-controls {
-        flex-direction: column;
-        align-items: stretch;
-        margin-left: 10px;
-        margin-right: 10px;
-        width: calc(100% - 20px);
-        max-width: calc(100% - 20px);
-    }
-    
-    .target-positions {
-        flex-direction: column;
+        padding: 12px;
     }
 
-    .bike-card {
+    .target-positions {
+        flex-direction: column;
+        gap: 0px;
+    }
+
+    .position-group {
         width: 100%;
+        max-width: 300px;
+        text-align: center;
+        background: var(--card-bg);
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px var(--shadow-color);
+    }
+
+    .position-group h3 {
+        text-align: center;
+        margin-bottom: 0px;
+        font-size: 14px;
+        color: var(--text-color);
+        padding-bottom: 0px;
+    }
+
+    .position-group .input-group {
+        justify-content: space-between;
+        padding: 4px 16px;
+        display: flex;
+        gap: 8px;
+    }
+
+    .position-group .input-group:nth-child(2),
+    .position-group .input-group:nth-child(3) {
+        width: 50%;
+        display: inline-flex;
+        margin: 0;
+        padding: 4px 8px;
+    }
+
+    .position-group .input-group:nth-child(2),
+    .position-group .input-group:nth-child(3) {
+        float: left;
+    }
+
+    .position-group:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+    .position-group .input-group label {
+        min-width: 20px;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    .position-group .input-group input {
+        width: 80px;
+        text-align: center;
+        font-size: 14px;
+        height: 32px;
+    }
+
+    .position-group .input-group span {
+        min-width: 30px;
+        text-align: left;
+        font-size: 14px;
     }
 
     .client-info {
@@ -741,6 +814,12 @@ button:disabled {
     color: var(--error-color);
 }
 
+.calculator-header {
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 1rem;
+}
+
 .calculator-title {
     text-align: center;
     margin-bottom: 0.5rem;
@@ -752,6 +831,21 @@ button:disabled {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.collapse-indicator {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+    display: inline-block;
+    color: var(--primary-color);
+}
+
+.calculator-header.collapsed .collapse-indicator {
+    transform: rotate(-90deg);
 }
 
 .calculator-description {
@@ -762,6 +856,15 @@ button:disabled {
     width: 100%;
     max-width: 100%;
     overflow: hidden;
+    max-height: 100px;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease;
+    opacity: 1;
+}
+
+.calculator-header.collapsed .calculator-description {
+    max-height: 0;
+    margin-bottom: 0;
+    opacity: 0;
 }
 
 .main-nav {
@@ -1291,4 +1394,501 @@ button:disabled {
 .results-section {
     padding-top: 6px;
     padding-bottom: 6px;
+}
+
+/* Mobile Menu Styles */
+.hamburger-menu {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1000;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.hamburger-menu span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    margin: 5px 0;
+    background-color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.mobile-nav {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--card-background);
+    z-index: 999;
+    padding: 4rem 1rem 1rem;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+}
+
+.mobile-nav.active {
+    transform: translateX(0);
+}
+
+.mobile-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mobile-nav li {
+    margin-bottom: 1rem;
+}
+
+.mobile-nav a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+.mobile-nav a.active {
+    background-color: var(--hover-bg);
+    color: var(--primary-color);
+}
+
+.mobile-nav .theme-toggle {
+    position: static;
+    margin-top: 1rem;
+    padding: 0 1rem;
+}
+
+.mobile-nav .privacy-link {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 0 1rem;
+}
+
+.mobile-nav .privacy-link a {
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-decoration: none;
+}
+
+/* Hamburger Menu Animation */
+.hamburger-menu.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-menu.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Responsive Layout */
+@media (max-width: 770px) {
+    .main-nav {
+        display: none;
+    }
+
+    .hamburger-menu {
+        display: block;
+    }
+
+    .mobile-nav {
+        display: block;
+    }
+
+    .calculator-container {
+        margin-left: 0;
+        padding: 1rem 1rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .calculator-title {
+        margin-top: 0;
+        margin-bottom: 0.25rem;
+    }
+
+    .calculator-description {
+        margin-bottom: 1rem;
+    }
+
+    .client-info {
+        flex-direction: column;
+        align-items: stretch;
+        min-width: auto;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+        margin-bottom: 12px;
+    }
+
+    .client-info input {
+        max-width: none;
+        height: 30px;
+        margin-left: 0;
+        margin-bottom: 6px;
+    }
+
+    .target-positions {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0;
+        max-width: 300px;
+        background: none;
+        box-shadow: none;
+    }
+
+    .position-group {
+        width: 100%;
+        max-width: none;
+        text-align: center;
+        background: none;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+        margin-bottom: 12px;
+    }
+
+    .position-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .position-group h3 {
+        text-align: center;
+        margin-bottom: 4px;
+        font-size: 14px;
+        color: var(--text-color);
+    }
+
+    .position-group .input-pairs {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .position-group .input-group {
+        flex: 1;
+        max-width: calc(50% - 6px);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0;
+        gap: 4px;
+    }
+
+    .position-group:last-child .input-group {
+        max-width: 150px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .position-group:last-child .input-group input {
+        width: 80px;
+        text-align: center;
+    }
+
+    .position-group:last-child .input-group label {
+        min-width: 0;
+        width: auto;
+    }
+
+    .position-group:last-child .input-group span {
+        min-width: 0;
+        width: auto;
+    }
+
+    .input-section {
+        margin: 0 auto;
+        max-width: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .input-section .input-group,
+    .input-section .results-group {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    /* Adjust other responsive styles */
+    .top-controls {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .privacy-container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    .position-group .input-group {
+        flex: 1;
+        max-width: calc(50% - 6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        gap: 4px;
+    }
+
+    .position-group:last-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .position-group:last-child .input-group {
+        flex: 0 0 auto;
+        max-width: none;
+        width: auto;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .position-group:last-child .input-group input {
+        width: 80px;
+        text-align: center;
+    }
+
+    .position-group:last-child .input-group label,
+    .position-group:last-child .input-group span {
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    .bikes-container-wrapper {
+        width: 100%;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        margin: 0;
+    }
+
+    #bikes-container {
+        gap: 1rem;
+        padding: 8px 0;
+        width: 100%;
+    }
+
+    .bike-card {
+        width: 100%;
+        max-width: none;
+        margin: 8px 0;
+        padding: 12px 16px;
+    }
+
+    .bike-selector {
+        gap: 4px;
+        margin-bottom: 12px;
+    }
+
+    .bike-selector select {
+        max-width: 280px;
+        margin: 0 auto;
+    }
+
+    .geometry-section .input-group,
+    .stem-section .input-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+        max-width: 280px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 0 4px;
+    }
+
+    .geometry-section .input-group label,
+    .stem-section .input-group label {
+        flex: 1;
+        text-align: left;
+        min-width: 140px;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    .geometry-section .input-group input,
+    .stem-section .input-group input {
+        width: 70px;
+        text-align: right;
+        height: 32px;
+        padding: 4px 8px;
+    }
+
+    .geometry-section .input-group span,
+    .stem-section .input-group span {
+        min-width: 25px;
+        text-align: left;
+    }
+
+    .result-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+        max-width: 280px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 0 4px;
+    }
+
+    .result-group label {
+        flex: 1;
+        text-align: left;
+        padding-right: 8px;
+        color: var(--text-secondary);
+    }
+
+    .result-group span {
+        min-width: 70px;
+        text-align: right;
+    }
+
+    .geometry-section h4,
+    .stem-section h4,
+    .results-section h4 {
+        text-align: center;
+        padding-left: 0;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .geometry-section,
+    .stem-section,
+    .results-section {
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+}
+
+/* Add responsive styles for screens under 1136px */
+@media (max-width: 1136px) {
+    .top-controls {
+        flex-direction: column;
+        align-items: stretch;
+        margin-left: 10px;
+        margin-right: 10px;
+        width: calc(100% - 20px);
+        max-width: calc(100% - 20px);
+        padding: 16px;
+    }
+
+    .client-info {
+        flex-direction: column;
+        align-items: stretch;
+        min-width: auto;
+        margin-bottom: 0px;
+    }
+
+    .client-info input {
+        max-width: none;
+        width: 100%;
+        margin-left: 0;
+        margin-bottom: 8px;
+    }
+
+    .client-info > div:last-child {
+        display: flex;
+        gap: 8px;
+    }
+
+    .client-info button {
+        flex: 1;
+    }
+
+    .target-positions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0px;
+        width: 100%;
+    }
+
+    .position-group {
+        flex: 0 1 auto;
+        min-width: 180px;
+        text-align: center;
+    }
+
+    .position-group .input-group {
+        justify-content: center;
+    }
+}
+
+/* Update the existing mobile styles to inherit from the 1136px breakpoint */
+@media (max-width: 768px) {
+    .top-controls {
+        padding: 12px;
+    }
+
+    .target-positions {
+        flex-direction: column;
+        gap: 0px;
+    }
+
+    .position-group {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 770px) {
+    .reset-button:hover,
+    .duplicate-button:hover {
+        background-color: transparent;
+    }
+
+    .reset-button:hover {
+        color: var(--error-color);
+    }
+
+    .duplicate-button:hover {
+        color: var(--primary-color);
+    }
+
+    .reset-button:active {
+        background-color: var(--error-color);
+        color: var(--button-text);
+        opacity: 0.9;
+    }
+
+    .duplicate-button:active {
+        background-color: var(--primary-color);
+        color: var(--button-text);
+        opacity: 0.9;
+    }
+
+    .reset-button,
+    .duplicate-button {
+        -webkit-tap-highlight-color: transparent;
+        transition: background-color 0.05s ease, color 0.05s ease;
+    }
 }

@@ -7,6 +7,30 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <button class="hamburger-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <nav class="mobile-nav">
+        <ul>
+            <li><a href="index.html">X/Y Position Calculator</a></li>
+            <li><a href="hxhy-frame-calculator.html">HX/HY to Frame Calculator</a></li>
+            <li><a href="stem-calculator.html">Stem Calculator</a></li>
+            <li><a href="bike-search.html">Bike Search</a></li>
+        </ul>
+        <div class="theme-toggle">
+            <button id="mobileDarkModeToggle" class="dark-mode-toggle">
+                <span class="toggle-icon">☀️</span>
+                <span class="toggle-text">Light Mode</span>
+            </button>
+        </div>
+        <div class="privacy-link">
+            <a href="privacy-policy.html">Privacy Policy</a>
+        </div>
+    </nav>
+
     <nav class="main-nav">
         <div class="nav-header">
             <h2>XY Bike Calc</h2>
@@ -23,44 +47,57 @@
                 <span class="toggle-text">Light Mode</span>
             </button>
         </div>
+        <div style="text-align: center; margin-top: 10px;">
+            <a href="privacy-policy.html" style="color: var(--text-secondary); font-size: 12px; text-decoration: none;">Privacy Policy</a>
+        </div>
     </nav>
     <div class="calculator-container">
-        <h1 class="calculator-title">X/Y Position Calculator</h1>
-        <p class="calculator-description">This tool is designed to help you prescribe bikes based on handlebar position (HX/HY). It can also provide insight to saddle position.</p>
+        <div class="calculator-header">
+            <h1 class="calculator-title">
+                <span class="collapse-indicator">▼</span>
+                X/Y Position Calculator
+            </h1>
+            <p class="calculator-description">This tool is designed to help you prescribe bikes based on handlebar position (HX/HY). It can also provide insight to saddle position.</p>
+        </div>
         <div class="top-controls">
             <div class="client-info">
-                <label for="clientName">Client Name:</label>
-                <input type="text" id="clientName">
-                <button id="saveButton" disabled>Save</button>
-                <button id="loadButton">Load</button>
+                <input type="text" id="clientName" placeholder="Client Name">
+                <div>
+                    <button id="saveButton" disabled>Save</button>
+                    <button id="loadButton">Load</button>
+                </div>
             </div>
 
             <div class="target-positions">
                 <div class="position-group">
                     <h3>Target Saddle</h3>
-                    <div class="input-group">
-                        <label for="targetSaddleX">X:</label>
-                        <input type="number" id="targetSaddleX" value="">
-                        <span>mm</span>
-                    </div>
-                    <div class="input-group">
-                        <label for="targetSaddleY">Y:</label>
-                        <input type="number" id="targetSaddleY" value="">
-                        <span>mm</span>
+                    <div class="input-pairs">
+                        <div class="input-group">
+                            <label for="targetSaddleX" style="font-style: bold;">SX:</label>
+                            <input type="number" id="targetSaddleX" value="">
+                            <span>mm</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="targetSaddleY">SY:</label>
+                            <input type="number" id="targetSaddleY" value="">
+                            <span>mm</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="position-group">
                     <h3>Target Handlebar</h3>
-                    <div class="input-group">
-                        <label for="targetHandlebarX">X:</label>
-                        <input type="number" id="targetHandlebarX" value="">
-                        <span>mm</span>
-                    </div>
-                    <div class="input-group">
-                        <label for="targetHandlebarY">Y:</label>
-                        <input type="number" id="targetHandlebarY" value="">
-                        <span>mm</span>
+                    <div class="input-pairs">
+                        <div class="input-group">
+                            <label for="targetHandlebarX">HX:</label>
+                            <input type="number" id="targetHandlebarX" value="">
+                            <span>mm</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="targetHandlebarY">HY:</label>
+                            <input type="number" id="targetHandlebarY" value="">
+                            <span>mm</span>
+                        </div>
                     </div>
                 </div>
 
@@ -88,6 +125,9 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
     <script src="js/calculator.js"></script>
+    <script src="js/dark-mode.js"></script>
+    <script src="js/mobile-menu.js"></script>
+    <script src="js/calculator-header.js"></script>
     <script>
         new BikeCalculator();
     </script>

@@ -83,7 +83,7 @@
         }
 
         .profile-button {
-            padding: 0.75rem 1.5rem;
+            padding: 0.25rem 1.5rem;
             background-color: var(--primary-color);
             color: white;
             border: none;
@@ -225,13 +225,13 @@
             <li><a href="bike-search.html">Bike Search</a></li>
         </ul>
         <div style="flex: 1"></div>
-        <div style="margin-bottom: 40px; text-align: center;">
+        <div style="margin-bottom: 30px; text-align: center;">
             <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
         </div>
         <div class="non-auth-dependent" style="margin-bottom: 20px; text-align: center;">
             <a href="login.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">Login</a>
         </div>
-        <div class="auth-dependent" style="margin-bottom: 20px; text-align: center; display: none;">
+        <div class="auth-dependent" style="margin-bottom: 40px; text-align: center; display: none;">
             <div style="display: flex; flex-direction: column; align-items: center; padding: 0.75rem 1rem;">
                 <span class="user-display" style="margin-bottom: 8px; color: var(--text-color);"></span>
                 <button id="logout-button" style="padding: 4px 12px; font-size: 12px;">Logout</button>
@@ -303,12 +303,6 @@
                 </form>
             </div>
             
-            <div class="profile-section">
-                <h3>Saved Bike Fits</h3>
-                <div class="saved-items" id="saved-fits">
-                    <p>No saved bike fits found.</p>
-                </div>
-            </div>
         </div>
         
         <div class="profile-container non-auth-dependent">

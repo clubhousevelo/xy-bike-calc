@@ -1191,6 +1191,7 @@ button:disabled {
     margin-top: 20px;
     overflow-x: auto;
     max-width: 100%;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 #resultsTable {
@@ -1198,37 +1199,40 @@ button:disabled {
     border-collapse: collapse;
     background: var(--table-bg);
     font-size: 13px;
-    table-layout: fixed;
+    min-width: 800px; /* Ensure minimum width to prevent squishing */
 }
 
 #resultsTable th,
 #resultsTable td {
-    padding: 6px 10px;
+    padding: 8px 12px;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
+/* Column widths for better content fit */
 #resultsTable th:nth-child(1), /* Brand */
 #resultsTable td:nth-child(1) {
-    width: 12%;
+    min-width: 120px;
+    width: 15%;
 }
 
 #resultsTable th:nth-child(2), /* Model */
 #resultsTable td:nth-child(2) {
+    min-width: 200px;
     width: 25%;
 }
 
 #resultsTable th:nth-child(3), /* Size */
 #resultsTable td:nth-child(3) {
-    width: 8%;
+    min-width: 80px;
+    width: 10%;
 }
 
 #resultsTable th:nth-child(4), /* Style */
 #resultsTable td:nth-child(4) {
-    width: 8%;
+    min-width: 100px;
+    width: 12%;
 }
 
 #resultsTable th:nth-child(5), /* Reach */
@@ -1239,7 +1243,8 @@ button:disabled {
 #resultsTable td:nth-child(6),
 #resultsTable td:nth-child(7),
 #resultsTable td:nth-child(8) {
-    width: 8%;
+    min-width: 90px;
+    width: 9.5%;
     text-align: right;
 }
 
@@ -1304,7 +1309,7 @@ button:disabled {
 @media (max-width: 768px) {
     .search-container {
         margin: 1rem;
-        padding: 1.25rem;
+        padding: 1rem;
     }
     
     .search-filters {
@@ -1316,6 +1321,53 @@ button:disabled {
     .filter-group {
         padding: 1rem;
     }
+
+    .search-results {
+        margin: 20px -1rem;
+        padding: 0 1rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #resultsTable {
+        font-size: 14px; /* Slightly larger font for better readability on mobile */
+    }
+
+    #resultsTable th,
+    #resultsTable td {
+        padding: 10px 12px; /* Larger padding for better touch targets */
+    }
+}
+
+/* Add horizontal scroll indicators */
+.search-results::before,
+.search-results::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 15px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.search-results::before {
+    left: 0;
+    background: linear-gradient(to right, var(--background-color), transparent);
+}
+
+.search-results::after {
+    right: 0;
+    background: linear-gradient(to left, var(--background-color), transparent);
+}
+
+.search-results.scroll-left::before {
+    opacity: 1;
+}
+
+.search-results.scroll-right::after {
+    opacity: 1;
 }
 
 .stem-box .input-field {

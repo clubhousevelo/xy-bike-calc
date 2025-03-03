@@ -36,8 +36,53 @@ class BikeSearch {
         // Load bike data to populate style filter
         this.loadStyleOptions();
         
-        // Load saved search parameters and results
-        this.loadSavedSearch();
+        // Check API key status
+        this.checkApiKeyStatus().then(isValid => {
+            if (isValid) {
+                console.log('API key is valid, proceeding with initialization');
+                // Load saved search if available
+                this.loadSavedSearch();
+            } else {
+                console.error('API key validation failed, search functionality may be limited');
+            }
+        });
+    }
+    
+    async checkApiKeyStatus() {
+        const testUrl = `https://sheets.googleapis.com/v4/spreadsheets/${this.SPREADSHEET_ID}/values/A1:A1?key=${this.API_KEY}`;
+        
+        try {
+            console.log('Testing API key status...');
+            const response = await fetch(testUrl);
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('API Key Status Check Failed:', errorData);
+                
+                if (errorData.error && errorData.error.code === 403) {
+                    if (errorData.error.message.includes('Requests from referer')) {
+                        const referrer = window.location.origin;
+                        console.error(`Current referrer (${referrer}) is not allowed. Please update API key settings.`);
+                        
+                        // Display a more user-friendly error message
+                        this.displayError(`
+                            <strong>API Key Error:</strong><br>
+                            The current website (${referrer}) is not authorized to access the bike database.<br>
+                            Please update the API key settings in Google Cloud Console to allow this domain.
+                        `);
+                    }
+                }
+                
+                return false;
+            }
+            
+            console.log('API key is valid and properly configured');
+            return true;
+        } catch (error) {
+            console.error('Error checking API key status:', error);
+            this.displayError('Error checking API key status: ' + error.message);
+            return false;
+        }
     }
     
     loadSavedSearch() {
@@ -98,14 +143,32 @@ class BikeSearch {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.SPREADSHEET_ID}/values/${range}?key=${this.API_KEY}`;
         
         try {
+            console.log('Fetching bike data from Google Sheets...');
             const response = await fetch(url);
+            
             if (!response.ok) {
-                throw new Error('Failed to fetch bike data');
+                const errorData = await response.json();
+                console.error('API Error Response:', errorData);
+                
+                if (errorData.error && errorData.error.code === 403) {
+                    if (errorData.error.message.includes('Requests from referer')) {
+                        throw new Error('API key is restricted by HTTP referrer. Please check your API key settings in Google Cloud Console.');
+                    } else if (errorData.error.message.includes('API key not valid')) {
+                        throw new Error('API key is not valid. Please check your API key.');
+                    } else {
+                        throw new Error(`Access denied: ${errorData.error.message}`);
+                    }
+                }
+                
+                throw new Error(`Failed to fetch bike data: ${response.status} ${response.statusText}`);
             }
+            
             const data = await response.json();
+            console.log('Bike data loaded successfully');
             return this.processSheetData(data.values);
         } catch (error) {
-            this.displayError('Error loading bike data: ' + error.message);
+            console.error('Error loading bike data:', error);
+            this.displayError('Error loading bike data: ' + error.message + '<br>Please check your internet connection and try again.');
             return [];
         }
     }

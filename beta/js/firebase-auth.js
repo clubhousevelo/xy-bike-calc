@@ -24,14 +24,54 @@ document.addEventListener('DOMContentLoaded', function() {
   // Set up UI event listeners once the DOM is fully loaded
   setupAuthUI();
   
-  // Check auth state and update UI accordingly
-  auth.onAuthStateChanged(user => {
-    updateUIForAuthState(user);
-    
-    // If user is logged in and we're on the main calculator page, load saved data
-    if (user && window.location.pathname.includes('index.html') && typeof BikeCalculator !== 'undefined') {
-      loadUserData(user.uid);
+  // Listen for auth state changes
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      console.log('User is logged in:', user.email);
+      
+      // Update UI for logged-in user
+      document.querySelectorAll('.non-auth-dependent').forEach(el => {
+        el.style.display = 'none';
+      });
+      
+      document.querySelectorAll('.auth-dependent').forEach(el => {
+        el.style.display = 'block';
+      });
+      
+      // Display user email
+      document.querySelectorAll('.user-display').forEach(el => {
+        el.textContent = user.email;
+        el.addEventListener('click', () => {
+          window.location.href = 'profile.html';
+        });
+        el.style.cursor = 'pointer';
+      });
+      
+      // Add logout functionality
+      document.querySelectorAll('#logout-button').forEach(button => {
+        button.addEventListener('click', () => {
+          firebase.auth().signOut().then(() => {
+            console.log('User signed out');
+          }).catch(error => {
+            console.error('Sign out error:', error);
+          });
+        });
+      });
+    } else {
+      console.log('User is not logged in');
+      
+      // Update UI for logged-out user
+      document.querySelectorAll('.non-auth-dependent').forEach(el => {
+        el.style.display = 'block';
+      });
+      
+      document.querySelectorAll('.auth-dependent').forEach(el => {
+        el.style.display = 'none';
+      });
     }
+    
+    // Don't add event listeners for save/load buttons here
+    // Let client-profiles.js handle that
   });
   
   // Function to load user data from Firestore

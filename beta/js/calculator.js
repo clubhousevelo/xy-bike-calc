@@ -1488,32 +1488,55 @@ class BikeCalculator {
             return;
         }
 
-        const saveData = {
+        const saveData = this.getSaveData();
+
+        // Get existing saves from localStorage
+        let savedInstances = JSON.parse(localStorage.getItem('savedBikeInstances') || '[]');
+        
+        // Add new save
+        savedInstances.push(saveData);
+        
+        // Save back to localStorage
+        localStorage.setItem('savedBikeInstances', JSON.stringify(savedInstances));
+        
+        // Replace alert with custom dialog
+        this.showCustomAlert('Bike configuration saved successfully!');
+    }
+
+    // Method to get data for saving to Firebase
+    getSaveData() {
+        // Get bikes with calculated handlebar positions
+        const validBikes = this.bikes.filter(bike => {
+            const card = document.getElementById(bike.id);
+            if (!card) return false;
+            const handlebarX = card.querySelector('.handlebar-x').textContent;
+            return handlebarX && handlebarX !== '-- mm';
+        });
+
+        return {
             timestamp: new Date().toISOString(),
-            clientName: clientName,
+            clientName: document.getElementById('clientName').value.trim(),
             targetSaddleX: document.getElementById('targetSaddleX').value,
             targetSaddleY: document.getElementById('targetSaddleY').value,
             targetHandlebarX: document.getElementById('targetHandlebarX').value,
             targetHandlebarY: document.getElementById('targetHandlebarY').value,
             handlebarReachUsed: document.getElementById('handlebarReachUsed').value,
-            bikes: validBikes
-        };
-
-        // Use ClientProfilesManager to save the profile to cloud storage
-        if (typeof ClientProfilesManager !== 'undefined') {
-            ClientProfilesManager.saveClientProfile(saveData)
-                .then(savedProfile => {
-                    if (savedProfile) {
-                        this.showCustomAlert('Client profile saved successfully!');
+            bikes: validBikes.map(bike => {
+                const card = document.getElementById(bike.id);
+                return {
+                    ...bike,
+                    calculatedValues: {
+                        handlebarX: card.querySelector('.handlebar-x').textContent.split(' ')[0],
+                        handlebarY: card.querySelector('.handlebar-y').textContent.split(' ')[0],
+                        barReachNeeded: card.querySelector('.bar-reach-needed').textContent.split(' ')[0],
+                        setbackSTA: card.querySelector('.setback-sta').textContent.split(' ')[0],
+                        effectiveSTA: card.querySelector('.effective-sta').textContent.split(' ')[0],
+                        bbToRail: card.querySelector('.bb-rail').textContent.split(' ')[0],
+                        exposedSeatpost: card.querySelector('.exposed-seatpost').textContent.split(' ')[0]
                     }
-                })
-                .catch(error => {
-                    console.error('Error saving client profile:', error);
-                    this.showCustomAlert('Failed to save client profile. Please try again.');
-                });
-        } else {
-            this.showCustomAlert('Client profile manager not available. Please refresh the page and try again.');
-        }
+                };
+            })
+        };
     }
     
     // Add a new method for custom alerts
@@ -1609,28 +1632,14 @@ class BikeCalculator {
     }
 
     showLoadDialog() {
-        // Use ClientProfilesManager to get client profiles from cloud storage
-        if (typeof ClientProfilesManager !== 'undefined') {
-            ClientProfilesManager.getClientProfiles()
-                .then(savedInstances => {
-                    if (!savedInstances || savedInstances.length === 0) {
-                        this.showCustomAlert('No saved client profiles found.');
-                        return;
-                    }
-                    
-                    this.displayLoadDialog(savedInstances);
-                })
-                .catch(error => {
-                    console.error('Error loading client profiles:', error);
-                    this.showCustomAlert('Failed to load client profiles. Please try again.');
-                });
-        } else {
-            this.showCustomAlert('Client profile manager not available. Please refresh the page and try again.');
+        // Get saved instances
+        let savedInstances = JSON.parse(localStorage.getItem('savedBikeInstances') || '[]');
+        
+        if (savedInstances.length === 0) {
+            this.showCustomAlert('No saved configurations found.');
+            return;
         }
-    }
-    
-    // New method to display the load dialog with saved instances
-    displayLoadDialog(savedInstances) {
+
         // Create dialog
         const dialog = document.createElement('div');
         dialog.className = 'load-dialog';
@@ -1677,7 +1686,7 @@ class BikeCalculator {
         `;
         
         const title = document.createElement('h2');
-        title.textContent = 'Load Client Profile';
+        title.textContent = 'Load Saved Configuration';
         title.style.margin = '0';
         
         const closeButton = document.createElement('button');
@@ -1770,12 +1779,7 @@ class BikeCalculator {
                     if (!searchTerm) return true;
                     return instance.clientName.toLowerCase().startsWith(searchTerm.toLowerCase());
                 })
-                .sort((a, b) => {
-                    // Sort by timestamp (newest first)
-                    const dateA = new Date(a.timestamp);
-                    const dateB = new Date(b.timestamp);
-                    return dateB - dateA;
-                });
+                .sort((a, b) => a.clientName.toLowerCase().localeCompare(b.clientName.toLowerCase()));
 
             itemsContainer.innerHTML = '';
             
@@ -1793,19 +1797,8 @@ class BikeCalculator {
                 // Remove hover effect CSS class and style tag
                 item.className = '';
                 
-                // Format date - handle both Firestore timestamp and ISO string
-                let formattedDate;
-                if (instance.createdAt && instance.createdAt.toDate) {
-                    // Firestore timestamp
-                    const date = instance.createdAt.toDate();
-                    formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                } else if (instance.timestamp) {
-                    // ISO string
-                    const date = new Date(instance.timestamp);
-                    formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                } else {
-                    formattedDate = 'Unknown date';
-                }
+                const date = new Date(instance.timestamp);
+                const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                 
                 const targetPosition = instance.targetHandlebarX && instance.targetHandlebarY
                     ? `HX: ${instance.targetHandlebarX}, HY: ${instance.targetHandlebarY}`
@@ -1860,6 +1853,8 @@ class BikeCalculator {
                 };
 
                 deleteButton.onclick = () => {
+                    console.log('Delete button clicked');
+                    
                     // Create custom confirmation dialog
                     const confirmDialog = document.createElement('div');
                     confirmDialog.className = 'confirm-dialog';
@@ -1881,7 +1876,7 @@ class BikeCalculator {
                     
                     confirmDialog.innerHTML = `
                         <h3 style="margin-top: 0;">Confirm Deletion</h3>
-                        <p>Are you sure you want to delete this client profile?</p>
+                        <p>Are you sure you want to delete this saved configuration?</p>
                         <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
                             <button class="cancel-button">Cancel</button>
                             <button class="confirm-button">Delete</button>
@@ -1936,42 +1931,82 @@ class BikeCalculator {
                         if (document.body.contains(confirmOverlay)) {
                             document.body.removeChild(confirmOverlay);
                         }
+                        // Remove keyboard event listener
+                        document.removeEventListener('keydown', handleConfirmKeyDown);
                     };
+                    
+                    // Handle keyboard events for confirmation dialog
+                    const handleConfirmKeyDown = (e) => {
+                        if (e.key === 'Escape') {
+                            e.preventDefault();
+                            closeConfirmDialog();
+                            console.log('Delete cancelled via Escape key');
+                        } else if (e.key === 'Enter') {
+                            e.preventDefault();
+                            // Perform delete operation
+                            console.log('Delete confirmed via Enter key');
+                            const updatedInstances = savedInstances.filter(saved => 
+                                saved.timestamp !== instance.timestamp
+                            );
+                            console.log('Original instances:', savedInstances.length);
+                            console.log('Updated instances:', updatedInstances.length);
+                            localStorage.setItem('savedBikeInstances', JSON.stringify(updatedInstances));
+                            
+                            // Update the local savedInstances array to match localStorage
+                            savedInstances = updatedInstances;
+                            
+                            // Remove the item from the display
+                            item.remove();
+                            console.log('Item removed from display');
+                            
+                            closeConfirmDialog();
+                            
+                            // If no items left, close the main dialog
+                            console.log('Items remaining:', itemsContainer.children.length);
+                            if (itemsContainer.children.length === 0) {
+                                closeLoadDialog();
+                                console.log('Dialog closed - no items left');
+                            }
+                        }
+                    };
+                    
+                    // Add keyboard event listener for confirmation dialog
+                    document.addEventListener('keydown', handleConfirmKeyDown);
                     
                     // Add event listeners
-                    cancelButton.onclick = closeConfirmDialog;
+                    cancelButton.onclick = () => {
+                        closeConfirmDialog();
+                        console.log('Delete cancelled');
+                    };
                     
                     confirmButton.onclick = () => {
-                        // Delete the profile using ClientProfilesManager
-                        if (typeof ClientProfilesManager !== 'undefined') {
-                            ClientProfilesManager.deleteClientProfile(instance.id)
-                                .then(success => {
-                                    if (success) {
-                                        // Remove the item from the display
-                                        item.remove();
-                                        
-                                        // Remove from the savedInstances array
-                                        const index = savedInstances.findIndex(p => p.id === instance.id);
-                                        if (index !== -1) {
-                                            savedInstances.splice(index, 1);
-                                        }
-                                        
-                                        // If no items left, close the main dialog
-                                        if (itemsContainer.children.length === 0) {
-                                            closeLoadDialog();
-                                        }
-                                    } else {
-                                        this.showCustomAlert('Failed to delete client profile. Please try again.');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error deleting client profile:', error);
-                                    this.showCustomAlert('Failed to delete client profile. Please try again.');
-                                });
-                        }
+                        console.log('Delete confirmed');
+                        const updatedInstances = savedInstances.filter(saved => 
+                            saved.timestamp !== instance.timestamp
+                        );
+                        console.log('Original instances:', savedInstances.length);
+                        console.log('Updated instances:', updatedInstances.length);
+                        localStorage.setItem('savedBikeInstances', JSON.stringify(updatedInstances));
+                        
+                        // Update the local savedInstances array to match localStorage
+                        savedInstances = updatedInstances;
+                        
+                        // Remove the item from the display
+                        item.remove();
+                        console.log('Item removed from display');
                         
                         closeConfirmDialog();
+                        
+                        // If no items left, close the main dialog
+                        console.log('Items remaining:', itemsContainer.children.length);
+                        if (itemsContainer.children.length === 0) {
+                            closeLoadDialog();
+                            console.log('Dialog closed - no items left');
+                        }
                     };
+                    
+                    // Focus the cancel button by default (safer option)
+                    cancelButton.focus();
                 };
 
                 itemsContainer.appendChild(item);
@@ -2059,30 +2094,10 @@ class BikeCalculator {
         document.getElementById('saveButton').disabled = false;
     }
 
-    // Get data for saving to cloud storage
-    getSaveData() {
-        // Get bikes with calculated handlebar positions
-        const validBikes = this.bikes.filter(bike => {
-            const card = document.getElementById(bike.id);
-            if (!card) return false;
-            const handlebarX = card.querySelector('.handlebar-x').textContent;
-            return handlebarX && handlebarX !== '-- mm';
-        });
-
-        return {
-            timestamp: new Date().toISOString(),
-            clientName: document.getElementById('clientName').value.trim(),
-            targetSaddleX: document.getElementById('targetSaddleX').value,
-            targetSaddleY: document.getElementById('targetSaddleY').value,
-            targetHandlebarX: document.getElementById('targetHandlebarX').value,
-            targetHandlebarY: document.getElementById('targetHandlebarY').value,
-            handlebarReachUsed: document.getElementById('handlebarReachUsed').value,
-            bikes: validBikes
-        };
-    }
-    
-    // Load a saved fit from cloud storage
+    // Method to load a saved fit from Firebase
     loadSavedFit(savedData) {
+        if (!savedData) return;
+
         // Set client name and target positions
         document.getElementById('clientName').value = savedData.clientName || '';
         document.getElementById('targetSaddleX').value = savedData.targetSaddleX || '';
@@ -2148,59 +2163,9 @@ class BikeDatabase {
 
     async initialize() {
         try {
-            await this.checkApiKeyStatus();
             await this.loadBikeData();
         } catch (error) {
             console.error('Failed to initialize bike database:', error);
-        }
-    }
-
-    async checkApiKeyStatus() {
-        const testUrl = `https://sheets.googleapis.com/v4/spreadsheets/${this.SPREADSHEET_ID}/values/A1:A1?key=${this.API_KEY}`;
-        
-        try {
-            console.log('Testing API key status...');
-            const response = await fetch(testUrl);
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('API Key Status Check Failed:', errorData);
-                
-                if (errorData.error && errorData.error.code === 403) {
-                    if (errorData.error.message.includes('Requests from referer')) {
-                        const referrer = window.location.origin;
-                        console.error(`Current referrer (${referrer}) is not allowed. Please update API key settings.`);
-                        
-                        // Display a more user-friendly error message
-                        const bikesContainer = document.getElementById('bikes-container');
-                        if (bikesContainer) {
-                            const errorMessage = document.createElement('div');
-                            errorMessage.style.color = 'red';
-                            errorMessage.style.padding = '20px';
-                            errorMessage.style.textAlign = 'center';
-                            errorMessage.innerHTML = `
-                                <strong>API Key Error:</strong><br>
-                                The current website (${referrer}) is not authorized to access the bike database.<br>
-                                Please update the API key settings in Google Cloud Console to allow this domain.
-                            `;
-                            
-                            // Only append if not already present
-                            if (!bikesContainer.querySelector('.api-key-error')) {
-                                errorMessage.className = 'api-key-error';
-                                bikesContainer.appendChild(errorMessage);
-                            }
-                        }
-                    }
-                }
-                
-                return false;
-            }
-            
-            console.log('API key is valid and properly configured');
-            return true;
-        } catch (error) {
-            console.error('Error checking API key status:', error);
-            return false;
         }
     }
 
@@ -2209,48 +2174,14 @@ class BikeDatabase {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.SPREADSHEET_ID}/values/${range}?key=${this.API_KEY}`;
         
         try {
-            console.log('Fetching bike data from Google Sheets...');
             const response = await fetch(url);
-            
             if (!response.ok) {
-                const errorData = await response.json();
-                console.error('API Error Response:', errorData);
-                
-                if (errorData.error && errorData.error.code === 403) {
-                    if (errorData.error.message.includes('Requests from referer')) {
-                        throw new Error('API key is restricted by HTTP referrer. Please check your API key settings in Google Cloud Console.');
-                    } else if (errorData.error.message.includes('API key not valid')) {
-                        throw new Error('API key is not valid. Please check your API key.');
-                    } else {
-                        throw new Error(`Access denied: ${errorData.error.message}`);
-                    }
-                }
-                
-                throw new Error(`Failed to fetch bike data: ${response.status} ${response.statusText}`);
+                throw new Error('Failed to fetch bike data');
             }
-            
             const data = await response.json();
             this.bikeData = this.processSheetData(data.values);
-            console.log('Bike data loaded successfully:', this.bikeData.length, 'bikes');
         } catch (error) {
             console.error('Error loading bike data:', error);
-            
-            // Display error to user
-            const bikesContainer = document.getElementById('bikes-container');
-            if (bikesContainer) {
-                const errorMessage = document.createElement('div');
-                errorMessage.style.color = 'red';
-                errorMessage.style.padding = '20px';
-                errorMessage.style.textAlign = 'center';
-                errorMessage.innerHTML = `<strong>Error loading bike database:</strong><br>${error.message}<br>Please check your internet connection and try again.`;
-                
-                // Only append if not already present
-                if (!bikesContainer.querySelector('.database-error')) {
-                    errorMessage.className = 'database-error';
-                    bikesContainer.appendChild(errorMessage);
-                }
-            }
-            
             throw error;
         }
     }

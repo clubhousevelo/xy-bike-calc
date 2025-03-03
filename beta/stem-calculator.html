@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H1TXBTLXDW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-H1TXBTLXDW');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://sheets.googleapis.com https://*.googleapis.com;">
@@ -157,6 +166,17 @@
         <div style="margin-bottom: 8px;">
             <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
         </div>
+        <div class="non-auth-dependent" style="margin-bottom: 8px;">
+            <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
+                <button onclick="window.location.href='login.html'" style="padding: 4px 12px; font-size: 12px;">Login</button>
+            </div>
+        </div>
+        <div class="auth-dependent" style="margin-bottom: 8px; display: none;">
+            <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
+                <span class="user-display" style="margin-right: 8px; color: var(--text-color);"></span>
+                <button id="logout-button" style="padding: 4px 8px; font-size: 12px;">Logout</button>
+            </div>
+        </div>
         <div class="theme-toggle">
             <button id="mobileDarkModeToggle" class="dark-mode-toggle">
                 <span class="toggle-icon">☀️</span>
@@ -184,6 +204,17 @@
         <div style="flex: 1"></div>
         <div style="margin-bottom: 40px; text-align: center;">
             <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
+        </div>
+        <div class="non-auth-dependent" style="margin-bottom: 40px; text-align: center;">
+            <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
+                <button onclick="window.location.href='login.html'" style="padding: 4px 12px; font-size: 12px;">Login</button>
+            </div>
+        </div>
+        <div class="auth-dependent" style="margin-bottom: 40px; text-align: center; display: none;">
+            <div style="display: flex; flex-direction: column; align-items: center; padding: 0.75rem 1rem;">
+                <span class="user-display" style="margin-bottom: 8px; color: var(--text-color);"></span>
+                <button id="logout-button" style="padding: 4px 12px; font-size: 12px;">Logout</button>
+            </div>
         </div>
         <div class="theme-toggle" style="margin-bottom: 32px;">
             <button id="darkModeToggle" class="dark-mode-toggle">
@@ -266,5 +297,9 @@
     <script src="js/dark-mode.js"></script>
     <script src="js/mobile-menu.js"></script>
     <script src="js/calculator-header.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="js/firebase-auth.js"></script>
 </body>
 </html>

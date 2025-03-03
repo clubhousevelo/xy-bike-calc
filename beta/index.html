@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H1TXBTLXDW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-H1TXBTLXDW');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://sheets.googleapis.com https://*.googleapis.com;">
@@ -27,8 +36,10 @@
         <div style="margin-bottom: 30px; text-align: center;">
             <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
         </div>
-        <div class="non-auth-dependent" style="margin-bottom: 20px; text-align: center;">
-            <a href="login.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">Login</a>
+        <div class="non-auth-dependent" style="margin-bottom: 8px;">
+            <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
+                <button onclick="window.location.href='login.html'" style="padding: 4px 12px; font-size: 12px;">Login</button>
+            </div>
         </div>
         <div class="auth-dependent" style="margin-bottom: 40px; text-align: center; display: none;">
             <div style="display: flex; flex-direction: column; align-items: center; padding: 0.75rem 1rem;">
@@ -61,11 +72,13 @@
             <li><a href="bike-search.html">Bike Search</a></li>
         </ul>
         <div style="flex: 1"></div>
-        <div style="margin-bottom: 30px; text-align: center;">
+        <div style="margin-bottom: 40px; text-align: center;">
             <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
         </div>
-        <div class="non-auth-dependent" style="margin-bottom: 20px; text-align: center;">
-            <a href="login.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">Login</a>
+        <div class="non-auth-dependent" style="margin-bottom: 40px; text-align: center;">
+            <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
+                <button onclick="window.location.href='login.html'" style="padding: 4px 12px; font-size: 12px;">Login</button>
+            </div>
         </div>
         <div class="auth-dependent" style="margin-bottom: 40px; text-align: center; display: none;">
             <div style="display: flex; flex-direction: column; align-items: center; padding: 0.75rem 1rem;">
@@ -150,7 +163,7 @@
             <div id="bikes-container"></div>
         </div>
 
-        <div class="add-buttons">
+        <div class="add-buttons" style="margin-bottom: 10px;margin-top: 10px;">
             <button id="addBike">Add Bike</button>
             <button id="addManualBike">Add Manual Bike</button>
             <button id="printButton" class="print-button">Print</button>

@@ -136,11 +136,11 @@ class BikeCalculator {
                     <button class="confirm-button">Reset</button>
                 </div>
             `;
-            
-            // Create overlay for confirmation dialog
-            const confirmOverlay = document.createElement('div');
-            confirmOverlay.className = 'confirm-dialog-overlay';
-            confirmOverlay.style.cssText = `
+
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'dialog-overlay';
+            overlay.style.cssText = `
                 position: fixed;
                 top: 0;
                 left: 0;
@@ -149,11 +149,11 @@ class BikeCalculator {
                 background: rgba(0, 0, 0, 0.5);
                 z-index: 1000;
             `;
-            
+
             // Add to DOM
-            document.body.appendChild(confirmOverlay);
+            document.body.appendChild(overlay);
             document.body.appendChild(confirmDialog);
-            
+
             // Style buttons
             const cancelButton = confirmDialog.querySelector('.cancel-button');
             cancelButton.style.cssText = `
@@ -176,16 +176,11 @@ class BikeCalculator {
                 cursor: pointer;
                 font-weight: 500;
             `;
-            
-            // Function to close the dialog
+
+            // Function to close dialog
             const closeDialog = () => {
-                if (document.body.contains(confirmDialog)) {
-                    document.body.removeChild(confirmDialog);
-                }
-                if (document.body.contains(confirmOverlay)) {
-                    document.body.removeChild(confirmOverlay);
-                }
-                // Remove keyboard event listener
+                document.body.removeChild(confirmDialog);
+                document.body.removeChild(overlay);
                 document.removeEventListener('keydown', handleKeyDown);
             };
             
@@ -225,8 +220,8 @@ class BikeCalculator {
                 }
                 this.addManualBike();
                 
-                // Disable save button
-                document.getElementById('saveButton').disabled = true;
+                // Update save button state
+                this.updateSaveButtonState();
             };
             
             // Add keyboard event listener
@@ -247,7 +242,7 @@ class BikeCalculator {
         // Client name input
         const clientNameInput = document.getElementById('clientName');
         clientNameInput.addEventListener('input', () => {
-            document.getElementById('saveButton').disabled = !clientNameInput.value.trim();
+            this.updateSaveButtonState();
             this.saveData();
         });
 
@@ -908,9 +903,33 @@ class BikeCalculator {
         // Render the new bike card
         this.renderBikeCard(duplicatedBike, originalIndex + 1);
         
-        // Setup bike selectors if it's not a manual bike
-        if (!duplicatedBike.isManual) {
-            this.setupBikeSelectors(duplicatedBike.id);
+        // Get the new card element
+        const card = document.getElementById(duplicatedBike.id);
+        if (card) {
+            // Set geometry values
+            card.querySelector('.reach').value = duplicatedBike.reach || '';
+            card.querySelector('.stack').value = duplicatedBike.stack || '';
+            card.querySelector('.hta').value = duplicatedBike.hta || '';
+            card.querySelector('.sta').value = duplicatedBike.sta || '';
+            card.querySelector('.stl').value = duplicatedBike.stl || '';
+            
+            // Set stem configuration values
+            card.querySelector('.stem-length').value = duplicatedBike.stemLength || 100;
+            card.querySelector('.stem-angle').value = duplicatedBike.stemAngle || -6;
+            card.querySelector('.spacer-height').value = duplicatedBike.spacersHeight || 20;
+            
+            // For manual bikes, set the brand/model/size
+            if (duplicatedBike.isManual) {
+                const brandInput = card.querySelector('.brand-input');
+                const modelInput = card.querySelector('.model-input');
+                const sizeInput = card.querySelector('.size-input');
+                
+                if (brandInput) brandInput.value = duplicatedBike.brand || '';
+                if (modelInput) modelInput.value = duplicatedBike.model || '';
+                if (sizeInput) sizeInput.value = duplicatedBike.size || '';
+            } else {
+                this.setupBikeSelectors(duplicatedBike.id);
+            }
         }
         
         // Update calculations and save
@@ -1169,10 +1188,15 @@ class BikeCalculator {
         const targetHandlebarY = document.getElementById('targetHandlebarY').value || 'N/A';
         const handlebarReachUsed = document.getElementById('handlebarReachUsed').value || 'N/A';
         
+        // Get user's name from Firebase auth
+        const user = firebase.auth().currentUser;
+        const byLine = !user ? ' by Anonymous' : 
+                      user.displayName ? ` by ${user.displayName}` : '';
+        
         // Create a title for the print
         const title = document.createElement('div');
-        title.innerHTML = `<h1 style="text-align: center; margin-bottom: 5px;">Bike Recommendations - ${clientName}</h1>
-                          <p style="text-align: center; margin-bottom: 20px;">Generated on ${new Date().toLocaleDateString()}</p>`;
+        title.innerHTML = `<h1 style="text-align: center; margin-bottom: 5px;">Bike Recommendations for ${clientName}</h1>
+                          <p style="text-align: center; margin-bottom: 20px;">Generated on ${new Date().toLocaleDateString()}${byLine}</p>`;
         
         // Create a temporary print container
         const printContainer = document.createElement('div');
@@ -1180,27 +1204,41 @@ class BikeCalculator {
         printContainer.style.display = 'none';
         document.body.appendChild(printContainer);
         
+        // Add print-specific styles
+        const printStyles = document.createElement('style');
+        printStyles.textContent = `
+            @media print {
+                .print-container {
+                    zoom: 68%;
+                    -webkit-transform: scale(0.68);
+                    transform: scale(0.68);
+                    transform-origin: top left;
+                }
+            }
+        `;
+        document.head.appendChild(printStyles);
+        
         // Add the title
         printContainer.appendChild(title);
         
         // Add target positions section
         const targetSection = document.createElement('div');
         targetSection.innerHTML = `
-            <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
-                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; text-align: center;">
+            <div style="margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; text-align: center;">
                     <div>
-                        <h3>Target Saddle</h3>
-                        <p>X: ${targetSaddleX} mm</p>
-                        <p>Y: ${targetSaddleY} mm</p>
+                        <h3 style="margin: 0 0 4px 0;">Target Saddle</h3>
+                        <p style="margin: 0;">X: ${targetSaddleX} mm</p>
+                        <p style="margin: 0;">Y: ${targetSaddleY} mm</p>
                     </div>
                     <div>
-                        <h3>Target Handlebar</h3>
-                        <p>X: ${targetHandlebarX} mm</p>
-                        <p>Y: ${targetHandlebarY} mm</p>
+                        <h3 style="margin: 0 0 4px 0;">Target Handlebar</h3>
+                        <p style="margin: 0;">X: ${targetHandlebarX} mm</p>
+                        <p style="margin: 0;">Y: ${targetHandlebarY} mm</p>
                     </div>
                     <div>
-                        <h3>Bar Reach Used</h3>
-                        <p>${handlebarReachUsed} mm</p>
+                        <h3 style="margin: 0 0 4px 0;">Bar Reach Used</h3>
+                        <p style="margin: 0;">${handlebarReachUsed} mm</p>
                     </div>
                 </div>
             </div>
@@ -1370,28 +1408,28 @@ class BikeCalculator {
                 
                 // Create bike card for print
                 const bikeCard = document.createElement('div');
-                bikeCard.style.cssText = 'margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; page-break-inside: avoid;';
+                bikeCard.style.cssText = 'margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; page-break-inside: avoid;';
                 bikeCard.innerHTML = `
-                    <h3 style="margin-bottom: 10px;">${bikeName}</h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                    <h3 style="margin: 0 0 6px 0;">${bikeName}</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
                         ${geometryData ? `
                             <div style="flex: 1; min-width: 200px;">
-                                <h4 style="margin-bottom: 8px;">Geometry</h4>
-                                ${geometryData}
+                                <h4 style="margin: 0 0 4px 0;">Geometry</h4>
+                                <div style="line-height: 1.3;">${geometryData}</div>
                             </div>
                         ` : ''}
                         
                         ${stemData ? `
                             <div style="flex: 1; min-width: 200px;">
-                                <h4 style="margin-bottom: 8px;">Stem</h4>
-                                ${stemData}
+                                <h4 style="margin: 0 0 4px 0;">Stem</h4>
+                                <div style="line-height: 1.3;">${stemData}</div>
                             </div>
                         ` : ''}
                         
                         ${resultsData ? `
                             <div style="flex: 1; min-width: 200px;">
-                                <h4 style="margin-bottom: 8px;">Results</h4>
-                                ${resultsData}
+                                <h4 style="margin: 0 0 4px 0;">Results</h4>
+                                <div style="line-height: 1.3;">${resultsData}</div>
                             </div>
                         ` : ''}
                     </div>
@@ -1471,6 +1509,14 @@ class BikeCalculator {
     }
 
     saveInstance() {
+        // Check if user is logged in
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            this.showCustomAlert('Please log in to save bike positions');
+            document.getElementById('saveButton').disabled = true;
+            return;
+        }
+
         const clientName = document.getElementById('clientName').value.trim();
         if (!clientName) return;
 
@@ -1483,24 +1529,29 @@ class BikeCalculator {
         });
 
         if (validBikes.length === 0) {
-            // Replace alert with custom dialog
             this.showCustomAlert('No bikes with calculated handlebar positions to save.');
             return;
         }
 
-        const saveData = this.getSaveData();
+        // Save to Firebase
+        window.saveUserData(this.getSaveData())
+            .then(() => {
+                this.showCustomAlert('Bike configuration saved successfully!');
+            })
+            .catch(error => {
+                this.showCustomAlert('Error saving bike configuration: ' + error.message);
+            });
+    }
 
-        // Get existing saves from localStorage
-        let savedInstances = JSON.parse(localStorage.getItem('savedBikeInstances') || '[]');
+    // Add a method to update save button state based on auth
+    updateSaveButtonState() {
+        const saveButton = document.getElementById('saveButton');
+        const user = firebase.auth().currentUser;
+        const clientName = document.getElementById('clientName')?.value?.trim();
         
-        // Add new save
-        savedInstances.push(saveData);
-        
-        // Save back to localStorage
-        localStorage.setItem('savedBikeInstances', JSON.stringify(savedInstances));
-        
-        // Replace alert with custom dialog
-        this.showCustomAlert('Bike configuration saved successfully!');
+        if (saveButton) {
+            saveButton.disabled = !user || !clientName;
+        }
     }
 
     // Method to get data for saving to Firebase
@@ -1632,38 +1683,98 @@ class BikeCalculator {
     }
 
     showLoadDialog() {
-        // Get saved instances
-        let savedInstances = JSON.parse(localStorage.getItem('savedBikeInstances') || '[]');
-        
-        if (savedInstances.length === 0) {
-            this.showCustomAlert('No saved configurations found.');
+        // Check if there's already a dialog open
+        if (document.querySelector('.load-dialog')) {
             return;
         }
 
-        // Create dialog
-        const dialog = document.createElement('div');
-        dialog.className = 'load-dialog';
-        dialog.style.cssText = `
+        // Create load dialog
+        const loadDialog = document.createElement('div');
+        loadDialog.className = 'load-dialog';
+        loadDialog.style.cssText = `
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: var(--card-bg);
             color: var(--text-color);
-            padding: 20px;
+            padding: 16px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            max-width: 900px;
-            width: 90%;
-            max-height: 80vh;
+            max-width: 800px;
+            width: 95%;
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
-            z-index: 1000;
+            z-index: 1001;
+        `;
+
+        // Create dialog content with responsive layout
+        loadDialog.innerHTML = `
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Load Saved Bike Position</h3>
+            <div style="margin-bottom: 12px;">
+                <input type="text" id="searchInput" placeholder="Search by client name..." style="
+                    width: 100%;
+                    padding: 8px;
+                    border: 1px solid var(--border-color);
+                    border-radius: 4px;
+                    background: var(--input-bg);
+                    color: var(--text-color);
+                ">
+            </div>
+            <div class="fits-table-header desktop-only" style="
+                display: grid;
+                grid-template-columns: 30px 2fr 1fr 1fr 1fr 100px;
+                gap: 10px;
+                padding: 10px;
+                border-bottom: 2px solid var(--border-color);
+                font-weight: bold;
+                margin-bottom: 10px;
+            ">
+                <div>
+                    <input type="checkbox" id="selectAll" style="cursor: pointer;">
+                </div>
+                <div>Client Name</div>
+                <div>Date Saved</div>
+                <div>Bikes</div>
+                <div>Target Position</div>
+                <div>Actions</div>
+            </div>
+            <div id="savedFitsList" style="
+                flex: 1;
+                overflow-y: auto;
+                margin-bottom: 12px;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                padding: 8px;
+                background: var(--background);
+            "></div>
+            <div style="display: flex; justify-content: space-between; gap: 8px; background: var(--background);">
+                <button id="deleteSelected" class="delete-selected-button" style="
+                    padding: 4px 10px;
+                    background: transparent;
+                    color: var(--error-color);
+                    border: 1px solid var(--error-color);
+                    border-radius: 4px;
+                    cursor: pointer;
+                    display: none;
+                    transition: background-color 0.2s;
+                ">Delete Selected</button>
+                <button class="cancel-button" style="
+                    padding: 4px 10px;
+                    background: transparent;
+                    color: var(--text-color);
+                    border: 1px solid var(--border-color);
+                    border-radius: 4px;
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                ">Cancel</button>
+            </div>
         `;
 
         // Create overlay
         const overlay = document.createElement('div');
-        overlay.className = 'load-dialog-overlay';
+        overlay.className = 'dialog-overlay';
         overlay.style.cssText = `
             position: fixed;
             top: 0;
@@ -1671,191 +1782,315 @@ class BikeCalculator {
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+            z-index: 1000;
         `;
 
-        // Add header with title and close button
-        const header = document.createElement('div');
-        header.style.cssText = `
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
+        // Add to DOM
+        document.body.appendChild(overlay);
+        document.body.appendChild(loadDialog);
+
+        // Get elements
+        const searchInput = loadDialog.querySelector('#searchInput');
+        const savedFitsList = loadDialog.querySelector('#savedFitsList');
+        const selectAllCheckbox = loadDialog.querySelector('#selectAll');
+        const deleteSelectedButton = loadDialog.querySelector('#deleteSelected');
+        const cancelButton = loadDialog.querySelector('.cancel-button');
+
+        // Add styles for mobile layout
+        const style = document.createElement('style');
+        style.textContent = `
+            .saved-fit-item {
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                background: var(--card-bg);
+                margin-bottom: 8px;
+            }
+            .saved-fit-item .client-name {
+                font-weight: bold;
+            }
+            .saved-fit-item .action-buttons {
+                display: flex;
+                gap: 6px;
+            }
+            .saved-fit-item .load-btn {
+                padding: 6px 12px;
+                background: var(--primary-color);
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            .saved-fit-item .delete-btn {
+                padding: 6px;
+                background: transparent;
+                color: var(--error-color);
+                border: 1px solid var(--error-color);
+                border-radius: 4px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            @media (max-width: 767px) {
+                .desktop-only {
+                    display: none !important;
+                }
+                .saved-fit-item {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    padding: 8px !important;
+                }
+                .saved-fit-item .main-row {
+                    display: flex !important;
+                    justify-content: space-between !important;
+                    align-items: center !important;
+                    margin-bottom: 4px !important;
+                }
+                .saved-fit-item .info-row {
+                    display: flex !important;
+                    flex-wrap: wrap !important;
+                    gap: 8px !important;
+                    font-size: 0.85em !important;
+                    color: var(--text-secondary) !important;
+                }
+                .saved-fit-item .checkbox-container {
+                    margin-right: 8px !important;
+                }
+                .saved-fit-item .client-name {
+                    flex: 1 !important;
+                }
+                .saved-fit-item .date-info,
+                .saved-fit-item .bikes-info,
+                .saved-fit-item .position-info {
+                    display: none !important;
+                }
+            }
+            @media (min-width: 768px) {
+                .saved-fit-item {
+                    display: grid !important;
+                    grid-template-columns: 30px 2fr 1fr 1fr 1fr 100px !important;
+                    gap: 10px !important;
+                    padding: 10px !important;
+                    align-items: center !important;
+                }
+                .saved-fit-item .main-row,
+                .saved-fit-item .info-row {
+                    display: contents !important;
+                }
+                .saved-fit-item .info-row {
+                    display: none !important;
+                }
+                .saved-fit-item .checkbox-container {
+                    grid-column: 1;
+                }
+                .saved-fit-item .client-name {
+                    grid-column: 2;
+                }
+                .saved-fit-item .date-info {
+                    grid-column: 3;
+                }
+                .saved-fit-item .bikes-info {
+                    grid-column: 4;
+                }
+                .saved-fit-item .position-info {
+                    grid-column: 5;
+                }
+                .saved-fit-item .action-buttons {
+                    grid-column: 6;
+                }
+            }
         `;
-        
-        const title = document.createElement('h2');
-        title.textContent = 'Load Saved Configuration';
-        title.style.margin = '0';
-        
-        const closeButton = document.createElement('button');
-        closeButton.textContent = '×';
-        closeButton.style.cssText = `
-            border: none;
-            background: none;
-            color: var(--text-color);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-        `;
-        
-        // Function to close the load dialog
+        document.head.appendChild(style);
+
+        // Function to close dialog
         const closeLoadDialog = () => {
-            if (document.body.contains(dialog)) {
-                document.body.removeChild(dialog);
-            }
-            if (document.body.contains(overlay)) {
-                document.body.removeChild(overlay);
-            }
-            // Remove keyboard event listener
+            document.body.removeChild(loadDialog);
+            document.body.removeChild(overlay);
             document.removeEventListener('keydown', handleKeyDown);
         };
-        
-        closeButton.onclick = closeLoadDialog;
-        
-        header.appendChild(title);
-        header.appendChild(closeButton);
-        dialog.appendChild(header);
 
-        // Add search input
-        const searchContainer = document.createElement('div');
-        searchContainer.style.cssText = `
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        `;
-        
-        const searchInput = document.createElement('input');
-        searchInput.type = 'text';
-        searchInput.placeholder = 'Search by client name...';
-        searchInput.style.cssText = `
-            flex-grow: 1;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            background: var(--input-bg);
-            color: var(--text-color);
-            font-size: 14px;
-        `;
-        
-        searchContainer.appendChild(searchInput);
-        dialog.appendChild(searchContainer);
+        // Handle keyboard events
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeLoadDialog();
+            }
+        };
 
-        // Create table header
-        const tableHeader = document.createElement('div');
-        tableHeader.style.cssText = `
-            display: grid;
-            grid-template-columns: 2fr 1.5fr 1fr 0.8fr 140px;
-            gap: 10px;
-            padding: 10px;
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            font-weight: bold;
-            text-align: left;
-        `;
-        tableHeader.innerHTML = `
-            <div>Client Name</div>
-            <div>Date</div>
-            <div>Target Position</div>
-            <div>Bikes</div>
-            <div>Actions</div>
-        `;
-        dialog.appendChild(tableHeader);
+        // Add keyboard event listener
+        document.addEventListener('keydown', handleKeyDown);
 
-        // Create scrollable container for items
-        const itemsContainer = document.createElement('div');
-        itemsContainer.style.cssText = `
-            overflow-y: auto;
-            flex-grow: 1;
-        `;
+        // Function to delete multiple fits
+        const deleteMultipleFits = async (fitIds) => {
+            const user = firebase.auth().currentUser;
+            if (!user) return;
+
+            const db = firebase.firestore();
+            const batch = db.batch();
+
+            fitIds.forEach(fitId => {
+                const fitRef = db.collection('users').doc(user.uid)
+                    .collection('bikeFits').doc(fitId);
+                batch.delete(fitRef);
+            });
+
+            try {
+                await batch.commit();
+                this.showCustomAlert(`${fitIds.length} bike position(s) deleted successfully`);
+                updateList(searchInput.value.trim());
+            } catch (error) {
+                console.error('Error deleting bike positions:', error);
+                this.showCustomAlert('Error deleting bike position(s)');
+            }
+        };
+
+        // Function to update the selected state
+        const updateSelectedState = () => {
+            const checkboxes = savedFitsList.querySelectorAll('.fit-checkbox');
+            const selectAllCheckbox = loadDialog.querySelector('#selectAll');
+            const deleteSelectedButton = loadDialog.querySelector('.delete-selected-button');
+            
+            // Count selected checkboxes
+            const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            
+            // Update select all checkbox state
+            if (selectAllCheckbox) {
+                if (selectedCount === checkboxes.length && checkboxes.length > 0) {
+                    selectAllCheckbox.checked = true;
+                    selectAllCheckbox.indeterminate = false;
+                } else if (selectedCount === 0) {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = false;
+                } else {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = true;
+                }
+            }
+            
+            // Show/hide delete selected button based on any selection
+            if (deleteSelectedButton) {
+                deleteSelectedButton.style.display = selectedCount > 0 ? 'block' : 'none';
+            }
+        };
 
         // Function to update the list
-        const updateList = (searchTerm = '') => {
-            const filteredInstances = savedInstances
-                .filter(instance => {
-                    if (!searchTerm) return true;
-                    return instance.clientName.toLowerCase().startsWith(searchTerm.toLowerCase());
-                })
-                .sort((a, b) => a.clientName.toLowerCase().localeCompare(b.clientName.toLowerCase()));
+        const updateList = async (searchTerm = '') => {
+            savedFitsList.innerHTML = '<div style="text-align: center;">Loading...</div>';
 
-            itemsContainer.innerHTML = '';
-            
-            filteredInstances.forEach(instance => {
-                const item = document.createElement('div');
-                item.style.cssText = `
-                    display: grid;
-                    grid-template-columns: 2fr 1.5fr 1fr 0.8fr 140px;
-                    gap: 10px;
-                    padding: 10px;
-                    border-bottom: 1px solid var(--border-color);
-                    align-items: center;
-                `;
-                
-                // Remove hover effect CSS class and style tag
-                item.className = '';
-                
-                const date = new Date(instance.timestamp);
-                const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                
-                const targetPosition = instance.targetHandlebarX && instance.targetHandlebarY
-                    ? `HX: ${instance.targetHandlebarX}, HY: ${instance.targetHandlebarY}`
-                    : 'Not set';
-                
-                const validBikes = instance.bikes.filter(bike => 
-                    bike.reach && bike.stack && bike.hta
-                ).length;
-                
-                item.innerHTML = `
-                    <div><strong>${instance.clientName}</strong></div>
-                    <div>${formattedDate}</div>
-                    <div>${targetPosition}</div>
-                    <div>${validBikes} bike${validBikes !== 1 ? 's' : ''}</div>
-                    <div style="display: flex; gap: 4px; justify-content: flex-start;">
-                        <button class="load-button">Load</button>
-                        <button class="delete-button">🗑️</button>
-                    </div>
-                `;
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    savedFitsList.innerHTML = '<div style="text-align: center;">Please log in to view saved clients and bike positions</div>';
+                    return;
+                }
 
-                const loadButton = item.querySelector('.load-button');
-                loadButton.style.cssText = `
-                    padding: 5px 10px;
-                    background: transparent;
-                    color: #007AFF;
-                    border: 1px solid #007AFF;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-weight: 500;
-                    min-width: 60px;
-                `;
+                const db = firebase.firestore();
+                let query = db.collection('users').doc(user.uid).collection('bikeFits')
+                    .orderBy('timestamp', 'desc');
 
-                const deleteButton = item.querySelector('.delete-button');
-                deleteButton.style.cssText = `
-                    padding: 5px 10px;
-                    background: transparent;
-                    color: #8E8E93;
-                    border: 1px solid #8E8E93;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-weight: 500;
-                    width: 32px;
-                    height: 28px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                `;
+                const snapshot = await query.get();
 
-                loadButton.onclick = () => {
-                    this.loadSavedInstance(instance);
-                    closeLoadDialog();
-                };
+                if (snapshot.empty) {
+                    savedFitsList.innerHTML = '<div style="text-align: center;">No saved bike positions found</div>';
+                    return;
+                }
 
-                deleteButton.onclick = () => {
-                    console.log('Delete button clicked');
+                const fits = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    fits.push({
+                        id: doc.id,
+                        ...data
+                    });
+                });
+
+                // Filter fits if there's a search term
+                const filteredFits = searchTerm
+                    ? fits.filter(fit => 
+                        fit.clientName.toLowerCase().includes(searchTerm.toLowerCase()))
+                    : fits;
+
+                if (filteredFits.length === 0) {
+                    savedFitsList.innerHTML = '<div style="text-align: center;">No matches found</div>';
+                    return;
+                }
+
+                savedFitsList.innerHTML = filteredFits.map(fit => {
+                    const date = new Date(fit.timestamp);
+                    const formattedDate = date.toLocaleDateString();
+                    const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     
-                    // Create custom confirmation dialog
+                    return `
+                    <div class="saved-fit-item" data-fit-id="${fit.id}">
+                        <div class="main-row">
+                            <div class="checkbox-container">
+                                <input type="checkbox" class="fit-checkbox" style="cursor: pointer;">
+                            </div>
+                            <div class="client-name">${fit.clientName}</div>
+                            <div class="date-info">${formattedDate}<br><span style="font-size: 0.9em; color: var(--text-secondary);">${formattedTime}</span></div>
+                            <div class="bikes-info">${fit.bikes.length} bikes</div>
+                            <div class="position-info">HX: ${fit.targetHandlebarX}mm<br>HY: ${fit.targetHandlebarY}mm</div>
+                            <div class="action-buttons">
+                                <button class="load-btn">Load</button>
+                                <button class="delete-btn">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span>${formattedDate} ${formattedTime}</span>
+                            <span>•</span>
+                            <span>${fit.bikes.length} bikes</span>
+                            <span>•</span>
+                            <span>HX: ${fit.targetHandlebarX}mm, HY: ${fit.targetHandlebarY}mm</span>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+
+                // Add event listeners to checkboxes
+                savedFitsList.querySelectorAll('.fit-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', updateSelectedState);
+                });
+
+                // Add event listener to select all checkbox
+                const selectAllCheckbox = loadDialog.querySelector('#selectAll');
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.addEventListener('change', () => {
+                        const checkboxes = savedFitsList.querySelectorAll('.fit-checkbox');
+                        checkboxes.forEach(cb => {
+                            cb.checked = selectAllCheckbox.checked;
+                        });
+                        updateSelectedState();
+                    });
+                }
+
+                // Add event listeners to load buttons
+                savedFitsList.querySelectorAll('.load-btn').forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const fitId = button.closest('.saved-fit-item').dataset.fitId;
+                        const user = firebase.auth().currentUser;
+                        if (!user) return;
+
+                        try {
+                            const doc = await firebase.firestore()
+                                .collection('users')
+                                .doc(user.uid)
+                                .collection('bikeFits')
+                                .doc(fitId)
+                                .get();
+
+                            if (doc.exists) {
+                                this.loadSavedFit(doc.data());
+                                closeLoadDialog();
+                            }
+                        } catch (error) {
+                            console.error('Error loading bike position:', error);
+                            this.showCustomAlert('Error loading bike position');
+                        }
+                    });
+                });
+
+                // Function to show custom confirmation dialog
+                const showDeleteConfirmation = (fitIds, onConfirm) => {
                     const confirmDialog = document.createElement('div');
                     confirmDialog.className = 'confirm-dialog';
                     confirmDialog.style.cssText = `
@@ -1871,21 +2106,41 @@ class BikeCalculator {
                         max-width: 400px;
                         width: 90%;
                         text-align: center;
-                        z-index: 1001;
+                        z-index: 1002;
                     `;
-                    
+
+                    const message = fitIds.length === 1 
+                        ? 'Are you sure you want to delete this bike position?' 
+                        : `Are you sure you want to delete ${fitIds.length} selected bike positions?`;
+
                     confirmDialog.innerHTML = `
-                        <h3 style="margin-top: 0;">Confirm Deletion</h3>
-                        <p>Are you sure you want to delete this saved configuration?</p>
+                        <h3 style="margin-top: 0;">Confirm Delete</h3>
+                        <p>${message}</p>
                         <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-                            <button class="cancel-button">Cancel</button>
-                            <button class="confirm-button">Delete</button>
+                            <button class="cancel-button" style="
+                                padding: 8px 16px;
+                                background: transparent;
+                                color: var(--text-color);
+                                border: 1px solid var(--border-color);
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-weight: 500;
+                            ">Cancel</button>
+                            <button class="confirm-button" style="
+                                padding: 8px 16px;
+                                background: var(--error-color);
+                                color: white;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-weight: 500;
+                            ">Delete</button>
                         </div>
                     `;
-                    
-                    // Create overlay for confirmation dialog
+
+                    // Create overlay
                     const confirmOverlay = document.createElement('div');
-                    confirmOverlay.className = 'confirm-dialog-overlay';
+                    confirmOverlay.className = 'dialog-overlay';
                     confirmOverlay.style.cssText = `
                         position: fixed;
                         top: 0;
@@ -1893,151 +2148,83 @@ class BikeCalculator {
                         right: 0;
                         bottom: 0;
                         background: rgba(0, 0, 0, 0.5);
-                        z-index: 1000;
+                        z-index: 1001;
                     `;
-                    
+
                     // Add to DOM
                     document.body.appendChild(confirmOverlay);
                     document.body.appendChild(confirmDialog);
-                    
-                    // Style buttons
-                    const cancelButton = confirmDialog.querySelector('.cancel-button');
-                    cancelButton.style.cssText = `
-                        padding: 8px 16px;
-                        background: transparent;
-                        color: var(--text-color);
-                        border: 1px solid var(--border-color);
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-weight: 500;
-                    `;
-                    
-                    const confirmButton = confirmDialog.querySelector('.confirm-button');
-                    confirmButton.style.cssText = `
-                        padding: 8px 16px;
-                        background: #FF3B30;
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-weight: 500;
-                    `;
-                    
-                    // Function to close the confirmation dialog
+
+                    // Handle close
                     const closeConfirmDialog = () => {
-                        if (document.body.contains(confirmDialog)) {
-                            document.body.removeChild(confirmDialog);
-                        }
-                        if (document.body.contains(confirmOverlay)) {
-                            document.body.removeChild(confirmOverlay);
-                        }
-                        // Remove keyboard event listener
-                        document.removeEventListener('keydown', handleConfirmKeyDown);
+                        document.body.removeChild(confirmDialog);
+                        document.body.removeChild(confirmOverlay);
                     };
-                    
-                    // Handle keyboard events for confirmation dialog
-                    const handleConfirmKeyDown = (e) => {
-                        if (e.key === 'Escape') {
-                            e.preventDefault();
-                            closeConfirmDialog();
-                            console.log('Delete cancelled via Escape key');
-                        } else if (e.key === 'Enter') {
-                            e.preventDefault();
-                            // Perform delete operation
-                            console.log('Delete confirmed via Enter key');
-                            const updatedInstances = savedInstances.filter(saved => 
-                                saved.timestamp !== instance.timestamp
-                            );
-                            console.log('Original instances:', savedInstances.length);
-                            console.log('Updated instances:', updatedInstances.length);
-                            localStorage.setItem('savedBikeInstances', JSON.stringify(updatedInstances));
-                            
-                            // Update the local savedInstances array to match localStorage
-                            savedInstances = updatedInstances;
-                            
-                            // Remove the item from the display
-                            item.remove();
-                            console.log('Item removed from display');
-                            
-                            closeConfirmDialog();
-                            
-                            // If no items left, close the main dialog
-                            console.log('Items remaining:', itemsContainer.children.length);
-                            if (itemsContainer.children.length === 0) {
-                                closeLoadDialog();
-                                console.log('Dialog closed - no items left');
-                            }
-                        }
-                    };
-                    
-                    // Add keyboard event listener for confirmation dialog
-                    document.addEventListener('keydown', handleConfirmKeyDown);
-                    
+
                     // Add event listeners
-                    cancelButton.onclick = () => {
+                    confirmDialog.querySelector('.cancel-button').onclick = closeConfirmDialog;
+                    confirmDialog.querySelector('.confirm-button').onclick = () => {
+                        onConfirm();
                         closeConfirmDialog();
-                        console.log('Delete cancelled');
                     };
-                    
-                    confirmButton.onclick = () => {
-                        console.log('Delete confirmed');
-                        const updatedInstances = savedInstances.filter(saved => 
-                            saved.timestamp !== instance.timestamp
-                        );
-                        console.log('Original instances:', savedInstances.length);
-                        console.log('Updated instances:', updatedInstances.length);
-                        localStorage.setItem('savedBikeInstances', JSON.stringify(updatedInstances));
-                        
-                        // Update the local savedInstances array to match localStorage
-                        savedInstances = updatedInstances;
-                        
-                        // Remove the item from the display
-                        item.remove();
-                        console.log('Item removed from display');
-                        
-                        closeConfirmDialog();
-                        
-                        // If no items left, close the main dialog
-                        console.log('Items remaining:', itemsContainer.children.length);
-                        if (itemsContainer.children.length === 0) {
-                            closeLoadDialog();
-                            console.log('Dialog closed - no items left');
-                        }
-                    };
-                    
-                    // Focus the cancel button by default (safer option)
-                    cancelButton.focus();
                 };
 
-                itemsContainer.appendChild(item);
-            });
-        };
+                // Update delete handlers to use custom confirmation
+                savedFitsList.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const fitId = button.closest('.saved-fit-item').dataset.fitId;
+                        showDeleteConfirmation([fitId], () => deleteMultipleFits([fitId]));
+                    });
+                });
 
-        // Add event listener for search input
-        searchInput.addEventListener('input', (e) => {
-            updateList(e.target.value);
-        });
-        
-        // Handle keyboard events for load dialog
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                closeLoadDialog();
+                // Update Delete Selected button handler
+                deleteSelectedButton.addEventListener('click', async () => {
+                    const selectedItems = savedFitsList.querySelectorAll('.fit-checkbox:checked');
+                    const selectedIds = Array.from(selectedItems).map(cb => 
+                        cb.closest('.saved-fit-item').dataset.fitId
+                    );
+
+                    if (selectedIds.length > 0) {
+                        showDeleteConfirmation(selectedIds, () => deleteMultipleFits(selectedIds));
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading saved positions:', error);
+                savedFitsList.innerHTML = '<div style="text-align: center; color: var(--error-color);">Error loading saved positions</div>';
             }
         };
-        
-        // Add keyboard event listener
-        document.addEventListener('keydown', handleKeyDown);
 
-        dialog.appendChild(itemsContainer);
-        document.body.appendChild(overlay);
-        document.body.appendChild(dialog);
+        // Add event listeners
+        searchInput.addEventListener('input', (e) => {
+            updateList(e.target.value.trim());
+        });
 
-        // Initial list population
+        cancelButton.addEventListener('click', closeLoadDialog);
+
+        // Select All checkbox handler
+        selectAllCheckbox.addEventListener('change', () => {
+            const checkboxes = savedFitsList.querySelectorAll('.fit-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = selectAllCheckbox.checked;
+            });
+            updateSelectedState();
+        });
+
+        // Delete Selected button handler
+        deleteSelectedButton.addEventListener('click', async () => {
+            const selectedItems = savedFitsList.querySelectorAll('.fit-checkbox:checked');
+            const selectedIds = Array.from(selectedItems).map(cb => 
+                cb.closest('.saved-fit-item').dataset.fitId
+            );
+
+            if (selectedIds.length > 0 && confirm(`Are you sure you want to delete ${selectedIds.length} selected bike position(s)?`)) {
+                await deleteMultipleFits(selectedIds);
+            }
+        });
+
+        // Initial load of saved fits
         updateList();
-        
-        // Focus the search input
-        searchInput.focus();
     }
 
     loadSavedInstance(savedData) {
@@ -2240,4 +2427,18 @@ class BikeDatabase {
         };
     }
 }
+        
+// Add hover styles
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+    .delete-selected-button:hover {
+        background-color: var(--error-color) !important;
+        color: white !important;
+    }
+    .cancel-button:hover {
+        background-color: var(--border-color) !important;
+        color: var(--text-color) !important;
+    }
+`;
+document.head.appendChild(styleSheet);
         

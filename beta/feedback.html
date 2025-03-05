@@ -205,9 +205,12 @@
             <form class="feedback-form" id="feedbackForm" action="https://formsubmit.co/feedback@xybikecalc.com" method="POST">
                 <!-- FormSubmit configuration fields -->
                 <input type="hidden" name="_subject" value="XY Bike Calculator Feedback">
-                <input type="hidden" name="_next" value="https://xybikecalc.com/thank-you.html">
+                <input type="hidden" name="_next" value="thank-you.html">
                 <input type="hidden" name="_template" value="table">
                 <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_autoresponse" value="Thank you for your feedback about XY Bike Calculator. We've received your message and will review it soon.">
+                <!-- Honeypot field to prevent spam -->
+                <input type="text" name="_honey" style="display:none">
                 
                 <div class="form-group">
                     <label for="feedbackType">Feedback Type<span class="required">*</span></label>

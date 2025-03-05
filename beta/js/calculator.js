@@ -1187,6 +1187,14 @@ class BikeCalculator {
         const targetHandlebarY = document.getElementById('targetHandlebarY').value || 'N/A';
         const handlebarReachUsed = document.getElementById('handlebarReachUsed').value || 'N/A';
         
+        // Check if any target positions are provided
+        const hasTargetPositions = 
+            targetSaddleX !== 'N/A' || 
+            targetSaddleY !== 'N/A' || 
+            targetHandlebarX !== 'N/A' || 
+            targetHandlebarY !== 'N/A' || 
+            handlebarReachUsed !== 'N/A';
+        
         // Get user's name from Firebase auth
         const user = firebase.auth().currentUser;
         let byLine = '';
@@ -1225,29 +1233,31 @@ class BikeCalculator {
         // Add the title
         printContainer.appendChild(title);
         
-        // Add target positions section
-        const targetSection = document.createElement('div');
-        targetSection.innerHTML = `
-            <div style="margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
-                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; text-align: center;">
-                    <div>
-                        <h3 style="margin: 0 0 4px 0;">Target Saddle</h3>
-                        <p style="margin: 0;">X: ${targetSaddleX} mm</p>
-                        <p style="margin: 0;">Y: ${targetSaddleY} mm</p>
-                    </div>
-                    <div>
-                        <h3 style="margin: 0 0 4px 0;">Target Handlebar</h3>
-                        <p style="margin: 0;">X: ${targetHandlebarX} mm</p>
-                        <p style="margin: 0;">Y: ${targetHandlebarY} mm</p>
-                    </div>
-                    <div>
-                        <h3 style="margin: 0 0 4px 0;">Bar Reach Used</h3>
-                        <p style="margin: 0;">${handlebarReachUsed} mm</p>
+        // Add target positions section only if any target positions are provided
+        if (hasTargetPositions) {
+            const targetSection = document.createElement('div');
+            targetSection.innerHTML = `
+                <div style="margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; text-align: center;">
+                        <div>
+                            <h3 style="margin: 0 0 4px 0;">Target Saddle</h3>
+                            <p style="margin: 0;">X: ${targetSaddleX} mm</p>
+                            <p style="margin: 0;">Y: ${targetSaddleY} mm</p>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0 0 4px 0;">Target Handlebar</h3>
+                            <p style="margin: 0;">X: ${targetHandlebarX} mm</p>
+                            <p style="margin: 0;">Y: ${targetHandlebarY} mm</p>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0 0 4px 0;">Bar Reach Used</h3>
+                            <p style="margin: 0;">${handlebarReachUsed} mm</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
-        printContainer.appendChild(targetSection);
+            `;
+            printContainer.appendChild(targetSection);
+        }
         
         // Add bike data section
         const bikesSection = document.createElement('div');
@@ -1356,7 +1366,7 @@ class BikeCalculator {
                     const value = valueSpan?.textContent || 'N/A';
                     
                     // Special handling for handlebar X and Y to show differences with arrows
-                    if (label === 'Handlebar X:' && targetHandlebarX && value !== '-- mm') {
+                    if (label === 'Handlebar X:' && targetHandlebarX !== 'N/A' && value !== '-- mm') {
                         const actualValue = parseInt(value);
                         if (!isNaN(actualValue)) {
                             const targetValue = parseInt(targetHandlebarX);
@@ -1377,8 +1387,8 @@ class BikeCalculator {
                         } else {
                             resultsData += `<p>${label} ${value}</p>`;
                         }
-                    } 
-                    else if (label === 'Handlebar Y:' && targetHandlebarY && value !== '-- mm') {
+                    }
+                    else if (label === 'Handlebar Y:' && targetHandlebarY !== 'N/A' && value !== '-- mm') {
                         const actualValue = parseInt(value);
                         if (!isNaN(actualValue)) {
                             const targetValue = parseInt(targetHandlebarY);

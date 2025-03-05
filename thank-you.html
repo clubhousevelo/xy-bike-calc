@@ -20,8 +20,63 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://sheets.googleapis.com https://*.googleapis.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
-    <title>HX/HY to Frame Calculator - Find Stack and Reach</title>
+    <title>Thank You - XY Bike Calculator</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .thank-you-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .thank-you-icon {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .thank-you-title {
+            font-size: 1.75rem;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .thank-you-message {
+            color: var(--text-color);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .return-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s;
+        }
+
+        .return-button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .thank-you-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <button class="hamburger-menu">
@@ -33,13 +88,14 @@
     <nav class="mobile-nav">
         <ul>
             <li><a href="index.html">X/Y Position Calculator</a></li>
-            <li><a href="hxhy-frame-calculator.html" class="active">HX/HY to Frame Calculator</a></li>
+            <li><a href="hxhy-frame-calculator.html">HX/HY to Frame Calculator</a></li>
             <li><a href="stem-calculator.html">Stem Calculator</a></li>
             <li><a href="bike-search.html">Bike Search</a></li>
         </ul>
         <div style="flex: 1"></div>
         <div style="margin-bottom: 8px;">
             <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
+            <a href="feedback.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">Feedback</a>
         </div>
         <div class="non-auth-dependent" style="margin-bottom: 8px;">
             <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
@@ -72,13 +128,14 @@
         </div>
         <ul>
             <li><a href="index.html">X/Y Position Calculator</a></li>
-            <li><a href="hxhy-frame-calculator.html" class="active">HX/HY to Frame Calculator</a></li>
+            <li><a href="hxhy-frame-calculator.html">HX/HY to Frame Calculator</a></li>
             <li><a href="stem-calculator.html">Stem Calculator</a></li>
             <li><a href="bike-search.html">Bike Search</a></li>
         </ul>
         <div style="flex: 1"></div>
         <div style="margin-bottom: 40px; text-align: center;">
             <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
+            <a href="feedback.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">Feedback</a>
         </div>
         <div class="non-auth-dependent" style="margin-bottom: 40px; text-align: center;">
             <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
@@ -104,65 +161,28 @@
             </div>
         </div>
     </nav>
+
     <div class="calculator-container">
         <div class="calculator-header">
             <h1 class="calculator-title">
                 <span class="collapse-indicator">▼</span>
-                HX/HY to Frame Calculator
+                Thank You
             </h1>
-            <p class="calculator-description">Use this tool to calculate Frame Stack and Reach from a desired HX/HY and specific stem configuration.</p>
+            <p class="calculator-description">Your feedback has been received.</p>
         </div>
-        <div class="input-section">
-            <div class="input-group">
-                <div class="input-field">
-                    <label for="handlebarX">Handlebar X:</label>
-                    <input type="number" id="handlebarX" value="">
-                    <span>mm</span>
-                </div>
-                <div class="input-field">
-                    <label for="handlebarY">Handlebar Y:</label>
-                    <input type="number" id="handlebarY" value="">
-                    <span>mm</span>
-                </div>
-                <div class="input-field hta-field">
-                    <label for="headTubeAngle">Head Tube Angle:</label>
-                    <input type="number" id="headTubeAngle" value="73" step="0.1">
-                    <span>°</span>
-                </div>
-                <div class="input-field">
-                    <label for="stemHeight">Stem Height:</label>
-                    <input type="number" id="stemHeight" value="40" min="0">
-                    <span>mm</span>
-                </div>
-                <div class="input-field">
-                    <label for="stemLength">Stem Length:</label>
-                    <input type="number" id="stemLength" value="100" min="35">
-                    <span>mm</span>
-                </div>
-                <div class="input-field">
-                    <label for="stemAngle">Stem Angle:</label>
-                    <input type="number" id="stemAngle" value="-6" step="1">
-                    <span>°</span>
-                </div>
-                <div class="input-field">
-                    <label for="spacerHeight">Spacer Height:</label>
-                    <input type="number" id="spacerHeight" value="20" min="0">
-                    <span>mm</span>
-                </div>
-            </div>
-            <div class="results-group">
-                <div class="result-field">
-                    <label>Reach</label>
-                    <span id="frameReach">-- mm</span>
-                </div>
-                <div class="result-field">
-                    <label>Stack</label>
-                    <span id="frameStack">-- mm</span>
-                </div>
-            </div>
+        
+        <div class="thank-you-container">
+            <div class="thank-you-icon">✓</div>
+            <h2 class="thank-you-title">Thank You for Your Feedback!</h2>
+            <p class="thank-you-message">
+                We've received your message and will review it shortly. Your input helps us improve XY Bike Calculator.
+                <br><br>
+                If you've requested a bike to be added to our database, we'll do our best to include it in our next update.
+            </p>
+            <a href="index.html" class="return-button">Return to Home</a>
         </div>
     </div>
-    <script src="js/hxhy-calculator.js"></script>
+
     <script src="js/dark-mode.js"></script>
     <script src="js/mobile-menu.js"></script>
     <script src="js/calculator-header.js"></script>

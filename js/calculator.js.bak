@@ -1187,23 +1187,10 @@ class BikeCalculator {
         const targetHandlebarY = document.getElementById('targetHandlebarY').value || 'N/A';
         const handlebarReachUsed = document.getElementById('handlebarReachUsed').value || 'N/A';
         
-        // Check if any target positions are provided
-        const hasTargetPositions = 
-            targetSaddleX !== 'N/A' || 
-            targetSaddleY !== 'N/A' || 
-            targetHandlebarX !== 'N/A' || 
-            targetHandlebarY !== 'N/A' || 
-            handlebarReachUsed !== 'N/A';
-        
         // Get user's name from Firebase auth
         const user = firebase.auth().currentUser;
-        let byLine = '';
-        if (!user) {
-            byLine = ' by Anonymous';
-        } else if (user.displayName) {
-            byLine = ` by ${user.displayName}`;
-        }
-        // The byLine will be empty if user is logged in but has no display name
+        const byLine = !user ? ' by Anonymous' : 
+                      user.displayName ? ` by ${user.displayName}` : '';
         
         // Create a title for the print
         const title = document.createElement('div');
@@ -1233,31 +1220,29 @@ class BikeCalculator {
         // Add the title
         printContainer.appendChild(title);
         
-        // Add target positions section only if any target positions are provided
-        if (hasTargetPositions) {
-            const targetSection = document.createElement('div');
-            targetSection.innerHTML = `
-                <div style="margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
-                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; text-align: center;">
-                        <div>
-                            <h3 style="margin: 0 0 4px 0;">Target Saddle</h3>
-                            <p style="margin: 0;">X: ${targetSaddleX} mm</p>
-                            <p style="margin: 0;">Y: ${targetSaddleY} mm</p>
-                        </div>
-                        <div>
-                            <h3 style="margin: 0 0 4px 0;">Target Handlebar</h3>
-                            <p style="margin: 0;">X: ${targetHandlebarX} mm</p>
-                            <p style="margin: 0;">Y: ${targetHandlebarY} mm</p>
-                        </div>
-                        <div>
-                            <h3 style="margin: 0 0 4px 0;">Bar Reach Used</h3>
-                            <p style="margin: 0;">${handlebarReachUsed} mm</p>
-                        </div>
+        // Add target positions section
+        const targetSection = document.createElement('div');
+        targetSection.innerHTML = `
+            <div style="margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; text-align: center;">
+                    <div>
+                        <h3 style="margin: 0 0 4px 0;">Target Saddle</h3>
+                        <p style="margin: 0;">X: ${targetSaddleX} mm</p>
+                        <p style="margin: 0;">Y: ${targetSaddleY} mm</p>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0 0 4px 0;">Target Handlebar</h3>
+                        <p style="margin: 0;">X: ${targetHandlebarX} mm</p>
+                        <p style="margin: 0;">Y: ${targetHandlebarY} mm</p>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0 0 4px 0;">Bar Reach Used</h3>
+                        <p style="margin: 0;">${handlebarReachUsed} mm</p>
                     </div>
                 </div>
-            `;
-            printContainer.appendChild(targetSection);
-        }
+            </div>
+        `;
+        printContainer.appendChild(targetSection);
         
         // Add bike data section
         const bikesSection = document.createElement('div');
@@ -1366,7 +1351,7 @@ class BikeCalculator {
                     const value = valueSpan?.textContent || 'N/A';
                     
                     // Special handling for handlebar X and Y to show differences with arrows
-                    if (label === 'Handlebar X:' && targetHandlebarX !== 'N/A' && value !== '-- mm') {
+                    if (label === 'Handlebar X:' && targetHandlebarX && value !== '-- mm') {
                         const actualValue = parseInt(value);
                         if (!isNaN(actualValue)) {
                             const targetValue = parseInt(targetHandlebarX);
@@ -1387,8 +1372,8 @@ class BikeCalculator {
                         } else {
                             resultsData += `<p>${label} ${value}</p>`;
                         }
-                    }
-                    else if (label === 'Handlebar Y:' && targetHandlebarY !== 'N/A' && value !== '-- mm') {
+                    } 
+                    else if (label === 'Handlebar Y:' && targetHandlebarY && value !== '-- mm') {
                         const actualValue = parseInt(value);
                         if (!isNaN(actualValue)) {
                             const targetValue = parseInt(targetHandlebarY);
@@ -1851,9 +1836,15 @@ class BikeCalculator {
                 <div>
                     <input type="checkbox" id="selectAll" style="cursor: pointer;">
                 </div>
-                <div>Client Name</div>
-                <div>Date Saved</div>
-                <div>Bikes</div>
+                <div class="sort-header" data-sort="name" style="cursor: pointer; user-select: none;">
+                    Client Name <span class="sort-indicator"></span>
+                </div>
+                <div class="sort-header" data-sort="date" style="cursor: pointer; user-select: none;">
+                    Date Saved <span class="sort-indicator"></span>
+                </div>
+                <div class="sort-header" data-sort="bikes" style="cursor: pointer; user-select: none;">
+                    Bikes <span class="sort-indicator"></span>
+                </div>
                 <div>Target Position</div>
                 <div>Actions</div>
             </div>
@@ -1866,29 +1857,26 @@ class BikeCalculator {
                 padding: 8px;
                 background: var(--background);
             "></div>
-            <div style="display: flex; justify-content: space-between; gap: 8px; background: var(--background);">
-                <div style="flex: 1;">
-                    <button id="deleteSelected" class="delete-selected-button" style="
-                        padding: 4px 10px;
-                        background: transparent;
-                        color: var(--error-color);
-                        border: 1px solid var(--error-color);
-                        border-radius: 4px;
-                        cursor: pointer;
-                        display: none;
-                        transition: background-color 0.2s;
-                    ">Delete Selected</button>
-                </div>
-                <div>
-                    <button id="cancelLoad" style="
-                        padding: 8px 16px;
-                        background: var(--primary-color);
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        cursor: pointer;
-                    ">Close</button>
-                </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; background: var(--background);">
+                <button id="cancelLoad" style="
+                    padding: 8px 16px;
+                    background: var(--primary-color);
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                ">Close</button>
+                <button id="deleteSelected" class="delete-selected-button" style="
+                    padding: 4px 10px;
+                    background: transparent;
+                    color: var(--error-color);
+                    border: 1px solid var(--error-color);
+                    border-radius: 4px;
+                    cursor: pointer;
+                    display: none;
+                    transition: background-color 0.2s;
+                    margin-right: auto;
+                ">Delete Selected</button>
             </div>
         `;
 
@@ -1902,7 +1890,15 @@ class BikeCalculator {
         const cancelButton = loadDialog.querySelector('#cancelLoad');
         const selectAllCheckbox = loadDialog.querySelector('#selectAll');
         const deleteSelectedButton = loadDialog.querySelector('#deleteSelected');
+        const sortHeaders = loadDialog.querySelectorAll('.sort-header');
 
+        // Get stored sort settings or set defaults
+        let currentSort = localStorage.getItem('bikePositionsSortBy') || 'date';
+        let sortDirection = localStorage.getItem('bikePositionsSortDirection') || 'desc';
+        
+        // Set initial sort indicators
+        setTimeout(() => updateSortIndicators(), 0);
+        
         // Add styles for mobile layout
         const style = document.createElement('style');
         style.textContent = `
@@ -2082,9 +2078,9 @@ class BikeCalculator {
                             padding: 8px 16px;
                             background: var(--primary-color);
                             color: white;
-            border: none;
+                            border: none;
                             border-radius: 4px;
-            cursor: pointer;
+                            cursor: pointer;
                         ">Refresh List</button>
                     </div>
                 `;
@@ -2101,678 +2097,22 @@ class BikeCalculator {
                 const retryButton = document.getElementById('retryLoadButton');
                 if (retryButton) {
                     retryButton.addEventListener('click', () => {
-                        updateList(searchInput.value.trim());
-                    });
-                }
-            }
-        };
-
-        // Function to update the selected state
-        const updateSelectedState = () => {
-            const checkboxes = savedFitsList.querySelectorAll('.fit-checkbox');
-            const selectAllCheckbox = loadDialog.querySelector('#selectAll');
-            const deleteSelectedButton = loadDialog.querySelector('.delete-selected-button');
-            
-            // Count selected checkboxes
-            const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-            
-            // Update select all checkbox state
-            if (selectAllCheckbox) {
-                if (selectedCount === checkboxes.length && checkboxes.length > 0) {
-                    selectAllCheckbox.checked = true;
-                    selectAllCheckbox.indeterminate = false;
-                } else if (selectedCount === 0) {
-                    selectAllCheckbox.checked = false;
-                    selectAllCheckbox.indeterminate = false;
-                } else {
-                    selectAllCheckbox.checked = false;
-                    selectAllCheckbox.indeterminate = true;
-                }
-            }
-            
-            // Show/hide delete selected button based on any selection
-            if (deleteSelectedButton) {
-                deleteSelectedButton.style.display = selectedCount > 0 ? 'block' : 'none';
-            }
-        };
-
-        // Function to update the list with retry mechanism
-        let allFits = []; // Store all fits to enable client-side searching
-        
-        const updateList = async (searchTerm = '', retryCount = 0, forceRefresh = false) => {
-            const maxRetries = 3;
-            
-            // If we already have data and we're just searching (not forcing refresh), filter client-side
-            if (allFits.length > 0 && !forceRefresh) {
-                renderFitsList(searchTerm);
-                return;
-            }
-            
-            // Show loading indicator
-            savedFitsList.innerHTML = '<div style="text-align: center; padding: 20px;">Loading...</div>';
-
-            try {
-                // Check if user is logged in
-                const user = firebase.auth().currentUser;
-                if (!user) {
-                    savedFitsList.innerHTML = '<div style="text-align: center; padding: 20px;">Please log in to view saved clients and bike positions</div>';
-                    return;
-                }
-
-                const db = firebase.firestore();
-                
-                // Add a retry backoff delay
-                if (retryCount > 0) {
-                    // Exponential backoff: 500ms, 1000ms, 2000ms, etc.
-                    const delay = Math.min(500 * Math.pow(2, retryCount - 1), 3000);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-                
-                // Create a query with cache-first approach
-                const fitsRef = db.collection('users').doc(user.uid).collection('bikeFits');
-                let query = fitsRef.orderBy('timestamp', 'desc');
-                
-                // Set a timeout for the query
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Request timed out')), 10000)
-                );
-                
-                // Try to get data with timeout protection
-                let snapshot;
-                try {
-                    snapshot = await Promise.race([
-                        query.get({ source: 'default' }), // Try cache first, then server
-                        timeoutPromise
-                    ]);
-                } catch (err) {
-                    console.warn(`Query attempt ${retryCount + 1} failed:`, err);
-                    
-                    // Retry with increased count if not at max retries
-                    if (retryCount < maxRetries) {
-                        return updateList(searchTerm, retryCount + 1, forceRefresh);
-                    }
-                    throw err; // Re-throw if max retries reached
-                }
-
-                // Handle empty results
-                if (!snapshot || snapshot.empty) {
-                    allFits = []; // Clear the cache
-                    savedFitsList.innerHTML = '<div style="text-align: center; padding: 20px;">No saved bike positions found</div>';
-                    return;
-                }
-
-                // Process the results
-                allFits = []; // Reset the fits array before processing new data
-                snapshot.forEach(doc => {
-                    try {
-                        const data = doc.data();
-                        // Validate required fields before adding to list
-                        if (data && data.clientName) {
-                            allFits.push({
-                                id: doc.id,
-                                ...data
-                            });
-                        } else {
-                            console.warn('Skipping invalid fit data:', doc.id);
-                        }
-                    } catch (error) {
-                        console.error('Error processing fit data:', error);
-                        // Continue with other fits even if one fails
-                    }
-                });
-
-                // Render the list with the search term
-                renderFitsList(searchTerm);
-                
-            } catch (error) {
-                console.error('Error loading saved positions:', error);
-                
-                // Provide a more helpful error message based on the error type
-                let errorMessage = 'Error loading saved positions';
-                
-                if (error.message === 'Request timed out') {
-                    errorMessage = 'Loading timed out. Please try again.';
-                } else if (error.code === 'permission-denied') {
-                    errorMessage = 'You don\'t have permission to view these positions.';
-                } else if (error.code === 'unavailable' || error.code === 'deadline-exceeded') {
-                    errorMessage = 'Network issue. Please check your connection and try again.';
-                }
-                
-                // Only show retry button if not already retrying
-                if (retryCount < maxRetries) {
-                    savedFitsList.innerHTML = `
-                        <div style="text-align: center; padding: 20px; color: var(--error-color);">${errorMessage}</div>
-                        <div style="text-align: center; margin-top: 10px;">
-                            <button id="retryButton" style="
-                                padding: 8px 16px;
-                                background: var(--primary-color);
-                                color: white;
-                                border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                            ">Retry</button>
-                        </div>
-                    `;
-                    
-                    const retryButton = document.getElementById('retryButton');
-                    if (retryButton) {
-                        retryButton.addEventListener('click', () => {
-                            updateList(searchTerm, retryCount + 1, true); // Force refresh on retry
-                        });
-                    }
-                } else {
-                    savedFitsList.innerHTML = `
-                        <div style="text-align: center; padding: 20px; color: var(--error-color);">
-                            ${errorMessage}
-                        </div>
-                        <div style="text-align: center; margin-top: 10px;">
-                            <p>Please try closing and reopening the dialog.</p>
-                        </div>
-                    `;
-                }
-            }
-        };
-        
-        // Function to render the list with filtering
-        const renderFitsList = (searchTerm = '') => {
-            // Filter fits if there's a search term - handle case insensitively and safely
-            const filteredFits = searchTerm
-                ? allFits.filter(fit => {
-                    try {
-                        return fit.clientName && 
-                            fit.clientName.toLowerCase().includes(searchTerm.toLowerCase());
-                    } catch (err) {
-                        console.warn('Error filtering fit:', err);
-                        return false; // Skip items that cause errors
-                    }
-                })
-                : allFits;
-
-            // Handle no matches
-            if (filteredFits.length === 0) {
-                savedFitsList.innerHTML = searchTerm 
-                    ? `<div style="text-align: center; padding: 20px;">No matches found for "${searchTerm}"</div>`
-                    : '<div style="text-align: center; padding: 20px;">No saved bike positions found</div>';
-                return;
-            }
-
-            // Build HTML for the list
-            let html = '';
-            
-            // Process each fit individually to prevent one bad fit from breaking the entire list
-            filteredFits.forEach(fit => {
-                try {
-                    const date = new Date(fit.timestamp || Date.now());
-                    const formattedDate = date.toLocaleDateString();
-                    const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    
-                    // Safely get bike count
-                    const bikeCount = fit.bikes && Array.isArray(fit.bikes) ? fit.bikes.length : 0;
-                    
-                    // Safely get target positions
-                    const targetX = fit.targetHandlebarX || '--';
-                    const targetY = fit.targetHandlebarY || '--';
-                    
-                    html += `
-                    <div class="saved-fit-item" data-fit-id="${fit.id}">
-                        <div class="main-row">
-                            <div class="checkbox-container">
-                                <input type="checkbox" class="fit-checkbox" style="cursor: pointer;">
-                            </div>
-                            <div class="client-name">${fit.clientName || 'Unnamed'}</div>
-                            <div class="date-info">${formattedDate}<br><span style="font-size: 0.9em; color: var(--text-secondary);">${formattedTime}</span></div>
-                            <div class="bikes-info">${bikeCount} bikes</div>
-                            <div class="position-info">HX: ${targetX}mm<br>HY: ${targetY}mm</div>
-                            <div class="action-buttons">
-                                <button class="load-btn">Open</button>
-                                <button class="delete-btn">🗑️</button>
-                            </div>
-                        </div>
-                        <div class="info-row">
-                            <span>${formattedDate} ${formattedTime}</span>
-                            <span>•</span>
-                            <span>${bikeCount} bikes</span>
-                            <span>•</span>
-                            <span>HX: ${targetX}mm, HY: ${targetY}mm</span>
-                        </div>
-                </div>
-            `;
-                } catch (itemError) {
-                    console.error('Error rendering item:', itemError);
-                    // Skip this item if it causes an error
-                }
-            });
-
-            // Update the DOM
-            savedFitsList.innerHTML = html || '<div style="text-align: center; padding: 20px;">No valid bike positions found</div>';
-
-            // Add event listeners after DOM update
-            try {
-                // Add event listeners to checkboxes
-                savedFitsList.querySelectorAll('.fit-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', updateSelectedState);
-                });
-
-                // Add event listeners to load buttons
-                savedFitsList.querySelectorAll('.load-btn').forEach(button => {
-                    button.addEventListener('click', async () => {
                         try {
-                            const fitId = button.closest('.saved-fit-item').dataset.fitId;
-                            if (!fitId) throw new Error('Missing fit ID');
+                            // Reset to default sort when retrying to avoid potential sort-related issues
+                            currentSort = 'date';
+                            sortDirection = 'desc';
+                            localStorage.setItem('bikePositionsSortBy', currentSort);
+                            localStorage.setItem('bikePositionsSortDirection', sortDirection);
                             
-                            const user = firebase.auth().currentUser;
-                            if (!user) throw new Error('User not logged in');
-
-                            button.textContent = 'Opening...';
-                            button.disabled = true;
-
-                            // First try to find the data in our locally cached allFits array
-                            const cachedFit = allFits.find(fit => fit.id === fitId);
-                            if (cachedFit) {
-                                self.loadSavedFit(cachedFit);
-                    closeLoadDialog();
-                                return;
-                            }
-
-                            // If not found in cache, fetch from Firestore
-                            const doc = await firebase.firestore()
-                                .collection('users')
-                                .doc(user.uid)
-                                .collection('bikeFits')
-                                .doc(fitId)
-                                .get();
-
-                            if (doc.exists) {
-                                self.loadSavedFit(doc.data());
-                                closeLoadDialog();
-                            } else {
-                                throw new Error('Bike position not found');
-                            }
-                        } catch (error) {
-                            console.error('Error loading bike position:', error);
-                            self.showToast('Error loading bike position', 'error');
-                            
-                            // Reset button
-                            button.textContent = 'Open';
-                            button.disabled = false;
+                            // Call updateList with incremented retry count
+                            updateList(searchInput.value.trim(), 1);
+                        } catch (retryError) {
+                            console.error('Error during retry:', retryError);
+                            savedFitsList.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--error-color);">An error occurred. Please refresh the page and try again.</div>';
                         }
                     });
-                });
-
-                // Add delete handlers
-                savedFitsList.querySelectorAll('.delete-btn').forEach(button => {
-                    button.addEventListener('click', async () => {
-                        try {
-                            const fitId = button.closest('.saved-fit-item').dataset.fitId;
-                            if (fitId) {
-                                showDeleteConfirmation([fitId], () => deleteMultipleFits([fitId]));
-                            }
-                        } catch (error) {
-                            console.error('Error setting up delete handler:', error);
-                        }
-                    });
-                });
-            } catch (eventError) {
-                console.error('Error setting up event listeners:', eventError);
-            }
-        };
-
-        cancelButton.addEventListener('click', closeLoadDialog);
-
-        // Select All checkbox handler
-        selectAllCheckbox.addEventListener('change', () => {
-            const checkboxes = savedFitsList.querySelectorAll('.fit-checkbox');
-            checkboxes.forEach(cb => {
-                cb.checked = selectAllCheckbox.checked;
-            });
-            updateSelectedState();
-        });
-
-        // Function to show custom confirmation dialog
-        const showDeleteConfirmation = (fitIds, onConfirm) => {
-            // Check if dialog already exists and remove it
-            const existingDialog = document.querySelector('.confirm-dialog');
-            if (existingDialog) {
-                existingDialog.parentNode.removeChild(existingDialog);
-            }
-
-            // Check if overlay already exists and remove it
-            const existingOverlay = document.querySelector('.dialog-overlay');
-            if (existingOverlay) {
-                document.body.removeChild(existingOverlay);
-            }
-
-                    const confirmDialog = document.createElement('div');
-                    confirmDialog.className = 'confirm-dialog';
-            confirmDialog.id = 'confirmDialog';
-                    confirmDialog.style.cssText = `
-                        background: var(--card-bg);
-                        color: var(--text-color);
-                        padding: 20px;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-                        max-width: 400px;
-                        width: 90%;
-                        text-align: center;
-                z-index: 1002;
-                    `;
-                    
-            const message = fitIds.length === 1 
-                ? 'Are you sure you want to delete this bike position?' 
-                : `Are you sure you want to delete ${fitIds.length} selected bike positions?`;
-            
-                    confirmDialog.innerHTML = `
-                <h3 style="margin-top: 0;">Confirm Delete</h3>
-                <p>${message}</p>
-                        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-                    <button class="cancel-button" style="
-                        padding: 8px 16px;
-                        background: transparent;
-                        color: var(--text-color);
-                        border: 1px solid var(--border-color);
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-weight: 500;
-                    ">Cancel</button>
-                    <button class="confirm-button" style="
-                        padding: 8px 16px;
-                        background: var(--error-color);
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-weight: 500;
-                    ">Delete</button>
-                </div>
-            `;
-
-            // Create overlay
-            const confirmOverlay = document.createElement('div');
-            confirmOverlay.className = 'dialog-overlay';
-            confirmOverlay.id = 'confirmOverlay';
-            confirmOverlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 1001;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            `;
-
-            // Add to DOM - place dialog inside overlay
-            confirmOverlay.appendChild(confirmDialog);
-            document.body.appendChild(confirmOverlay);
-
-            // Handle close
-                    const closeConfirmDialog = () => {
-                            document.body.removeChild(confirmOverlay);
-            };
-                    
-                    // Add event listeners
-            confirmDialog.querySelector('.cancel-button').onclick = closeConfirmDialog;
-            confirmDialog.querySelector('.confirm-button').onclick = () => {
-                onConfirm();
-                        closeConfirmDialog();
-            };
-        };
-
-        // Add Delete Selected button handler - using a single event listener
-        if (deleteSelectedButton) {
-            // Remove any existing event listeners by cloning and replacing the button
-            const newDeleteSelectedButton = deleteSelectedButton.cloneNode(true);
-            deleteSelectedButton.parentNode.replaceChild(newDeleteSelectedButton, deleteSelectedButton);
-            
-            // Add the event listener to the new button
-            newDeleteSelectedButton.addEventListener('click', () => {
-                const selectedItems = savedFitsList.querySelectorAll('.fit-checkbox:checked');
-                const selectedIds = Array.from(selectedItems).map(cb => 
-                    cb.closest('.saved-fit-item').dataset.fitId
-                );
-
-                if (selectedIds.length > 0) {
-                    // Show confirmation dialog before deletion
-                    showDeleteConfirmation(selectedIds, () => deleteMultipleFits(selectedIds));
-                }
-            });
-        }
-
-        // Add event listener to search input using client-side filtering
-        searchInput.addEventListener('input', (e) => {
-            // No need to debounce since we're filtering client-side
-            renderFitsList(e.target.value.trim());
-        });
-
-        // Add select all checkbox handler
-        if (selectAllCheckbox) {
-            selectAllCheckbox.addEventListener('change', () => {
-                const checkboxes = savedFitsList.querySelectorAll('.fit-checkbox');
-                checkboxes.forEach(cb => {
-                    cb.checked = selectAllCheckbox.checked;
-                });
-                updateSelectedState();
-            });
-        }
-
-        // Initial load of saved fits
-        updateList();
-    }
-
-    loadSavedInstance(savedData) {
-        // Set client name and target positions
-        document.getElementById('clientName').value = savedData.clientName;
-        document.getElementById('targetSaddleX').value = savedData.targetSaddleX;
-        document.getElementById('targetSaddleY').value = savedData.targetSaddleY;
-        document.getElementById('targetHandlebarX').value = savedData.targetHandlebarX;
-        document.getElementById('targetHandlebarY').value = savedData.targetHandlebarY;
-        document.getElementById('handlebarReachUsed').value = savedData.handlebarReachUsed;
-
-        // Clear existing bikes
-        document.getElementById('bikes-container').innerHTML = '';
-        this.bikes = [];
-
-        // Load saved bikes
-        savedData.bikes.forEach((bikeData, index) => {
-            this.bikes.push(bikeData);
-            this.renderBikeCard(bikeData, index);
-            
-            const card = document.getElementById(bikeData.id);
-            if (card) {
-                // Set geometry values
-                card.querySelector('.reach').value = bikeData.reach || '';
-                card.querySelector('.stack').value = bikeData.stack || '';
-                card.querySelector('.hta').value = bikeData.hta || '';
-                card.querySelector('.sta').value = bikeData.sta || '';
-                card.querySelector('.stl').value = bikeData.stl || '';
-                
-                // Set stem configuration values
-                card.querySelector('.stem-length').value = bikeData.stemLength || 100;
-                card.querySelector('.stem-angle').value = bikeData.stemAngle || -6;
-                card.querySelector('.spacer-height').value = bikeData.spacersHeight || 20;
-                
-                // For manual bikes, set the brand/model/size
-                if (bikeData.isManual) {
-                    const brandInput = card.querySelector('.brand-input');
-                    const modelInput = card.querySelector('.model-input');
-                    const sizeInput = card.querySelector('.size-input');
-                    
-                    if (brandInput) brandInput.value = bikeData.brand || '';
-                    if (modelInput) modelInput.value = bikeData.model || '';
-                    if (sizeInput) sizeInput.value = bikeData.size || '';
-                } else {
-                    this.setupBikeSelectors(bikeData.id);
                 }
             }
-        });
-
-        // Update calculations
-        this.updateCalculations();
-        
-        // Enable save button
-        document.getElementById('saveButton').disabled = false;
-    }
-
-    // Method to load a saved fit from Firebase
-    loadSavedFit(savedData) {
-        if (!savedData) return;
-
-        // Set client name and target positions
-        document.getElementById('clientName').value = savedData.clientName || '';
-        document.getElementById('targetSaddleX').value = savedData.targetSaddleX || '';
-        document.getElementById('targetSaddleY').value = savedData.targetSaddleY || '';
-        document.getElementById('targetHandlebarX').value = savedData.targetHandlebarX || '';
-        document.getElementById('targetHandlebarY').value = savedData.targetHandlebarY || '';
-        document.getElementById('handlebarReachUsed').value = savedData.handlebarReachUsed || '';
-
-        // Clear existing bikes
-        document.getElementById('bikes-container').innerHTML = '';
-        this.bikes = [];
-
-        // Load saved bikes
-        if (savedData.bikes && Array.isArray(savedData.bikes)) {
-            savedData.bikes.forEach((bikeData, index) => {
-                this.bikes.push(bikeData);
-                this.renderBikeCard(bikeData, index);
-                
-                const card = document.getElementById(bikeData.id);
-                if (card) {
-                    // Set geometry values
-                    card.querySelector('.reach').value = bikeData.reach || '';
-                    card.querySelector('.stack').value = bikeData.stack || '';
-                    card.querySelector('.hta').value = bikeData.hta || '';
-                    card.querySelector('.sta').value = bikeData.sta || '';
-                    card.querySelector('.stl').value = bikeData.stl || '';
-                    
-                    // Set stem configuration values
-                    card.querySelector('.stem-length').value = bikeData.stemLength || 100;
-                    card.querySelector('.stem-angle').value = bikeData.stemAngle || -6;
-                    card.querySelector('.spacer-height').value = bikeData.spacersHeight || 20;
-                    
-                    // For manual bikes, set the brand/model/size
-                    if (bikeData.isManual) {
-                        const brandInput = card.querySelector('.brand-input');
-                        const modelInput = card.querySelector('.model-input');
-                        const sizeInput = card.querySelector('.size-input');
-                        
-                        if (brandInput) brandInput.value = bikeData.brand || '';
-                        if (modelInput) modelInput.value = bikeData.model || '';
-                        if (sizeInput) sizeInput.value = bikeData.size || '';
-                    } else {
-                        this.setupBikeSelectors(bikeData.id);
-                    }
-                }
-            });
-        }
-
-        // Update calculations
-        this.updateCalculations();
-        
-        // Enable save button
-        document.getElementById('saveButton').disabled = false;
-    }
-}
-
-class BikeDatabase {
-    constructor() {
-        this.API_KEY = 'AIzaSyBoHxCzT5MxcfMwp0-SBxBR95yGYyxYf7E';
-        this.SPREADSHEET_ID = '1MBOgylql47RC_7KScV4f_avVicEqPrBt5HoC3nMBiTE';
-        this.bikeData = null;
-    }
-
-    async initialize() {
-        try {
-            await this.loadBikeData();
-        } catch (error) {
-            console.error('Failed to initialize bike database:', error);
-        }
-    }
-
-    async loadBikeData() {
-        const range = 'A1:I2000';  // Adjust range to include all necessary columns
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.SPREADSHEET_ID}/values/${range}?key=${this.API_KEY}`;
-        
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error('Failed to fetch bike data');
-            }
-            const data = await response.json();
-            this.bikeData = this.processSheetData(data.values);
-        } catch (error) {
-            console.error('Error loading bike data:', error);
-            throw error;
-        }
-    }
-
-    processSheetData(values) {
-        if (!values || values.length < 2) return [];
-        
-        const headers = values[0];
-        return values.slice(1).map(row => {
-            const bike = {};
-            headers.forEach((header, index) => {
-                const value = row[index] || '';
-                bike[header.toLowerCase().replace(/\s+/g, '_')] = value;
-            });
-            return bike;
-        });
-    }
-
-    async getBrands() {
-        if (!this.bikeData) await this.loadBikeData();
-        return [...new Set(this.bikeData.map(bike => bike.brand))].sort();
-    }
-
-    async getModels(brand) {
-        if (!this.bikeData) await this.loadBikeData();
-        return [...new Set(this.bikeData
-            .filter(bike => bike.brand === brand)
-            .map(bike => bike.model))]
-            .sort();
-    }
-
-    async getSizes(brand, model) {
-        if (!this.bikeData) await this.loadBikeData();
-        const bikes = this.bikeData
-            .filter(bike => bike.brand === brand && bike.model === model)
-            .sort((a, b) => parseFloat(a.stack) - parseFloat(b.stack));
-        return [...new Set(bikes.map(bike => bike.size))];
-    }
-
-    async getBikeGeometry(brand, model, size) {
-        if (!this.bikeData) await this.loadBikeData();
-        const bike = this.bikeData.find(b => 
-            b.brand === brand && 
-            b.model === model && 
-            b.size === size
-        );
-        
-        if (!bike) return null;
-        
-        return {
-            reach: parseFloat(bike.reach) || 0,
-            stack: parseFloat(bike.stack) || 0,
-            hta: parseFloat(bike.ht_angle) || 0,
-            sta: parseFloat(bike.st_angle) || 0,
-            stl: parseFloat(bike.st_length) || 0
         };
     }
 }
-        
-// Add hover styles
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-    .delete-selected-button:hover {
-        background-color: var(--error-color) !important;
-        color: white !important;
-    }
-    .cancel-button:hover {
-        background-color: var(--border-color) !important;
-        color: var(--text-color) !important;
-    }
-`;
-document.head.appendChild(styleSheet);
-        

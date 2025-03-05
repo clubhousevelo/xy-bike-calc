@@ -10,6 +10,16 @@
 
       gtag('config', 'G-H1TXBTLXDW');
     </script>
+    <!-- Immediate dark mode setup -->
+    <script>
+      // Set theme immediately to prevent flash
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://sheets.googleapis.com https://*.googleapis.com;">
@@ -17,79 +27,49 @@
     <meta http-equiv="X-Frame-Options" content="DENY">
     <title>XY Bike Calculator - Bike Prescription Tool</title>
     <link rel="stylesheet" href="css/styles.css">
-        <style>
-        .upgrade-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+    <!-- Ensure dark mode styles are applied -->
+    <style>
+        /* Ensure dark mode styles are applied */
+        html[data-theme="dark"] {
+            --primary-color: #0A84FF;
+            --secondary-color: #5E5CE6;
+            --background-color: #1C1C1E;
+            --card-background: #2C2C2E;
+            --border-color: #3C3C3E;
+            --text-color: #FFFFFF;
+            --text-secondary: #98989D;
+            --error-color: #FF453A;
+            --success-color: #32D74B;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --bg-color: #1C1C1E;
+            --nav-bg: #2C2C2E;
+            --card-bg: #2C2C2E;
+            --input-bg: #3C3C3E;
+            --input-border: #48484A;
+            --button-bg: #0A84FF;
+            --button-text: #FFFFFF;
+            --hover-bg: #3C3C3E;
+            --table-bg: #2C2C2E;
+            --table-header-bg: #3C3C3E;
+            --table-hover-bg: rgba(94, 92, 230, 0.1);
         }
-
-        .upgrade-modal.show {
-            display: flex;
-        }
-
-        .upgrade-content {
-            background-color: var(--card-background);
-            padding: 2rem;
-            border-radius: 8px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
-
-        .upgrade-content h2 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .upgrade-content p {
+        
+        html[data-theme="dark"] body {
+            background-color: var(--background-color);
             color: var(--text-color);
-            margin-bottom: 1rem;
-            line-height: 1.5;
         }
-
-        .upgrade-content .warning {
-            color: #e74c3c;
-            font-weight: 500;
-            margin-top: 1rem;
-        }
-
-        .upgrade-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0rem 1.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            margin-top: 0rem;
-        }
-
-        .upgrade-button:hover {
-            opacity: 0.9;
+        
+        html[data-theme="dark"] .calculator-container,
+        html[data-theme="dark"] .bike-card,
+        html[data-theme="dark"] input,
+        html[data-theme="dark"] select {
+            background-color: var(--card-background);
+            color: var(--text-color);
+            border-color: var(--border-color);
         }
     </style>
-    </head>
 </head>
 <body>
-        <div class="upgrade-modal" id="upgradeModal">
-        <div class="upgrade-content">
-            <h2>Important Update Notice</h2>
-            <p>On Wednesday, March 4, XY Bike Calc will be upgraded to version 1.2. This update includes new features and improvements to enhance your experience.</p>
-            <p>After the upgrade, you will need to create an account and log in to save or load client profiles in the XY Position Calculator.</p>
-            <p class="warning">⚠️ Important: All previously stored profiles in your browser will no longer be accessible after the upgrade. Please print or take screenshots of any important bike setups before Wednesday.</p>
-            <button class="upgrade-button" onclick="acknowledgeUpgrade()">I Understand</button>
-        </div>
-    </div>
     <button class="hamburger-menu">
         <span></span>
         <span></span>
@@ -119,7 +99,7 @@
             </div>
         </div>
         <div class="theme-toggle" style="margin-bottom: 32px;">
-            <button id="darkModeToggle" class="dark-mode-toggle">
+            <button id="mobileDarkModeToggle" class="dark-mode-toggle" onclick="toggleTheme()">
                 <span class="toggle-icon">☀️</span>
                 <span class="toggle-text">Light Mode</span>
             </button>
@@ -127,7 +107,7 @@
         <div style="text-align: center; margin-bottom: 8px;">
             <a href="privacy-policy.html" style="color: var(--text-secondary); font-size: 12px; text-decoration: none;">Privacy Policy</a>
             <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
-                <a href="changelog.html" style="color: inherit; text-decoration: none;">version 1.1.1 beta</a>
+                <a href="changelog.html" style="color: inherit; text-decoration: none;">version 1.2</a>
             </div>
         </div>
     </nav>
@@ -158,7 +138,7 @@
             </div>
         </div>
         <div class="theme-toggle" style="margin-bottom: 32px;">
-            <button id="darkModeToggle" class="dark-mode-toggle">
+            <button id="darkModeToggle" class="dark-mode-toggle" onclick="toggleTheme()">
                 <span class="toggle-icon">☀️</span>
                 <span class="toggle-text">Light Mode</span>
             </button>
@@ -166,7 +146,7 @@
         <div style="text-align: center; margin-bottom: 8px;">
             <a href="privacy-policy.html" style="color: var(--text-secondary); font-size: 12px; text-decoration: none;">Privacy Policy</a>
             <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
-                <a href="changelog.html" style="color: inherit; text-decoration: none;">version 1.1.1 beta</a>
+                <a href="changelog.html" style="color: inherit; text-decoration: none;">version 1.2</a>
             </div>
         </div>
     </nav>
@@ -183,7 +163,7 @@
                 <input type="text" id="clientName" placeholder="Client Name">
                 <div>
                     <button id="saveButton" disabled>Save</button>
-                    <button id="loadButton">Load</button>
+                    <button id="loadButton">Open</button>
                 </div>
             </div>
 
@@ -247,25 +227,47 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="js/dark-mode.js"></script>
+    
+    <!-- Custom Scripts -->
     <script src="js/mobile-menu.js"></script>
     <script src="js/calculator-header.js"></script>
     <script src="js/firebase-auth.js"></script>
     <script src="js/calculator.js"></script>
     <script>
-        new BikeCalculator();
-                new BikeCalculator();
-
-        // Upgrade notice handling
-        function acknowledgeUpgrade() {
-            localStorage.setItem('upgradeNoticeAcknowledged', 'true');
-            document.getElementById('upgradeModal').classList.remove('show');
+        // Initialize the calculator
+        const calculator = new BikeCalculator();
+        
+        // Global function for dark mode toggle
+        function toggleTheme() {
+            // Toggle theme
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            // Apply theme
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Update all toggle buttons
+            document.querySelectorAll('#darkModeToggle, #mobileDarkModeToggle').forEach(btn => {
+                const icon = btn.querySelector('.toggle-icon');
+                const text = btn.querySelector('.toggle-text');
+                
+                if (icon) icon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+                if (text) text.textContent = newTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+            });
+            
+            return false; // Prevent default action
         }
-
-        // Show upgrade notice if not previously acknowledged
-        if (!localStorage.getItem('upgradeNoticeAcknowledged')) {
-            document.getElementById('upgradeModal').classList.add('show');
-        }
+        
+        // Update button appearance on page load
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        document.querySelectorAll('#darkModeToggle, #mobileDarkModeToggle').forEach(btn => {
+            const icon = btn.querySelector('.toggle-icon');
+            const text = btn.querySelector('.toggle-text');
+            
+            if (icon) icon.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+            if (text) text.textContent = currentTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+        });
     </script>
 </body>
 </html>

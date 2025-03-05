@@ -63,7 +63,7 @@ const ClientProfilesManager = (() => {
         if (loadButton) {
             loadButton.addEventListener('click', handleLoadClick);
             loadButton.disabled = false;
-            loadButton.title = "Load client profile";
+            loadButton.title = "Open client profile";
         }
         
         const clientNameInput = document.getElementById('clientName');

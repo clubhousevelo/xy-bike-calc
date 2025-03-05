@@ -196,43 +196,45 @@ button:disabled {
 .bikes-container-wrapper {
     width: 100%;
     display: flex;
-    justify-content: flex-start;
-    overflow: hidden;
+    justify-content: center;
+    overflow-x: auto;
     margin-bottom: 12px;
     position: relative;
     padding-left: 12px;
     padding-right: 12px;
+    box-sizing: border-box;
+    scrollbar-width: thin; /* Firefox scrollbar */
 }
 
 #bikes-container {
     display: flex;
     gap: 12px;
-    overflow-x: auto;
-    padding: 8px 0;
+    overflow-x: visible;
+    padding: 8px 4px; /* Changed from 8px 0 to add horizontal padding */
     flex-wrap: nowrap;
-    scrollbar-width: thin;
     margin: 0;
-    max-width: 100%;
-    width: 100%;
+    max-width: none;
+    width: max-content;
+    min-width: min-content;
     justify-content: flex-start;
 }
 
 /* Styling for webkit scrollbars (Chrome, Safari, Edge) */
-#bikes-container::-webkit-scrollbar {
+.bikes-container-wrapper::-webkit-scrollbar {
     height: 8px;
 }
 
-#bikes-container::-webkit-scrollbar-track {
+.bikes-container-wrapper::-webkit-scrollbar-track {
     background: var(--background-color);
     border-radius: 4px;
 }
 
-#bikes-container::-webkit-scrollbar-thumb {
+.bikes-container-wrapper::-webkit-scrollbar-thumb {
     background-color: var(--border-color);
     border-radius: 4px;
 }
 
-#bikes-container::-webkit-scrollbar-thumb:hover {
+.bikes-container-wrapper::-webkit-scrollbar-thumb:hover {
     background-color: var(--text-secondary);
 }
 

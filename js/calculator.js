@@ -39,6 +39,9 @@ class BikeCalculator {
                 // Set new session timestamp
                 sessionStorage.setItem('xyCalculatorSession', Date.now().toString());
             }
+            
+            // Adjust bike container width after initial load
+            this.adjustBikesContainerWidth();
         } catch (error) {
             console.error('Failed to initialize calculator:', error);
             this.showCustomAlert('Failed to load bike database. Please check your internet connection and try again.');
@@ -52,6 +55,11 @@ class BikeCalculator {
 
         // Print button
         document.getElementById('printButton').addEventListener('click', () => this.printBikeData());
+        
+        // Window resize listener for adjusting bike container
+        window.addEventListener('resize', () => {
+            this.adjustBikesContainerWidth();
+        });
 
         // Clear all data button
         document.getElementById('clearAllData').addEventListener('click', () => {
@@ -462,6 +470,48 @@ class BikeCalculator {
         
         // Initialize bike card inputs and event listeners
         this.initializeBikeCardInputs(bikeCard, bikeData, index);
+        
+        // Adjust container width based on number of cards
+        this.adjustBikesContainerWidth();
+    }
+    
+    // Add this new method to dynamically adjust the bikes container width
+    adjustBikesContainerWidth() {
+        const bikesContainer = document.getElementById('bikes-container');
+        const containerWrapper = document.querySelector('.bikes-container-wrapper');
+        const bikeCards = document.querySelectorAll('.bike-card');
+        
+        if (bikeCards.length === 0) {
+            containerWrapper.style.justifyContent = 'center';
+            return;
+        }
+        
+        // Calculate total width of all bike cards
+        let totalCardsWidth = 0;
+        
+        // Get the computed gap between cards
+        const computedStyle = window.getComputedStyle(bikesContainer);
+        const gap = parseInt(computedStyle.gap) || 12; // Default to 12px if gap can't be determined
+        
+        // Calculate actual width by measuring each card
+        bikeCards.forEach((card, index) => {
+            totalCardsWidth += card.offsetWidth;
+            // Add gap width for all but the last card
+            if (index < bikeCards.length - 1) {
+                totalCardsWidth += gap;
+            }
+        });
+        
+        // Compare with container width
+        const containerWidth = containerWrapper.clientWidth;
+        
+        if (totalCardsWidth <= containerWidth - 24) { // 24px accounts for padding
+            // Cards fit within container - center them
+            containerWrapper.style.justifyContent = 'center';
+        } else {
+            // Cards overflow - align to left to enable scrolling
+            containerWrapper.style.justifyContent = 'flex-start';
+        }
     }
 
     getBikeCardHTML(index, isManual) {
@@ -881,6 +931,9 @@ class BikeCalculator {
         // Remove from array
         this.bikes.splice(bikeIndex, 1);
         this.saveData(); // Save data after deletion
+        
+        // Adjust container width after removing a bike card
+        this.adjustBikesContainerWidth();
     }
 
     duplicateBike(bikeId) {
@@ -927,7 +980,7 @@ class BikeCalculator {
                 if (modelInput) modelInput.value = duplicatedBike.model || '';
                 if (sizeInput) sizeInput.value = duplicatedBike.size || '';
             } else {
-            this.setupBikeSelectors(duplicatedBike.id);
+                this.setupBikeSelectors(duplicatedBike.id);
             }
         }
         
@@ -1235,28 +1288,28 @@ class BikeCalculator {
         
         // Add target positions section only if any target positions are provided
         if (hasTargetPositions) {
-            const targetSection = document.createElement('div');
-            targetSection.innerHTML = `
+        const targetSection = document.createElement('div');
+        targetSection.innerHTML = `
                 <div style="margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
                     <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; text-align: center;">
-                        <div>
+                    <div>
                             <h3 style="margin: 0 0 4px 0;">Target Saddle</h3>
                             <p style="margin: 0;">X: ${targetSaddleX} mm</p>
                             <p style="margin: 0;">Y: ${targetSaddleY} mm</p>
-                        </div>
-                        <div>
+                    </div>
+                    <div>
                             <h3 style="margin: 0 0 4px 0;">Target Handlebar</h3>
                             <p style="margin: 0;">X: ${targetHandlebarX} mm</p>
                             <p style="margin: 0;">Y: ${targetHandlebarY} mm</p>
-                        </div>
-                        <div>
+                    </div>
+                    <div>
                             <h3 style="margin: 0 0 4px 0;">Bar Reach Used</h3>
                             <p style="margin: 0;">${handlebarReachUsed} mm</p>
-                        </div>
                     </div>
                 </div>
-            `;
-            printContainer.appendChild(targetSection);
+            </div>
+        `;
+        printContainer.appendChild(targetSection);
         }
         
         // Add bike data section
@@ -1387,7 +1440,7 @@ class BikeCalculator {
                         } else {
                             resultsData += `<p>${label} ${value}</p>`;
                         }
-                    }
+                    } 
                     else if (label === 'Handlebar Y:' && targetHandlebarY !== 'N/A' && value !== '-- mm') {
                         const actualValue = parseInt(value);
                         if (!isNaN(actualValue)) {
@@ -2460,7 +2513,7 @@ class BikeCalculator {
             const message = fitIds.length === 1 
                 ? 'Are you sure you want to delete this bike position?' 
                 : `Are you sure you want to delete ${fitIds.length} selected bike positions?`;
-            
+                    
                     confirmDialog.innerHTML = `
                 <h3 style="margin-top: 0;">Confirm Delete</h3>
                 <p>${message}</p>

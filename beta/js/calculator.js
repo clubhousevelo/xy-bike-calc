@@ -1189,8 +1189,13 @@ class BikeCalculator {
         
         // Get user's name from Firebase auth
         const user = firebase.auth().currentUser;
-        const byLine = !user ? ' by Anonymous' : 
-                      user.displayName ? ` by ${user.displayName}` : '';
+        let byLine = '';
+        if (!user) {
+            byLine = ' by Anonymous';
+        } else if (user.displayName) {
+            byLine = ` by ${user.displayName}`;
+        }
+        // The byLine will be empty if user is logged in but has no display name
         
         // Create a title for the print
         const title = document.createElement('div');
@@ -2233,8 +2238,8 @@ class BikeCalculator {
                                 background: var(--primary-color);
                                 color: white;
                                 border: none;
-                                border-radius: 4px;
-                                cursor: pointer;
+                    border-radius: 4px;
+                    cursor: pointer;
                             ">Retry</button>
                         </div>
                     `;
@@ -2355,7 +2360,7 @@ class BikeCalculator {
                             const cachedFit = allFits.find(fit => fit.id === fitId);
                             if (cachedFit) {
                                 self.loadSavedFit(cachedFit);
-                                closeLoadDialog();
+                    closeLoadDialog();
                                 return;
                             }
 
@@ -2427,46 +2432,46 @@ class BikeCalculator {
                 document.body.removeChild(existingOverlay);
             }
 
-            const confirmDialog = document.createElement('div');
-            confirmDialog.className = 'confirm-dialog';
+                    const confirmDialog = document.createElement('div');
+                    confirmDialog.className = 'confirm-dialog';
             confirmDialog.id = 'confirmDialog';
-            confirmDialog.style.cssText = `
-                background: var(--card-bg);
-                color: var(--text-color);
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-                max-width: 400px;
-                width: 90%;
-                text-align: center;
+                    confirmDialog.style.cssText = `
+                        background: var(--card-bg);
+                        color: var(--text-color);
+                        padding: 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+                        max-width: 400px;
+                        width: 90%;
+                        text-align: center;
                 z-index: 1002;
-            `;
-            
+                    `;
+                    
             const message = fitIds.length === 1 
                 ? 'Are you sure you want to delete this bike position?' 
                 : `Are you sure you want to delete ${fitIds.length} selected bike positions?`;
             
-            confirmDialog.innerHTML = `
+                    confirmDialog.innerHTML = `
                 <h3 style="margin-top: 0;">Confirm Delete</h3>
                 <p>${message}</p>
-                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
                     <button class="cancel-button" style="
-                padding: 8px 16px;
-                background: transparent;
-                color: var(--text-color);
-                border: 1px solid var(--border-color);
-                border-radius: 4px;
-                cursor: pointer;
-                font-weight: 500;
+                        padding: 8px 16px;
+                        background: transparent;
+                        color: var(--text-color);
+                        border: 1px solid var(--border-color);
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-weight: 500;
                     ">Cancel</button>
                     <button class="confirm-button" style="
-                padding: 8px 16px;
+                        padding: 8px 16px;
                         background: var(--error-color);
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-weight: 500;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-weight: 500;
                     ">Delete</button>
                 </div>
             `;
@@ -2493,15 +2498,15 @@ class BikeCalculator {
             document.body.appendChild(confirmOverlay);
 
             // Handle close
-            const closeConfirmDialog = () => {
-                    document.body.removeChild(confirmOverlay);
+                    const closeConfirmDialog = () => {
+                            document.body.removeChild(confirmOverlay);
             };
-
-            // Add event listeners
+                    
+                    // Add event listeners
             confirmDialog.querySelector('.cancel-button').onclick = closeConfirmDialog;
             confirmDialog.querySelector('.confirm-button').onclick = () => {
                 onConfirm();
-                    closeConfirmDialog();
+                        closeConfirmDialog();
             };
         };
 

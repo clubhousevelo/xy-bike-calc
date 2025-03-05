@@ -20,55 +20,58 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://sheets.googleapis.com https://*.googleapis.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
-    <title>Changelog - XY Bike Calculator</title>
+    <title>Thank You - XY Bike Calculator</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
-        .changelog-container {
-            max-width: 800px;
+        .thank-you-container {
+            max-width: 600px;
             margin: 0 auto;
             padding: 2rem;
             background-color: var(--card-background);
             border-radius: 8px;
             box-shadow: 0 2px 4px var(--shadow-color);
             border: 1px solid var(--border-color);
+            text-align: center;
         }
 
-        .changelog-container h2 {
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            margin-top: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .changelog-container .version-date {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+        .thank-you-icon {
+            font-size: 4rem;
+            color: var(--success-color);
             margin-bottom: 1rem;
         }
 
-        .changelog-container ul {
-            list-style-type: none;
-            padding-left: 0;
+        .thank-you-title {
+            font-size: 1.75rem;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .thank-you-message {
+            color: var(--text-color);
+            line-height: 1.6;
             margin-bottom: 2rem;
         }
 
-        .changelog-container li {
-            color: var(--text-color);
-            margin-bottom: 0.5rem;
-            padding-left: 1.5rem;
-            position: relative;
-            line-height: 1.6;
+        .return-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s;
         }
 
-        .changelog-container li::before {
-            content: "•";
-            color: var(--primary-color);
-            position: absolute;
-            left: 0.5rem;
+        .return-button:hover {
+            background-color: var(--secondary-color);
         }
 
         @media (max-width: 768px) {
-            .changelog-container {
+            .thank-you-container {
                 margin: 1rem;
                 padding: 1.5rem;
             }
@@ -92,6 +95,7 @@
         <div style="flex: 1"></div>
         <div style="margin-bottom: 8px;">
             <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
+            <a href="feedback.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">Feedback</a>
         </div>
         <div class="non-auth-dependent" style="margin-bottom: 8px;">
             <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
@@ -131,6 +135,7 @@
         <div style="flex: 1"></div>
         <div style="margin-bottom: 40px; text-align: center;">
             <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
+            <a href="feedback.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">Feedback</a>
         </div>
         <div class="non-auth-dependent" style="margin-bottom: 40px; text-align: center;">
             <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
@@ -161,47 +166,20 @@
         <div class="calculator-header">
             <h1 class="calculator-title">
                 <span class="collapse-indicator">▼</span>
-                Changelog
+                Thank You
             </h1>
-            <p class="calculator-description">A detailed history of updates and changes to XY Bike Calc.</p>
+            <p class="calculator-description">Your feedback has been received.</p>
         </div>
         
-        <div class="changelog-container">
-            <h2>Version 1.2</h2>
-            <div class="version-date">March 3, 2025</div>
-            <ul>
-                <li>Implemented account creation</li>
-                <li>Client profiles in XY Position Calculator are now saved to the cloud instead of using local browser storage and require login credentials</li>
-                <li>Optimized Load dialog to be optimized for both desktop and mobile views</li>
-                <li>Added Google Analytics tracking</li>
-                <li>Updated Privacy Policy to include Google Analytics information</li>
-                <li>Added user name to print header when available</li>
-            </ul>
-
-            <h2>Version 1.1.1</h2>
-            <div class="version-date">March 1, 2024</div>
-            <ul>
-                <li>Fixed Bike Search table so the results table doesn't resize and cut off text</li>
-                <li>Combined Target Reach/Stack and Acceptable Range inputs into one box</li>
-                <li>Added "About" page</li>
-                <li>Added public Changelog</li>
-                <li>Fixed Dark Mode toggle on XY Position Calculator</li>
-            </ul>
-
-            <h2>Version 1.1</h2>
-            <div class="version-date">March 1, 2024</div>
-            <ul>
-                <li>Added responsiveness to improve the mobile experience</li>
-                <li>Added ability to hide description of calculator tools by clicking page title</li>
-                <li>Added privacy policy</li>
-                <li>Reorganized css</li>
-            </ul>
-
-            <h2>Version 1.0</h2>
-            <div class="version-date">February 28, 2024</div>
-            <ul>
-                <li>Initial release</li>
-            </ul>
+        <div class="thank-you-container">
+            <div class="thank-you-icon">✓</div>
+            <h2 class="thank-you-title">Thank You for Your Feedback!</h2>
+            <p class="thank-you-message">
+                We've received your message and will review it shortly. Your input helps us improve XY Bike Calculator.
+                <br><br>
+                If you've requested a bike to be added to our database, we'll do our best to include it in our next update.
+            </p>
+            <a href="index.html" class="return-button">Return to Home</a>
         </div>
     </div>
 

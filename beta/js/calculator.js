@@ -31,14 +31,24 @@ class BikeCalculator {
                 }
             } else {
                 // Start fresh with default bikes
-                for (let i = 0; i < 2; i++) {
-                    this.addBike();
+                const isLoggedIn = firebase.auth().currentUser !== null;
+                
+                if (isLoggedIn) {
+                    // Add database bikes for logged in users
+                    for (let i = 0; i < 2; i++) {
+                        this.addBike();
+                    }
                 }
+                
+                // Always add at least one manual bike
                 this.addManualBike();
                 
                 // Set new session timestamp
                 sessionStorage.setItem('xyCalculatorSession', Date.now().toString());
             }
+            
+            // Adjust bike container width after initial load
+            this.adjustBikesContainerWidth();
         } catch (error) {
             console.error('Failed to initialize calculator:', error);
             this.showCustomAlert('Failed to load bike database. Please check your internet connection and try again.');
@@ -47,11 +57,30 @@ class BikeCalculator {
 
     initializeEventListeners() {
         // Add bike buttons
-        document.getElementById('addBike').addEventListener('click', () => this.addBike());
+        const addBikeBtn = document.getElementById('addBike');
+        addBikeBtn.addEventListener('click', () => this.addBike());
+        addBikeBtn.title = "Login required to add bikes from database";
+        
+        // Update add bike button state based on login status
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                addBikeBtn.classList.remove('disabled-button');
+                addBikeBtn.title = "Add a bike from our database";
+            } else {
+                addBikeBtn.classList.add('disabled-button');
+                addBikeBtn.title = "Login required to add bikes from database";
+            }
+        });
+        
         document.getElementById('addManualBike').addEventListener('click', () => this.addManualBike());
 
         // Print button
         document.getElementById('printButton').addEventListener('click', () => this.printBikeData());
+        
+        // Window resize listener for adjusting bike container
+        window.addEventListener('resize', () => {
+            this.adjustBikesContainerWidth();
+        });
 
         // Clear all data button
         document.getElementById('clearAllData').addEventListener('click', () => {
@@ -398,6 +427,12 @@ class BikeCalculator {
     }
 
     addBike() {
+        // Check if user is logged in when adding a non-manual bike (Google Sheets data)
+        if (!firebase.auth().currentUser) {
+            this.showCustomAlert('Please log in to access bikes from our database. You can still use manual bikes without logging in.');
+            return;
+        }
+        
         const bikeData = {
             id: `bike-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
             isManual: false,
@@ -462,6 +497,48 @@ class BikeCalculator {
         
         // Initialize bike card inputs and event listeners
         this.initializeBikeCardInputs(bikeCard, bikeData, index);
+        
+        // Adjust container width based on number of cards
+        this.adjustBikesContainerWidth();
+    }
+    
+    // Add this new method to dynamically adjust the bikes container width
+    adjustBikesContainerWidth() {
+        const bikesContainer = document.getElementById('bikes-container');
+        const containerWrapper = document.querySelector('.bikes-container-wrapper');
+        const bikeCards = document.querySelectorAll('.bike-card');
+        
+        if (bikeCards.length === 0) {
+            containerWrapper.style.justifyContent = 'center';
+            return;
+        }
+        
+        // Calculate total width of all bike cards
+        let totalCardsWidth = 0;
+        
+        // Get the computed gap between cards
+        const computedStyle = window.getComputedStyle(bikesContainer);
+        const gap = parseInt(computedStyle.gap) || 12; // Default to 12px if gap can't be determined
+        
+        // Calculate actual width by measuring each card
+        bikeCards.forEach((card, index) => {
+            totalCardsWidth += card.offsetWidth;
+            // Add gap width for all but the last card
+            if (index < bikeCards.length - 1) {
+                totalCardsWidth += gap;
+            }
+        });
+        
+        // Compare with container width
+        const containerWidth = containerWrapper.clientWidth;
+        
+        if (totalCardsWidth <= containerWidth - 24) { // 24px accounts for padding
+            // Cards fit within container - center them
+            containerWrapper.style.justifyContent = 'center';
+        } else {
+            // Cards overflow - align to left to enable scrolling
+            containerWrapper.style.justifyContent = 'flex-start';
+        }
     }
 
     getBikeCardHTML(index, isManual) {
@@ -881,17 +958,32 @@ class BikeCalculator {
         // Remove from array
         this.bikes.splice(bikeIndex, 1);
         this.saveData(); // Save data after deletion
+        
+        // Adjust container width after removing a bike card
+        this.adjustBikesContainerWidth();
     }
 
     duplicateBike(bikeId) {
         const originalBike = this.bikes.find(b => b.id === bikeId);
         if (!originalBike) return;
 
+        // Check if trying to duplicate a non-manual bike while not logged in
+        if (!originalBike.isManual && !firebase.auth().currentUser) {
+            this.showCustomAlert('Please log in to duplicate bikes from our database. You can duplicate manual bikes without logging in.');
+            return;
+        }
+        
         // Create a deep copy of the bike data with a new ID
         const duplicatedBike = {
             ...JSON.parse(JSON.stringify(originalBike)),
             id: `bike-${Date.now()}-${Math.floor(Math.random() * 1000)}`
         };
+        
+        // For non-logged in users, ensure duplicated bikes are manual
+        if (!firebase.auth().currentUser && !duplicatedBike.isManual) {
+            duplicatedBike.isManual = true;
+            duplicatedBike.id = `manual-bike-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        }
 
         // Find the index of the original bike
         const originalIndex = this.bikes.findIndex(b => b.id === bikeId);
@@ -902,7 +994,7 @@ class BikeCalculator {
         // Render the new bike card
         this.renderBikeCard(duplicatedBike, originalIndex + 1);
         
-        // Get the new card element
+        // Set values in the duplicated bike card
         const card = document.getElementById(duplicatedBike.id);
         if (card) {
             // Set geometry values
@@ -927,7 +1019,7 @@ class BikeCalculator {
                 if (modelInput) modelInput.value = duplicatedBike.model || '';
                 if (sizeInput) sizeInput.value = duplicatedBike.size || '';
             } else {
-            this.setupBikeSelectors(duplicatedBike.id);
+                this.setupBikeSelectors(duplicatedBike.id);
             }
         }
         
@@ -937,6 +1029,26 @@ class BikeCalculator {
     }
 
     async setupBikeSelectors(bikeId) {
+        // Check if user is logged in before loading data from Google Sheets
+        if (!firebase.auth().currentUser) {
+            const card = document.getElementById(bikeId);
+            if (card) {
+                // Replace the bike selector with a message about login
+                const selectorContainer = card.querySelector('.bike-selector');
+                if (selectorContainer) {
+                    selectorContainer.innerHTML = `
+                        <div style="padding: 10px; text-align: center; color: var(--text-secondary);">
+                            <p>🔒 Login required to access bike database</p>
+                            <button onclick="window.location.href='login.html'" style="margin-top: 10px;">
+                                Login / Sign Up
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+            return;
+        }
+
         const card = document.getElementById(bikeId);
         const brandSelect = card.querySelector('.brand-select');
         const modelSelect = card.querySelector('.model-select');
@@ -1098,75 +1210,92 @@ class BikeCalculator {
     loadSavedData() {
         const savedData = localStorage.getItem('xyCalculatorData');
         if (savedData) {
-            const data = JSON.parse(savedData);
-            
-            // Restore target positions
-            document.getElementById('clientName').value = data.clientName || '';
-            document.getElementById('targetSaddleX').value = data.targetSaddleX || '';
-            document.getElementById('targetSaddleY').value = data.targetSaddleY || '';
-            document.getElementById('targetHandlebarX').value = data.targetHandlebarX || '';
-            document.getElementById('targetHandlebarY').value = data.targetHandlebarY || '';
-            document.getElementById('handlebarReachUsed').value = data.handlebarReachUsed || '';
-            
-            // Enable/disable save button based on client name
-            document.getElementById('saveButton').disabled = !data.clientName;
-
-            // Restore bikes
-            if (data.bikes && data.bikes.length > 0) {
-                this.bikes = data.bikes;
-                // Clear existing bike cards
+            try {
+                const data = JSON.parse(savedData);
+                
+                // Clear existing bikes
                 document.getElementById('bikes-container').innerHTML = '';
-                // Render saved bikes
-                this.bikes.forEach((bikeData, index) => {
-                    this.renderBikeCard(bikeData, index);
+                this.bikes = [];
+                
+                // Set target positions
+                document.getElementById('clientName').value = data.clientName || '';
+                document.getElementById('targetSaddleX').value = data.targetSaddleX || '';
+                document.getElementById('targetSaddleY').value = data.targetSaddleY || '';
+                document.getElementById('targetHandlebarX').value = data.targetHandlebarX || '';
+                document.getElementById('targetHandlebarY').value = data.targetHandlebarY || '';
+                document.getElementById('handlebarReachUsed').value = data.handlebarReachUsed || '';
+                
+                // Check if user is logged in
+                const isLoggedIn = firebase.auth().currentUser !== null;
+                
+                // Load bikes
+                if (data.bikes && Array.isArray(data.bikes)) {
+                    // If user is not logged in, filter out non-manual bikes
+                    const bikesToLoad = isLoggedIn ? data.bikes : data.bikes.filter(bike => bike.isManual);
                     
-                    // Get the card element
-                    const card = document.getElementById(bikeData.id);
-                    
-                    // Explicitly set the geometry values in the input fields
-                    if (card) {
-                        // Set geometry values
-                        card.querySelector('.reach').value = bikeData.reach || '';
-                        card.querySelector('.stack').value = bikeData.stack || '';
-                        card.querySelector('.hta').value = bikeData.hta || '';
-                        card.querySelector('.sta').value = bikeData.sta || '';
-                        card.querySelector('.stl').value = bikeData.stl || '';
-                        
-                        // Set stem configuration values
-                        card.querySelector('.stem-length').value = bikeData.stemLength || 100;
-                        card.querySelector('.stem-angle').value = bikeData.stemAngle || -6;
-                        card.querySelector('.spacer-height').value = bikeData.spacersHeight || 20;
-                        
-                        // For manual bikes, also set the brand/model/size
-                        if (bikeData.isManual) {
-                            const brandInput = card.querySelector('.brand-input');
-                            const modelInput = card.querySelector('.model-input');
-                            const sizeInput = card.querySelector('.size-input');
+                    // If no bikes remain after filtering, add a default manual bike
+                    if (bikesToLoad.length === 0) {
+                        this.addManualBike();
+                    } else {
+                        bikesToLoad.forEach((bikeData, index) => {
+                            this.bikes.push(bikeData);
+                            this.renderBikeCard(bikeData, index);
                             
-                            if (brandInput) brandInput.value = bikeData.brand || '';
-                            if (modelInput) modelInput.value = bikeData.model || '';
-                            if (sizeInput) sizeInput.value = bikeData.size || '';
+                            // Get the card element
+                            const card = document.getElementById(bikeData.id);
+                            
+                            // Explicitly set the geometry values in the input fields
+                            if (card) {
+                                // Set geometry values
+                                card.querySelector('.reach').value = bikeData.reach || '';
+                                card.querySelector('.stack').value = bikeData.stack || '';
+                                card.querySelector('.hta').value = bikeData.hta || '';
+                                card.querySelector('.sta').value = bikeData.sta || '';
+                                card.querySelector('.stl').value = bikeData.stl || '';
+                                
+                                // Set stem configuration values
+                                card.querySelector('.stem-length').value = bikeData.stemLength || 100;
+                                card.querySelector('.stem-angle').value = bikeData.stemAngle || -6;
+                                card.querySelector('.spacer-height').value = bikeData.spacersHeight || 20;
+                                
+                                // For manual bikes, also set the brand/model/size
+                                if (bikeData.isManual) {
+                                    const brandInput = card.querySelector('.brand-input');
+                                    const modelInput = card.querySelector('.model-input');
+                                    const sizeInput = card.querySelector('.size-input');
+                                    
+                                    if (brandInput) brandInput.value = bikeData.brand || '';
+                                    if (modelInput) modelInput.value = bikeData.model || '';
+                                    if (sizeInput) sizeInput.value = bikeData.size || '';
+                                }
+                            }
+                            
+                            if (!bikeData.isManual && isLoggedIn) {
+                                this.setupBikeSelectors(bikeData.id);
+                            }
+                        });
+                    }
+                    
+                    this.updateCalculations();
+                } else {
+                    // No saved bikes, add defaults based on login status
+                    const isLoggedIn = firebase.auth().currentUser !== null;
+                    
+                    if (isLoggedIn) {
+                        // Add database bikes for logged in users
+                        for (let i = 0; i < 2; i++) {
+                            this.addBike();
                         }
                     }
                     
-                    if (!bikeData.isManual) {
-                        this.setupBikeSelectors(bikeData.id);
-                    }
-                });
-                this.updateCalculations();
-            } else {
-                // Add default bikes if no saved data
-                for (let i = 0; i < 2; i++) {
-                    this.addBike();
+                    // Always add at least one manual bike
+                    this.addManualBike();
                 }
+            } catch (error) {
+                console.error('Error loading saved data:', error);
+                // In case of error, add a default manual bike
                 this.addManualBike();
             }
-        } else {
-            // Add default bikes if no saved data
-            for (let i = 0; i < 2; i++) {
-                this.addBike();
-            }
-            this.addManualBike();
         }
     }
 
@@ -1235,28 +1364,28 @@ class BikeCalculator {
         
         // Add target positions section only if any target positions are provided
         if (hasTargetPositions) {
-            const targetSection = document.createElement('div');
-            targetSection.innerHTML = `
+        const targetSection = document.createElement('div');
+        targetSection.innerHTML = `
                 <div style="margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
                     <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; text-align: center;">
-                        <div>
+                    <div>
                             <h3 style="margin: 0 0 4px 0;">Target Saddle</h3>
                             <p style="margin: 0;">X: ${targetSaddleX} mm</p>
                             <p style="margin: 0;">Y: ${targetSaddleY} mm</p>
-                        </div>
-                        <div>
+                    </div>
+                    <div>
                             <h3 style="margin: 0 0 4px 0;">Target Handlebar</h3>
                             <p style="margin: 0;">X: ${targetHandlebarX} mm</p>
                             <p style="margin: 0;">Y: ${targetHandlebarY} mm</p>
-                        </div>
-                        <div>
+                    </div>
+                    <div>
                             <h3 style="margin: 0 0 4px 0;">Bar Reach Used</h3>
                             <p style="margin: 0;">${handlebarReachUsed} mm</p>
-                        </div>
                     </div>
                 </div>
-            `;
-            printContainer.appendChild(targetSection);
+            </div>
+        `;
+        printContainer.appendChild(targetSection);
         }
         
         // Add bike data section
@@ -1387,7 +1516,7 @@ class BikeCalculator {
                         } else {
                             resultsData += `<p>${label} ${value}</p>`;
                         }
-                    }
+                    } 
                     else if (label === 'Handlebar Y:' && targetHandlebarY !== 'N/A' && value !== '-- mm') {
                         const actualValue = parseInt(value);
                         if (!isNaN(actualValue)) {
@@ -2460,7 +2589,7 @@ class BikeCalculator {
             const message = fitIds.length === 1 
                 ? 'Are you sure you want to delete this bike position?' 
                 : `Are you sure you want to delete ${fitIds.length} selected bike positions?`;
-            
+                    
                     confirmDialog.innerHTML = `
                 <h3 style="margin-top: 0;">Confirm Delete</h3>
                 <p>${message}</p>

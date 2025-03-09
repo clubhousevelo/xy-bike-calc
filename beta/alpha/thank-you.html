@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H1TXBTLXDW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-H1TXBTLXDW');
+    </script>
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com https://www.googletagmanager.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.google-analytics.com; connect-src https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://sheets.googleapis.com https://*.googleapis.com;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <title>Thank You - XY Bike Calculator</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .thank-you-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .thank-you-icon {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .thank-you-title {
+            font-size: 1.75rem;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .thank-you-message {
+            color: var(--text-color);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .return-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s;
+        }
+
+        .return-button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .thank-you-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="hamburger-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <nav class="mobile-nav">
+        <ul>
+            <li><a href="index.html">X/Y Position Calculator</a></li>
+            <li><a href="hxhy-frame-calculator.html">HX/HY to Frame Calculator</a></li>
+            <li><a href="stem-calculator.html">Stem Calculator</a></li>
+            <li><a href="bike-search.html">Bike Search</a></li>
+        </ul>
+        <div style="flex: 1"></div>
+        <div style="margin-bottom: 8px;">
+            <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
+            <a href="feedback.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">Feedback</a>
+        </div>
+        <div class="non-auth-dependent" style="margin-bottom: 8px;">
+            <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
+                <button onclick="window.location.href='login.html'" style="padding: 4px 12px; font-size: 12px;">Login</button>
+            </div>
+        </div>
+        <div class="auth-dependent" style="margin-bottom: 8px; display: none;">
+            <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
+                <span class="user-display" style="margin-right: 8px; color: var(--text-color);"></span>
+                <button id="logout-button" style="padding: 4px 8px; font-size: 12px;">Logout</button>
+            </div>
+        </div>
+        <div class="theme-toggle">
+            <button id="mobileDarkModeToggle" class="dark-mode-toggle">
+                <span class="toggle-icon">☀️</span>
+                <span class="toggle-text">Light Mode</span>
+            </button>
+        </div>
+        <div class="privacy-link">
+            <a href="privacy-policy.html">Privacy Policy</a>
+            <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
+                <a href="changelog.html" style="color: inherit; text-decoration: none;">version 1.2</a>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="main-nav">
+        <div class="nav-header">
+            <h2>XY Bike Calc</h2>
+        </div>
+        <ul>
+            <li><a href="index.html">X/Y Position Calculator</a></li>
+            <li><a href="hxhy-frame-calculator.html">HX/HY to Frame Calculator</a></li>
+            <li><a href="stem-calculator.html">Stem Calculator</a></li>
+            <li><a href="bike-search.html">Bike Search</a></li>
+        </ul>
+        <div style="flex: 1"></div>
+        <div style="margin-bottom: 40px; text-align: center;">
+            <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
+            <a href="feedback.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">Feedback</a>
+        </div>
+        <div class="non-auth-dependent" style="margin-bottom: 40px; text-align: center;">
+            <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
+                <button onclick="window.location.href='login.html'" style="padding: 4px 12px; font-size: 12px;">Login</button>
+            </div>
+        </div>
+        <div class="auth-dependent" style="margin-bottom: 40px; text-align: center; display: none;">
+            <div style="display: flex; flex-direction: column; align-items: center; padding: 0.75rem 1rem;">
+                <span class="user-display" style="margin-bottom: 8px; color: var(--text-color);"></span>
+                <button id="logout-button" style="padding: 4px 12px; font-size: 12px;">Logout</button>
+            </div>
+        </div>
+        <div class="theme-toggle" style="margin-bottom: 32px;">
+            <button id="darkModeToggle" class="dark-mode-toggle">
+                <span class="toggle-icon">☀️</span>
+                <span class="toggle-text">Light Mode</span>
+            </button>
+        </div>
+        <div style="text-align: center; margin-bottom: 8px;">
+            <a href="privacy-policy.html" style="color: var(--text-secondary); font-size: 12px; text-decoration: none;">Privacy Policy</a>
+            <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
+                <a href="changelog.html" style="color: inherit; text-decoration: none;">version 1.2</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="calculator-container">
+        <div class="calculator-header">
+            <h1 class="calculator-title">
+                <span class="collapse-indicator">▼</span>
+                Thank You
+            </h1>
+            <p class="calculator-description">Your feedback has been received.</p>
+        </div>
+        
+        <div class="thank-you-container">
+            <div class="thank-you-icon">✓</div>
+            <h2 class="thank-you-title">Thank You for Your Feedback!</h2>
+            <p class="thank-you-message">
+                We've received your message and will review it shortly. Your input helps us improve XY Bike Calculator.
+                <br><br>
+                If you've requested a bike to be added to our database, we'll do our best to include it in our next update.
+            </p>
+            <a href="index.html" class="return-button">Return to Home</a>
+        </div>
+    </div>
+
+    <script src="js/dark-mode.js"></script>
+    <script src="js/mobile-menu.js"></script>
+    <script src="js/calculator-header.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="js/firebase-auth.js"></script>
+</body>
+</html> 

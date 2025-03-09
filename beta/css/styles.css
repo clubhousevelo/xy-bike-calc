@@ -2333,7 +2333,7 @@ button:disabled {
 }
 
 .main-nav .auth-container, .mobile-nav .auth-container {
-    margin-bottom: 40px;
+    margin-bottom: 10px;
     text-align: center;
 }
 
@@ -2354,6 +2354,8 @@ button:disabled {
     justify-content: center;
     align-items: center;
     padding: 0.75rem 1rem;
+    margin-bottom:10px;
+    text-align: center;
 }
 
 .main-nav .theme-toggle, .mobile-nav .theme-toggle {

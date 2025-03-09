@@ -18,7 +18,10 @@
   - Fixed Dark Mode toggle on XY Position Calculator
 
 1.2
-3/3/25
+3/5/25
+  - Fixed light/dark mode toggle on home page
   - Implemented account creation
   - Client profiles in XY Position Calculator are now saved to the cloud instead of using local browser storage and require login credentials
   - Optimized Load dialog to be optimized for both desktop and mobile views
+  - User's name (entered) will display on printed bike recommendation report
+  - Added favicon

@@ -32,6 +32,68 @@
     <meta http-equiv="X-Frame-Options" content="DENY">
     <title>XY Bike Calculator - Bike Prescription Tool</title>
     <link rel="stylesheet" href="css/styles.css">
+    <!-- Upgrade Modal Styles -->
+    <style>
+        .upgrade-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .upgrade-modal.show {
+            display: flex;
+        }
+
+        .upgrade-content {
+            background-color: var(--card-background);
+            padding: 2.0rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .upgrade-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .upgrade-content p {
+            color: var(--text-color);
+            margin-bottom: 0rem;
+            line-height: 1.5;
+        }
+
+        .upgrade-content .warning {
+            color: #e74c3c;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        .upgrade-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        .upgrade-button:hover {
+            opacity: 0.9;
+        }
+    </style>
     <!-- Ensure dark mode styles are applied -->
     <style>
         /* Ensure dark mode styles are applied */
@@ -75,6 +137,17 @@
     </style>
 </head>
 <body>
+    <div class="upgrade-modal" id="upgradeModal">
+        <div class="upgrade-content">
+            <center><h2>Version 1.2.1 Updates</h2></center>
+            <p>
+                <li>Account login is now required to access bikes from the database in XY Position Calculator. Manual geometry configurations still available without an account.</li>
+                <br><li>Reformatted printed results page to more similarly reflect the configuration screen for easier visual side-to-side comparison.</li>
+                <br><li>Added a "Guide" page to help explain the XY Position Calculator and values produced.</li>
+            <center><button class="upgrade-button" onclick="acknowledgeUpgrade()">Close</button></p></center>
+        </div>
+    </div>
+
     <button class="hamburger-menu">
         <span></span>
         <span></span>
@@ -88,31 +161,32 @@
             <li><a href="stem-calculator.html">Stem Calculator</a></li>
             <li><a href="bike-search.html">Bike Search</a></li>
         </ul>
-        <div style="flex: 1"></div>
-        <div style="margin-bottom: 30px; text-align: center;">
-            <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
+        <div class="flex-spacer"></div>
+        <div class="nav-item">
+            <a href="about.html">About</a>
         </div>
-        <div class="non-auth-dependent" style="margin-bottom: 8px;">
-            <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
-                <button onclick="window.location.href='login.html'" style="padding: 4px 12px; font-size: 12px;">Login</button>
+        <div class="nav-item-guide">
+            <a href="guide.html">Guide</a>
+        </div>
+        <div class="non-auth-dependent login-container">
+            <button class="login-button" onclick="window.location.href='login.html'">Login</button>
+        </div>
+        <div class="auth-dependent auth-container">
+            <div class="user-container">
+                <span class="user-display"></span>
+                <button id="logout-button-mobile" class="logout-button">Logout</button>
             </div>
         </div>
-        <div class="auth-dependent" style="margin-bottom: 40px; text-align: center; display: none;">
-            <div style="display: flex; flex-direction: column; align-items: center; padding: 0.75rem 1rem;">
-                <span class="user-display" style="margin-bottom: 8px; color: var(--text-color);"></span>
-                <button id="logout-button" style="padding: 4px 12px; font-size: 12px;">Logout</button>
-            </div>
-        </div>
-        <div class="theme-toggle" style="margin-bottom: 32px;">
+        <div class="theme-toggle">
             <button id="mobileDarkModeToggle" class="dark-mode-toggle" onclick="toggleTheme()">
                 <span class="toggle-icon">☀️</span>
                 <span class="toggle-text">Light Mode</span>
             </button>
         </div>
-        <div style="text-align: center; margin-bottom: 8px;">
-            <a href="privacy-policy.html" style="color: var(--text-secondary); font-size: 12px; text-decoration: none;">Privacy Policy</a>
-            <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
-                <a href="changelog.html" style="color: inherit; text-decoration: none;">version 1.2</a>
+        <div class="footer-links">
+            <a href="privacy-policy.html">Privacy Policy</a>
+            <div class="version">
+                <a href="changelog.html">version 1.2.1</a>
             </div>
         </div>
     </nav>
@@ -127,31 +201,32 @@
             <li><a href="stem-calculator.html">Stem Calculator</a></li>
             <li><a href="bike-search.html">Bike Search</a></li>
         </ul>
-        <div style="flex: 1"></div>
-        <div style="margin-bottom: 40px; text-align: center;">
-            <a href="about.html" style="display: block; padding: 0.75rem 1rem; color: var(--text-color); text-decoration: none; font-weight: 500;">About</a>
+        <div class="flex-spacer"></div>
+        <div class="nav-item">
+            <a href="about.html">About</a>
         </div>
-        <div class="non-auth-dependent" style="margin-bottom: 40px; text-align: center;">
-            <div style="display: flex; justify-content: center; align-items: center; padding: 0.75rem 1rem;">
-                <button onclick="window.location.href='login.html'" style="padding: 4px 12px; font-size: 12px;">Login</button>
+        <div class="nav-item-guide">
+            <a href="guide.html">Guide</a>
+        </div>
+        <div class="non-auth-dependent login-container">
+            <button class="login-button" onclick="window.location.href='login.html'">Login</button>
+        </div>
+        <div class="auth-dependent auth-container">
+            <div class="user-container">
+                <span class="user-display"></span>
+                <button id="logout-button" class="logout-button">Logout</button>
             </div>
         </div>
-        <div class="auth-dependent" style="margin-bottom: 40px; text-align: center; display: none;">
-            <div style="display: flex; flex-direction: column; align-items: center; padding: 0.75rem 1rem;">
-                <span class="user-display" style="margin-bottom: 8px; color: var(--text-color);"></span>
-                <button id="logout-button" style="padding: 4px 12px; font-size: 12px;">Logout</button>
-            </div>
-        </div>
-        <div class="theme-toggle" style="margin-bottom: 32px;">
+        <div class="theme-toggle">
             <button id="darkModeToggle" class="dark-mode-toggle" onclick="toggleTheme()">
                 <span class="toggle-icon">☀️</span>
                 <span class="toggle-text">Light Mode</span>
             </button>
         </div>
-        <div style="text-align: center; margin-bottom: 8px;">
-            <a href="privacy-policy.html" style="color: var(--text-secondary); font-size: 12px; text-decoration: none;">Privacy Policy</a>
-            <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
-                <a href="changelog.html" style="color: inherit; text-decoration: none;">version 1.2</a>
+        <div class="footer-links">
+            <a href="privacy-policy.html">Privacy Policy</a>
+            <div class="version">
+                <a href="changelog.html">version 1.2.1</a>
             </div>
         </div>
     </nav>
@@ -273,6 +348,19 @@
             if (icon) icon.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
             if (text) text.textContent = currentTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
         });
+    </script>
+
+    <script>
+        // Upgrade notice handling (removed duplicate BikeCalculator initialization)
+        function acknowledgeUpgrade() {
+            localStorage.setItem('upgradeNoticeAcknowledged', 'true');
+            document.getElementById('upgradeModal').classList.remove('show');
+        }
+
+        // Show upgrade notice if not previously acknowledged
+        if (!localStorage.getItem('upgradeNoticeAcknowledged')) {
+            document.getElementById('upgradeModal').classList.add('show');
+        }
     </script>
 </body>
 </html>

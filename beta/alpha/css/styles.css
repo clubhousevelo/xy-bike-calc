@@ -143,6 +143,20 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.disabled-button {
+    opacity: 0.65;
+    position: relative;
+    cursor: help; /* Shows a question mark cursor indicating more information is available */
+}
+
+.disabled-button::after {
+    content: "🔒";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 14px;
+}
+
 .target-positions {
     display: flex;
     gap: 15px;
@@ -196,43 +210,42 @@ button:disabled {
 .bikes-container-wrapper {
     width: 100%;
     display: flex;
-    justify-content: flex-start;
-    overflow: hidden;
+    justify-content: center;
+    overflow-x: auto;
     margin-bottom: 12px;
     position: relative;
     padding-left: 12px;
     padding-right: 12px;
+    box-sizing: border-box;
+    scrollbar-width: thin; /* Firefox scrollbar */
 }
 
 #bikes-container {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
+    gap: 1rem;
     padding: 8px 0;
+    display: flex;
+    flex-direction: row;
     flex-wrap: nowrap;
-    scrollbar-width: thin;
-    margin: 0;
-    max-width: 100%;
-    width: 100%;
-    justify-content: flex-start;
+    width: max-content;
+    min-width: min-content;
 }
 
 /* Styling for webkit scrollbars (Chrome, Safari, Edge) */
-#bikes-container::-webkit-scrollbar {
+.bikes-container-wrapper::-webkit-scrollbar {
     height: 8px;
 }
 
-#bikes-container::-webkit-scrollbar-track {
+.bikes-container-wrapper::-webkit-scrollbar-track {
     background: var(--background-color);
     border-radius: 4px;
 }
 
-#bikes-container::-webkit-scrollbar-thumb {
+.bikes-container-wrapper::-webkit-scrollbar-thumb {
     background-color: var(--border-color);
     border-radius: 4px;
 }
 
-#bikes-container::-webkit-scrollbar-thumb:hover {
+.bikes-container-wrapper::-webkit-scrollbar-thumb:hover {
     background-color: var(--text-secondary);
 }
 
@@ -1767,22 +1780,43 @@ button:disabled {
 
     .bikes-container-wrapper {
         width: 100%;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
         margin: 0;
+        overflow-x: auto;
+        box-sizing: border-box;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        scrollbar-width: thin; /* Firefox scrollbar */
+    }
+
+    /* Mobile scrollbar styling */
+    .bikes-container-wrapper::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .bikes-container-wrapper::-webkit-scrollbar-thumb {
+        background-color: var(--border-color);
+        border-radius: 2px;
     }
 
     #bikes-container {
         gap: 1rem;
         padding: 8px 0;
-        width: 100%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        width: max-content;
+        min-width: min-content;
     }
 
     .bike-card {
-        width: 100%;
-        max-width: none;
-        margin: 8px 0;
+        width: 85vw;
+        min-width: 280px;
+        max-width: 350px;
+        margin: 8px 0.5rem;
         padding: 12px 16px;
+        box-sizing: border-box;
+        flex: 0 0 auto;
     }
 
     .bike-selector {
@@ -2157,4 +2191,213 @@ button:disabled {
         font-size: 1.25rem;
         margin: 1.5rem 0 0.75rem;
     }
+}
+
+/* Disabled database bike card styles */
+.disabled-database-bike {
+    position: relative;
+    opacity: 0.8;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.disabled-database-bike::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.disabled-database-bike .disabled-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(128, 128, 128, 0.2);
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+.disabled-database-bike .login-prompt {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.disabled-database-bike .drag-handle.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Adjusting input elements to look disabled within database bike card */
+.disabled-database-bike input:disabled,
+.disabled-database-bike select:disabled,
+.disabled-database-bike button:disabled {
+    opacity: 0.7;
+    color: #999;
+}
+
+/* Dark mode adjustments for disabled database bike */
+[data-theme="dark"] .disabled-database-bike::before {
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .disabled-database-bike .disabled-overlay {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .disabled-database-bike .login-prompt {
+    background-color: rgba(50, 50, 50, 0.8);
+}
+
+/* Specific mobile styles for bike cards */
+@media (max-width: 770px) {
+    .bikes-container-wrapper {
+        width: 100%;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        margin: 0;
+        overflow-x: auto;
+        box-sizing: border-box;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        scrollbar-width: thin; /* Firefox scrollbar */
+    }
+
+    /* Mobile scrollbar styling */
+    .bikes-container-wrapper::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .bikes-container-wrapper::-webkit-scrollbar-thumb {
+        background-color: var(--border-color);
+        border-radius: 2px;
+    }
+
+    #bikes-container {
+        gap: 1rem;
+        padding: 8px 0;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        width: max-content;
+        min-width: min-content;
+    }
+
+    .bike-card {
+        width: 85vw;
+        min-width: 280px;
+        max-width: 350px;
+        margin: 8px 0.5rem;
+        padding: 12px 16px;
+        box-sizing: border-box;
+        flex: 0 0 auto;
+    }
+}
+
+/* Navigation styling for all pages */
+.main-nav a, .mobile-nav a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.main-nav .nav-item, .mobile-nav .nav-item {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.main-nav .nav-item-guide, .mobile-nav .nav-item-guide {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.main-nav .nav-item-guide.active, .main-nav .nav-item.active {
+    color: var(--primary-color);
+    border-left: 3px solid var(--primary-color);
+    background-color: var(--hover-bg);
+}
+
+.main-nav .auth-container, .mobile-nav .auth-container {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.auth-container .user-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem 1rem;
+}
+
+.auth-container .user-display {
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.main-nav .login-container, .mobile-nav .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    margin-bottom:10px;
+    text-align: center;
+}
+
+.main-nav .theme-toggle, .mobile-nav .theme-toggle {
+    margin-bottom: 32px;
+}
+
+.main-nav .footer-links, .mobile-nav .footer-links {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.footer-links .version {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Login/logout buttons */
+.login-button, .logout-button {
+    padding: 4px 12px;
+    font-size: 12px;
+}
+
+/* Specific mobile nav adjustments */
+.mobile-nav .nav-item-guide {
+    margin-bottom: 20px;
+}
+
+.flex-spacer {
+    flex: 1;
+}
+
+.auth-dependent {
+    display: none;
+}
+
+.text-center {
+    text-align: center;
 }

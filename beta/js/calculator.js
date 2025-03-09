@@ -30,18 +30,18 @@ class BikeCalculator {
                     sessionStorage.setItem('xyCalculatorSession', Date.now().toString());
                 }
             } else {
-                // Start fresh with default bikes
+                // Start fresh with default bikes based on login status
                 const isLoggedIn = firebase.auth().currentUser !== null;
                 
                 if (isLoggedIn) {
-                    // Add database bikes for logged in users
-                    for (let i = 0; i < 2; i++) {
-                        this.addBike();
-                    }
+                    // For logged in users: one database bike and one manual bike
+                    this.addBike(); // Add one database bike
+                    this.addManualBike(); // Add one manual bike
+                } else {
+                    // For non-logged in users: a disabled database bike and one manual bike
+                    this.addDisabledBike(); // Add disabled database bike
+                    this.addManualBike(); // Add one manual bike
                 }
-                
-                // Always add at least one manual bike
-                this.addManualBike();
                 
                 // Set new session timestamp
                 sessionStorage.setItem('xyCalculatorSession', Date.now().toString());
@@ -66,10 +66,24 @@ class BikeCalculator {
             if (user) {
                 addBikeBtn.classList.remove('disabled-button');
                 addBikeBtn.title = "Add a bike from our database";
+                // Update Save button state
+                const saveButton = document.getElementById('saveButton');
+                saveButton.classList.remove('disabled-button');
+                saveButton.title = "Save your bike fit profile";
+                
+                // Remove any disabled bike cards when user logs in
+                this.removeDisabledBikeCards();
             } else {
                 addBikeBtn.classList.add('disabled-button');
                 addBikeBtn.title = "Login required to add bikes from database";
+                // Update Save button state
+                const saveButton = document.getElementById('saveButton');
+                saveButton.classList.add('disabled-button');
+                saveButton.title = "Login required to save your profile";
             }
+            
+            // Update save button enabled/disabled state
+            this.updateSaveButtonState();
         });
         
         document.getElementById('addManualBike').addEventListener('click', () => this.addManualBike());
@@ -194,11 +208,18 @@ class BikeCalculator {
                 document.getElementById('bikes-container').innerHTML = '';
                 this.bikes = [];
                 
-                // Add default bikes
-                for (let i = 0; i < 2; i++) {
-                    this.addBike();
+                // Add default bikes based on login status
+                const isLoggedIn = firebase.auth().currentUser !== null;
+                
+                if (isLoggedIn) {
+                    // For logged in users: one database bike and one manual bike
+                    this.addBike(); // Add one database bike
+                    this.addManualBike(); // Add one manual bike
+                } else {
+                    // For non-logged in users: a disabled database bike and one manual bike
+                    this.addDisabledBike(); // Add disabled database bike
+                    this.addManualBike(); // Add one manual bike
                 }
-                this.addManualBike();
                 
                 // Update save button state
                 this.updateSaveButtonState();
@@ -227,7 +248,14 @@ class BikeCalculator {
         });
 
         // Save/Load buttons
-        document.getElementById('saveButton').addEventListener('click', () => this.saveInstance());
+        document.getElementById('saveButton').addEventListener('click', () => {
+            // Check if user is logged in before allowing save
+            if (!firebase.auth().currentUser) {
+                this.showCustomAlert('Please log in to save bike configurations to a client profile.');
+                return;
+            }
+            this.saveInstance();
+        });
         document.getElementById('loadButton').addEventListener('click', () => this.showLoadDialog());
 
         // Target position inputs - these should update ALL bike cards
@@ -429,7 +457,7 @@ class BikeCalculator {
     addBike() {
         // Check if user is logged in when adding a non-manual bike (Google Sheets data)
         if (!firebase.auth().currentUser) {
-            this.showCustomAlert('Please log in to access bikes from our database. You can still use manual bikes without logging in.');
+            this.showCustomAlert('Please log in to access bikes from our database. You can still use "Manual Bikes" to input custom geometry numbers without logging in.');
             return;
         }
         
@@ -460,6 +488,36 @@ class BikeCalculator {
         if (!bikeData.isManual) {
             this.setupBikeSelectors(bikeData.id);
         }
+    }
+    
+    addDisabledBike() {
+        // Don't add disabled bike if user is already logged in
+        if (firebase.auth().currentUser) {
+            return;
+        }
+        
+        const bikeData = {
+            id: `disabled-bike-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            isManual: false,
+            isDisabled: true,
+            brand: '',
+            model: '',
+            size: '',
+            reach: '',
+            stack: '',
+            hta: '',
+            sta: '',
+            stl: '',
+            stemLength: 100,
+            stemAngle: -6,
+            spacersHeight: 20,
+            handlebarReach: 80,
+            saddleSetback: 0,
+            saddleHeight: 0
+        };
+        
+        this.bikes.push(bikeData);
+        this.renderDisabledBikeCard(bikeData, this.bikes.length - 1);
     }
 
     addManualBike() {
@@ -497,6 +555,66 @@ class BikeCalculator {
         
         // Initialize bike card inputs and event listeners
         this.initializeBikeCardInputs(bikeCard, bikeData, index);
+        
+        // Adjust container width based on number of cards
+        this.adjustBikesContainerWidth();
+    }
+    
+    renderDisabledBikeCard(bikeData, index) {
+        const bikeCard = document.createElement('div');
+        bikeCard.className = 'bike-card disabled-database-bike';
+        bikeCard.id = bikeData.id;
+        bikeCard.title = "Log in to use bikes from our database";
+        
+        // Use the same HTML structure as a regular database bike card
+        bikeCard.innerHTML = this.getBikeCardHTML(index, false);
+        
+        // Add the disabled overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'disabled-overlay';
+        overlay.innerHTML = '<span class="login-prompt">Log in to configure bikes from database. You may still configure "Manual Bikes".</span>';
+        bikeCard.appendChild(overlay);
+        
+        document.getElementById('bikes-container').appendChild(bikeCard);
+        
+        // Disable all inputs, selects, and buttons
+        const inputs = bikeCard.querySelectorAll('input, select, button');
+        inputs.forEach(input => {
+            input.disabled = true;
+            if (input.tagName === 'INPUT') {
+                input.readOnly = true;
+            }
+        });
+        
+        // Make drag handle unclickable
+        const dragHandle = bikeCard.querySelector('.drag-handle');
+        if (dragHandle) {
+            dragHandle.classList.add('disabled');
+            dragHandle.title = "Log in to enable this feature";
+        }
+        
+        // Add empty options to selectors
+        const selectors = bikeCard.querySelectorAll('select');
+        selectors.forEach(selector => {
+            // Clear any existing options
+            while (selector.firstChild) {
+                selector.removeChild(selector.firstChild);
+            }
+            
+            // Add placeholder option
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            
+            if (selector.classList.contains('brand-selector')) {
+                placeholderOption.textContent = 'Select a brand';
+            } else if (selector.classList.contains('model-selector')) {
+                placeholderOption.textContent = 'Select a model';
+            } else if (selector.classList.contains('size-selector')) {
+                placeholderOption.textContent = 'Select a size';
+            }
+            
+            selector.appendChild(placeholderOption);
+        });
         
         // Adjust container width based on number of cards
         this.adjustBikesContainerWidth();
@@ -581,7 +699,7 @@ class BikeCalculator {
                 </div>
                 <div class="input-group">
                     <label>Stem Length:</label>
-                    <input type="number" class="stem-length" value="100" min="0">
+                    <input type="number" class="stem-length" value="100" min="0" step="5">
                     <span>mm</span>
                 </div>
                 <div class="input-group">
@@ -969,10 +1087,10 @@ class BikeCalculator {
 
         // Check if trying to duplicate a non-manual bike while not logged in
         if (!originalBike.isManual && !firebase.auth().currentUser) {
-            this.showCustomAlert('Please log in to duplicate bikes from our database. You can duplicate manual bikes without logging in.');
+            this.showCustomAlert('Please log in to duplicate bikes from our database. You can duplicate bikes with manually input geometry data without logging in.');
             return;
         }
-        
+
         // Create a deep copy of the bike data with a new ID
         const duplicatedBike = {
             ...JSON.parse(JSON.stringify(originalBike)),
@@ -1019,7 +1137,7 @@ class BikeCalculator {
                 if (modelInput) modelInput.value = duplicatedBike.model || '';
                 if (sizeInput) sizeInput.value = duplicatedBike.size || '';
             } else {
-                this.setupBikeSelectors(duplicatedBike.id);
+            this.setupBikeSelectors(duplicatedBike.id);
             }
         }
         
@@ -1211,20 +1329,20 @@ class BikeCalculator {
         const savedData = localStorage.getItem('xyCalculatorData');
         if (savedData) {
             try {
-                const data = JSON.parse(savedData);
-                
+            const data = JSON.parse(savedData);
+            
                 // Clear existing bikes
                 document.getElementById('bikes-container').innerHTML = '';
                 this.bikes = [];
                 
                 // Set target positions
-                document.getElementById('clientName').value = data.clientName || '';
-                document.getElementById('targetSaddleX').value = data.targetSaddleX || '';
-                document.getElementById('targetSaddleY').value = data.targetSaddleY || '';
-                document.getElementById('targetHandlebarX').value = data.targetHandlebarX || '';
-                document.getElementById('targetHandlebarY').value = data.targetHandlebarY || '';
-                document.getElementById('handlebarReachUsed').value = data.handlebarReachUsed || '';
-                
+            document.getElementById('clientName').value = data.clientName || '';
+            document.getElementById('targetSaddleX').value = data.targetSaddleX || '';
+            document.getElementById('targetSaddleY').value = data.targetSaddleY || '';
+            document.getElementById('targetHandlebarX').value = data.targetHandlebarX || '';
+            document.getElementById('targetHandlebarY').value = data.targetHandlebarY || '';
+            document.getElementById('handlebarReachUsed').value = data.handlebarReachUsed || '';
+            
                 // Check if user is logged in
                 const isLoggedIn = firebase.auth().currentUser !== null;
                 
@@ -1233,68 +1351,86 @@ class BikeCalculator {
                     // If user is not logged in, filter out non-manual bikes
                     const bikesToLoad = isLoggedIn ? data.bikes : data.bikes.filter(bike => bike.isManual);
                     
-                    // If no bikes remain after filtering, add a default manual bike
+                    // If no bikes remain after filtering, add default bikes based on login status
                     if (bikesToLoad.length === 0) {
-                        this.addManualBike();
+                        if (isLoggedIn) {
+                            // For logged in users: one database bike and one manual bike
+                            this.addBike();
+                            this.addManualBike();
+                        } else {
+                            // For non-logged in users: a disabled database bike and one manual bike
+                            this.addDisabledBike(); // Add disabled database bike
+                            this.addManualBike(); // Add one manual bike
+                        }
                     } else {
                         bikesToLoad.forEach((bikeData, index) => {
                             this.bikes.push(bikeData);
-                            this.renderBikeCard(bikeData, index);
+                    this.renderBikeCard(bikeData, index);
+                    
+                    // Get the card element
+                    const card = document.getElementById(bikeData.id);
+                    
+                    // Explicitly set the geometry values in the input fields
+                    if (card) {
+                        // Set geometry values
+                        card.querySelector('.reach').value = bikeData.reach || '';
+                        card.querySelector('.stack').value = bikeData.stack || '';
+                        card.querySelector('.hta').value = bikeData.hta || '';
+                        card.querySelector('.sta').value = bikeData.sta || '';
+                        card.querySelector('.stl').value = bikeData.stl || '';
+                        
+                        // Set stem configuration values
+                        card.querySelector('.stem-length').value = bikeData.stemLength || 100;
+                        card.querySelector('.stem-angle').value = bikeData.stemAngle || -6;
+                        card.querySelector('.spacer-height').value = bikeData.spacersHeight || 20;
+                        
+                        // For manual bikes, also set the brand/model/size
+                        if (bikeData.isManual) {
+                            const brandInput = card.querySelector('.brand-input');
+                            const modelInput = card.querySelector('.model-input');
+                            const sizeInput = card.querySelector('.size-input');
                             
-                            // Get the card element
-                            const card = document.getElementById(bikeData.id);
-                            
-                            // Explicitly set the geometry values in the input fields
-                            if (card) {
-                                // Set geometry values
-                                card.querySelector('.reach').value = bikeData.reach || '';
-                                card.querySelector('.stack').value = bikeData.stack || '';
-                                card.querySelector('.hta').value = bikeData.hta || '';
-                                card.querySelector('.sta').value = bikeData.sta || '';
-                                card.querySelector('.stl').value = bikeData.stl || '';
-                                
-                                // Set stem configuration values
-                                card.querySelector('.stem-length').value = bikeData.stemLength || 100;
-                                card.querySelector('.stem-angle').value = bikeData.stemAngle || -6;
-                                card.querySelector('.spacer-height').value = bikeData.spacersHeight || 20;
-                                
-                                // For manual bikes, also set the brand/model/size
-                                if (bikeData.isManual) {
-                                    const brandInput = card.querySelector('.brand-input');
-                                    const modelInput = card.querySelector('.model-input');
-                                    const sizeInput = card.querySelector('.size-input');
-                                    
-                                    if (brandInput) brandInput.value = bikeData.brand || '';
-                                    if (modelInput) modelInput.value = bikeData.model || '';
-                                    if (sizeInput) sizeInput.value = bikeData.size || '';
-                                }
-                            }
-                            
-                            if (!bikeData.isManual && isLoggedIn) {
-                                this.setupBikeSelectors(bikeData.id);
-                            }
-                        });
+                            if (brandInput) brandInput.value = bikeData.brand || '';
+                            if (modelInput) modelInput.value = bikeData.model || '';
+                            if (sizeInput) sizeInput.value = bikeData.size || '';
+                        }
                     }
                     
-                    this.updateCalculations();
-                } else {
+                            if (!bikeData.isManual && isLoggedIn) {
+                        this.setupBikeSelectors(bikeData.id);
+                    }
+                });
+                    }
+                    
+                this.updateCalculations();
+            } else {
                     // No saved bikes, add defaults based on login status
                     const isLoggedIn = firebase.auth().currentUser !== null;
                     
                     if (isLoggedIn) {
-                        // Add database bikes for logged in users
-                        for (let i = 0; i < 2; i++) {
-                            this.addBike();
-                        }
+                        // For logged in users: one database bike and one manual bike
+                    this.addBike();
+                this.addManualBike();
+        } else {
+                        // For non-logged in users: a disabled database bike and one manual bike
+                        this.addDisabledBike(); // Add disabled database bike
+                        this.addManualBike(); // Add one manual bike
                     }
-                    
-                    // Always add at least one manual bike
-                    this.addManualBike();
                 }
             } catch (error) {
                 console.error('Error loading saved data:', error);
-                // In case of error, add a default manual bike
-                this.addManualBike();
+                // In case of error, add default bikes based on login status
+                const isLoggedIn = firebase.auth().currentUser !== null;
+                
+                if (isLoggedIn) {
+                    // For logged in users: one database bike and one manual bike
+                    this.addBike();
+            this.addManualBike();
+                } else {
+                    // For non-logged in users: a disabled database bike and one manual bike
+                    this.addDisabledBike(); // Add disabled database bike
+                    this.addManualBike(); // Add one manual bike
+                }
             }
         }
     }
@@ -1350,10 +1486,7 @@ class BikeCalculator {
         printStyles.textContent = `
             @media print {
                 .print-container {
-                    zoom: 68%;
-                    -webkit-transform: scale(0.68);
-                    transform: scale(0.68);
-                    transform-origin: top left;
+                    width: 80%;
                 }
             }
         `;
@@ -1366,21 +1499,32 @@ class BikeCalculator {
         if (hasTargetPositions) {
         const targetSection = document.createElement('div');
         targetSection.innerHTML = `
-                <div style="margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                <div style="margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background-color: #ffffff;">
                     <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; text-align: center;">
                     <div>
-                            <h3 style="margin: 0 0 4px 0;">Target Saddle</h3>
-                            <p style="margin: 0;">X: ${targetSaddleX} mm</p>
-                            <p style="margin: 0;">Y: ${targetSaddleY} mm</p>
+                            <h4 style="margin: 0 0 4px 0;">Target Saddle</h4>
+                            <div style="display: grid; grid-template-columns: 0.5fr 1fr; gap: 2px 2px;">
+                                <div style="text-align: left; font-size: 15px;">X:</div>
+                                <div style="text-align: right; font-size: 15px; font-weight: 600;">${targetSaddleX} mm</div>
+                                <div style="text-align: left; font-size: 15px;">Y:</div>
+                                <div style="text-align: right; font-size: 15px; font-weight: 600;">${targetSaddleY} mm</div>
+                            </div>
                     </div>
                     <div>
-                            <h3 style="margin: 0 0 4px 0;">Target Handlebar</h3>
-                            <p style="margin: 0;">X: ${targetHandlebarX} mm</p>
-                            <p style="margin: 0;">Y: ${targetHandlebarY} mm</p>
+                            <h4 style="margin: 0 0 4px 0;">Target Handlebar</h4>
+                            <div style="display: grid; grid-template-columns: 0.5fr 1fr; gap: 2px 2px;">
+                                <div style="text-align: left; font-size: 15px;">X:</div>
+                                <div style="text-align: right; font-size: 15px; font-weight: 600;">${targetHandlebarX} mm</div>
+                                <div style="text-align: left; font-size: 15px;">Y:</div>
+                                <div style="text-align: right; font-size: 15px; font-weight: 600;">${targetHandlebarY} mm</div>
+                            </div>
                     </div>
                     <div>
-                            <h3 style="margin: 0 0 4px 0;">Bar Reach Used</h3>
-                            <p style="margin: 0;">${handlebarReachUsed} mm</p>
+                            <h4 style="margin: 0 0 4px 0;">Bar Reach Used</h4>
+                            <div style="display: grid; grid-template-columns: 0.5fr 1fr; gap: 2px 2px;">
+                                <div style="text-align: left; font-size: 15px;">Length:</div>
+                                <div style="text-align: right; font-size: 15px; font-weight: 600;">${handlebarReachUsed} mm</div>
+                            </div>
                     </div>
                 </div>
             </div>
@@ -1390,6 +1534,7 @@ class BikeCalculator {
         
         // Add bike data section
         const bikesSection = document.createElement('div');
+        bikesSection.style.cssText = 'display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-start;';
         
         // Get all bike cards with data
         const bikeCards = document.querySelectorAll('.bike-card');
@@ -1413,9 +1558,11 @@ class BikeCalculator {
             
             // Get bike name - construct from brand, model, and size if available
             let bikeName = '';
+            let isManual = false;
             
             // For manual bikes, get values from input fields
             if (card.querySelector('.manual-inputs')) {
+                isManual = true;
                 const brandInput = card.querySelector('.brand-input');
                 const modelInput = card.querySelector('.model-input');
                 const sizeInput = card.querySelector('.size-input');
@@ -1458,36 +1605,47 @@ class BikeCalculator {
             const geometrySection = card.querySelector('.geometry-section');
             let geometryData = '';
             if (geometrySection) {
+                geometryData = '<div style="display: grid; grid-template-columns: 1fr 0.5fr; gap: 4px 2px;">';
                 const geometryInputs = geometrySection.querySelectorAll('.input-group');
                 geometryInputs.forEach(group => {
                     const label = group.querySelector('label')?.textContent || '';
                     const value = group.querySelector('input')?.value || 'N/A';
                     const unit = group.querySelector('span')?.textContent || '';
                     if (label && value) {
-                        geometryData += `<p>${label} ${value}${unit}</p>`;
+                        geometryData += `
+                            <div style="text-align: left; font-size: 13px;">${label}</div>
+                            <div style="text-align: right; font-size: 13px; font-weight: 500;">${value}${unit}</div>
+                        `;
                     }
                 });
+                geometryData += '</div>';
             }
             
             // Get stem data
             const stemSection = card.querySelector('.stem-section');
             let stemData = '';
             if (stemSection) {
+                stemData = '<div style="display: grid; grid-template-columns: 1fr 0.5fr; gap: 4px 2px;">';
                 const stemInputs = stemSection.querySelectorAll('.input-group');
                 stemInputs.forEach(group => {
                     const label = group.querySelector('label')?.textContent || '';
                     const value = group.querySelector('input')?.value || 'N/A';
                     const unit = group.querySelector('span')?.textContent || '';
                     if (label && value) {
-                        stemData += `<p>${label} ${value}${unit}</p>`;
+                        stemData += `
+                            <div style="text-align: left; font-size: 13px;">${label}</div>
+                            <div style="text-align: right; font-size: 13px; font-weight: 500;">${value}${unit}</div>
+                        `;
                     }
                 });
+                stemData += '</div>';
             }
             
             // Get results data
             const resultsSection = card.querySelector('.results-section');
             let resultsData = '';
             if (resultsSection) {
+                    resultsData = '<div style="display: grid; grid-template-columns: 1fr 0.7fr; gap: 4px 2px;">';
                 const resultGroups = resultsSection.querySelectorAll('.result-group');
                 resultGroups.forEach(group => {
                     const label = group.querySelector('label')?.textContent || '';
@@ -1504,17 +1662,27 @@ class BikeCalculator {
                             if (Math.abs(diff) >= 1) {
                                 let diffText = '';
                                 if (diff > 0) {
-                                    diffText = `<span style="display: block; font-size: 12px; color: #FF3B30;">→ ${diff}mm longer</span>`;
+                                    diffText = `<div style="text-align: right; font-size: 12px; color: #FF3B30;">→ ${diff}mm longer</div>`;
                                 } else if (diff < 0) {
-                                    diffText = `<span style="display: block; font-size: 12px; color: #007AFF;">← ${Math.abs(diff)}mm shorter</span>`;
+                                    diffText = `<div style="text-align: right; font-size: 12px; color: #007AFF;">← ${Math.abs(diff)}mm shorter</div>`;
                                 }
                                 
-                                resultsData += `<p>${label} ${actualValue} mm ${diffText}</p>`;
+                                resultsData += `
+                                    <div style="text-align: left; font-size: 13px;">${label}</div>
+                                    <div style="text-align: right; font-size: 14px; font-weight: 600;">${actualValue} mm</div>
+                                    <div></div>${diffText}
+                                `;
                             } else {
-                                resultsData += `<p>${label} ${actualValue} mm</p>`;
+                                resultsData += `
+                                    <div style="text-align: left; font-size: 13px;">${label}</div>
+                                    <div style="text-align: right; font-size: 14px; font-weight: 600;">${actualValue} mm</div>
+                                `;
                             }
                         } else {
-                            resultsData += `<p>${label} ${value}</p>`;
+                            resultsData += `
+                                <div style="text-align: left; font-size: 13px;">${label}</div>
+                                <div style="text-align: right; font-size: 14px; font-weight: 600;">${value}</div>
+                            `;
                         }
                     } 
                     else if (label === 'Handlebar Y:' && targetHandlebarY !== 'N/A' && value !== '-- mm') {
@@ -1526,53 +1694,77 @@ class BikeCalculator {
                             if (Math.abs(diff) >= 1) {
                                 let diffText = '';
                                 if (diff > 0) {
-                                    diffText = `<span style="display: block; font-size: 12px; color: #007AFF;">↑ ${diff}mm higher</span>`;
+                                    diffText = `<div style="text-align: right; font-size: 12px; color: #007AFF;">↑ ${diff}mm higher</div>`;
                                 } else if (diff < 0) {
-                                    diffText = `<span style="display: block; font-size: 12px; color: #FF3B30;">↓ ${Math.abs(diff)}mm lower</span>`;
+                                    diffText = `<div style="text-align: right; font-size: 12px; color: #FF3B30;">↓ ${Math.abs(diff)}mm lower</div>`;
                                 }
                                 
-                                resultsData += `<p>${label} ${actualValue} mm ${diffText}</p>`;
+                                resultsData += `
+                                    <div style="text-align: left; font-size: 13px;">${label}</div>
+                                    <div style="text-align: right; font-size: 14px; font-weight: 600;">${actualValue} mm</div>
+                                    <div></div>${diffText}
+                                `;
                             } else {
-                                resultsData += `<p>${label} ${actualValue} mm</p>`;
+                                resultsData += `
+                                    <div style="text-align: left; font-size: 13px;">${label}</div>
+                                    <div style="text-align: right; font-size: 14px; font-weight: 600;">${actualValue} mm</div>
+                                `;
                             }
                         } else {
-                            resultsData += `<p>${label} ${value}</p>`;
+                            resultsData += `
+                                <div style="text-align: left; font-size: 13px;">${label}</div>
+                                <div style="text-align: right; font-size: 14px; font-weight: 600;">${value}</div>
+                            `;
                         }
                     }
                     else {
-                        resultsData += `<p>${label} ${value}</p>`;
+                        // For all other result values
+                        let fontSize = '14px';
+                        let fontWeight = '500';
+                        
+                        // Use larger fonts for position-related values
+                        if (label.includes('Saddle') || label.includes('Handlebar')) {
+                            fontSize = '15px';
+                            fontWeight = '500';
+                        }
+                        
+                        resultsData += `
+                            <div style="text-align: left; font-size: 13px;">${label}</div>
+                            <div style="text-align: right; font-size: ${fontSize}; font-weight: ${fontWeight};">${value}</div>
+                        `;
                     }
                 });
+                resultsData += '</div>';
             }
             
             // Only add cards that have some data
             if (geometryData || stemData || resultsData) {
                 hasBikeData = true;
                 
-                // Create bike card for print
+                // Create bike card for print - using vertical column layout
                 const bikeCard = document.createElement('div');
-                bikeCard.style.cssText = 'margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; page-break-inside: avoid;';
+                bikeCard.style.cssText = 'width: 220px; margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; page-break-inside: avoid; display: flex; flex-direction: column; background-color: #ffffff;';
                 bikeCard.innerHTML = `
-                    <h3 style="margin: 0 0 6px 0;">${bikeName}</h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                    <h3 style="margin: 0 0 6px 0; font-size: 14px; text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 6px;">${bikeName}</h3>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
                         ${geometryData ? `
-                            <div style="flex: 1; min-width: 200px;">
-                                <h4 style="margin: 0 0 4px 0;">Geometry</h4>
-                                <div style="line-height: 1.3;">${geometryData}</div>
+                            <div>
+                                <h4 style="margin: 4px 0 4px 0; font-size: 13px; border-bottom: 1px solid #eee; padding-bottom: 2px;text-align: center;">Geometry</h4>
+                                <div style="line-height: 1.2;">${geometryData}</div>
                             </div>
                         ` : ''}
                         
                         ${stemData ? `
-                            <div style="flex: 1; min-width: 200px;">
-                                <h4 style="margin: 0 0 4px 0;">Stem</h4>
-                                <div style="line-height: 1.3;">${stemData}</div>
+                            <div>
+                                <h4 style="margin: 4px 0 4px 0; font-size: 13px; border-bottom: 1px solid #eee; padding-bottom: 2px;text-align: center;">Stem</h4>
+                                <div style="line-height: 1.2;">${stemData}</div>
                             </div>
                         ` : ''}
                         
                         ${resultsData ? `
-                            <div style="flex: 1; min-width: 200px;">
-                                <h4 style="margin: 0 0 4px 0;">Results</h4>
-                                <div style="line-height: 1.3;">${resultsData}</div>
+                            <div>
+                                <h4 style="margin: 4px 0 4px 0; font-size: 13px; border-bottom: 1px solid #eee; padding-bottom: 2px;text-align: center;">Results</h4>
+                                <div style="line-height: 1.2;">${resultsData}</div>
                             </div>
                         ` : ''}
                     </div>
@@ -1603,7 +1795,7 @@ class BikeCalculator {
                         line-height: 1.4;
                         color: #1C1C1E;
                         padding: 20px;
-                        max-width: 1000px;
+                        max-width: 1200px;
                         margin: 0 auto;
                     }
                     h1, h2, h3, h4 {
@@ -1629,9 +1821,20 @@ class BikeCalculator {
                     @media print {
                         body {
                             padding: 0;
+                            margin: 0;
+                            max-width: none;
                         }
                         .print-button {
                             display: none;
+                        }
+                        @page {
+                            size: landscape;
+                            margin: 0.5cm;
+                        }
+                        /* Force background colors to print */
+                        * {
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
                         }
                     }
                 </style>
@@ -1651,94 +1854,8 @@ class BikeCalculator {
         printWindow.focus();
     }
 
-    // Add a new method for toast notifications
-    showToast(message, type = 'success', duration = 3000) {
-        // Remove any existing toast
-        const existingToast = document.querySelector('.toast-notification');
-        if (existingToast) {
-            existingToast.remove();
-        }
-        
-        // Create toast element
-        const toast = document.createElement('div');
-        toast.className = 'toast-notification';
-        
-        // Set background color based on type
-        let bgColor = 'var(--success-color, #4CAF50)';
-        if (type === 'error') {
-            bgColor = 'var(--error-color, #F44336)';
-        } else if (type === 'info') {
-            bgColor = 'var(--info-color, #2196F3)';
-        }
-        
-        // Get the save button position to place the toast near it
-        const saveButton = document.getElementById('saveButton');
-        let top, left;
-        
-        if (saveButton) {
-            const rect = saveButton.getBoundingClientRect();
-            top = rect.top + window.scrollY - 40; // Position above the button
-            left = rect.left + window.scrollX + (rect.width / 2); // Center horizontally with the button
-        } else {
-            // Fallback position if button not found
-            top = 20;
-            left = '50%';
-        }
-        
-        toast.style.cssText = `
-            position: absolute;
-            top: ${typeof top === 'number' ? top + 'px' : top};
-            left: ${typeof left === 'number' ? left + 'px' : left};
-            transform: translateX(-50%) translateY(0);
-            background: ${bgColor};
-            color: white;
-            padding: 8px 16px;
-            border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
-            max-width: 300px;
-            word-wrap: break-word;
-            font-weight: 500;
-            text-align: center;
-            pointer-events: none;
-        `;
-        
-        toast.textContent = message;
-        
-        // Add to DOM
-        document.body.appendChild(toast);
-        
-        // Trigger animation
-        setTimeout(() => {
-            toast.style.opacity = '1';
-            toast.style.transform = 'translateX(-50%) translateY(0)';
-        }, 10);
-        
-        // Remove after duration
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(-50%) translateY(-20px)';
-            
-            // Remove from DOM after animation completes
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 300);
-        }, duration);
-    }
-
     saveInstance() {
-        // Check if user is logged in
-        const user = firebase.auth().currentUser;
-        if (!user) {
-            this.showCustomAlert('Please log in to save bike positions');
-            document.getElementById('saveButton').disabled = true;
-            return;
-        }
-
+        // Client name should already be verified by the disabled state
         const clientName = document.getElementById('clientName').value.trim();
         if (!clientName) return;
 
@@ -1770,11 +1887,11 @@ class BikeCalculator {
     // Add a method to update save button state based on auth
     updateSaveButtonState() {
         const saveButton = document.getElementById('saveButton');
-        const user = firebase.auth().currentUser;
         const clientName = document.getElementById('clientName')?.value?.trim();
         
         if (saveButton) {
-            saveButton.disabled = !user || !clientName;
+            // Only disable if there's no client name
+            saveButton.disabled = !clientName;
         }
     }
 
@@ -2154,6 +2271,7 @@ class BikeCalculator {
 
         // Add keyboard event listener
         document.addEventListener('keydown', handleKeyDown);
+
 
         // Function to delete multiple fits
         const deleteMultipleFits = async (fitIds) => {
@@ -2801,6 +2919,23 @@ class BikeCalculator {
         
         // Enable save button
         document.getElementById('saveButton').disabled = false;
+    }
+
+    removeDisabledBikeCards() {
+        // Remove any disabled bike cards from the DOM
+        const disabledBikeCards = document.querySelectorAll('.disabled-database-bike');
+        disabledBikeCards.forEach(card => {
+            card.remove();
+        });
+
+        // Remove any disabled bike data from the array
+        this.bikes = this.bikes.filter(bike => !bike.isDisabled);
+
+        // Update calculations
+        this.updateCalculations();
+
+        // Save data
+        this.saveData();
     }
 }
 

@@ -67,9 +67,10 @@
 <!-- insert just after body tag -->
     <div class="upgrade-modal" id="upgradeModal">
         <div class="upgrade-content">
-            <h2>Important Update Notice</h2>
-            <p>On Wednesday, March 4, XY Bike Calc will be upgraded to version 1.2. This update includes new features and improvements to enhance your experience.</p>
-            <p>After the upgrade, you will need to create an account and log in to save or load client profiles in the XY Position Calculator.</p>
+            <h2>Version 1.2.1 Updates</h2>
+            <p>
+                <li>Access to bike configurations drawing from the database requires account creation/login in XY Position Calculator. Manual geometry configurations still available without an account.</li>
+                <li>Reformatted printed results page to more similarly reflect the configuration screen for easier visual side-to-side comparison.</li>
             <p class="warning">⚠️ Important: All previously stored profiles in your browser will no longer be accessible after the upgrade. Please print or take screenshots of any important bike setups before Wednesday.</p>
             <button class="upgrade-button" onclick="acknowledgeUpgrade()">I Understand</button>
         </div>

@@ -100,6 +100,7 @@ body {
     width: 900px;
     max-width: 900px;
     box-sizing: border-box;
+
 }
 
 .client-info {
@@ -2317,7 +2318,7 @@ button:disabled {
 }
 
 .main-nav .nav-item, .mobile-nav .nav-item {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     text-align: center;
 }
 
@@ -2333,7 +2334,7 @@ button:disabled {
 }
 
 .main-nav .auth-container, .mobile-nav .auth-container {
-    margin-bottom: 10px;
+    margin-bottom: 30px;
     text-align: center;
 }
 
@@ -2345,7 +2346,7 @@ button:disabled {
 }
 
 .auth-container .user-display {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     color: var(--text-color);
 }
 
@@ -2354,17 +2355,17 @@ button:disabled {
     justify-content: center;
     align-items: center;
     padding: 0.75rem 1rem;
-    margin-bottom:10px;
+    margin-bottom:30px;
     text-align: center;
 }
 
 .main-nav .theme-toggle, .mobile-nav .theme-toggle {
-    margin-bottom: 32px;
+    margin-bottom: 55px;
 }
 
 .main-nav .footer-links, .mobile-nav .footer-links {
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .footer-links a {
@@ -2376,7 +2377,7 @@ button:disabled {
 .footer-links .version {
     color: var(--text-secondary);
     font-size: 12px;
-    margin-top: 4px;
+    margin-top: -10px;
 }
 
 /* Login/logout buttons */

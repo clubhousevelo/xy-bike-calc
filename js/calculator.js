@@ -655,11 +655,13 @@ class BikeCalculator {
         const stemLengthValue = card.querySelector('.stem-length').value;
         const stemAngleValue = card.querySelector('.stem-angle').value;
         const spacerHeightValue = card.querySelector('.spacer-height').value;
+        const stemHeightValue = card.querySelector('.stem-height').value;
+
         
         bike.stemLength = stemLengthValue === '' ? 0 : parseFloat(stemLengthValue);
         bike.stemAngle = stemAngleValue === '' ? 0 : parseFloat(stemAngleValue);
         bike.spacersHeight = spacerHeightValue === '' ? 0 : parseFloat(spacerHeightValue);
-        
+        bike.stemHeight = stemHeightValue === '' ? 40 : parseFloat(stemHeightValue);
         // If it's a manual bike, update brand/model/size
         if (bike.isManual) {
             bike.brand = card.querySelector('.brand-input').value || '';
@@ -713,8 +715,11 @@ class BikeCalculator {
             
             // Ensure spacersHeight is treated as a number (could be 0)
             const spacersHeight = bike.spacersHeight !== undefined && bike.spacersHeight !== '' ? bike.spacersHeight : 0;
-            const stemCenterX = (spacersHeight + 20) * Math.cos(htaRad); // Using 20mm as default stem height
-            const stemCenterY = (spacersHeight + 20) * Math.sin(htaRad);
+            
+            // Use stemHeight/2 instead of fixed 20mm value
+            const stemHeight = bike.stemHeight !== undefined && bike.stemHeight !== '' ? bike.stemHeight / 2 : 20;
+            const stemCenterX = (spacersHeight + stemHeight) * Math.cos(htaRad);
+            const stemCenterY = (spacersHeight + stemHeight) * Math.sin(htaRad);
             
             // Ensure stemLength is treated as a number (could be 0)
             const stemLength = bike.stemLength !== undefined && bike.stemLength !== '' ? bike.stemLength : 0;
@@ -811,6 +816,7 @@ class BikeCalculator {
         bike.stemLength = 100;
         bike.stemAngle = -6;
         bike.spacersHeight = 20;
+        bike.stemHeight = 40; // Default stem height
         bike.handlebarReach = 80;
         bike.saddleSetback = 0;
         bike.saddleHeight = 0;
@@ -850,6 +856,7 @@ class BikeCalculator {
         card.querySelector('.stem-length').value = bike.stemLength;
         card.querySelector('.stem-angle').value = bike.stemAngle;
         card.querySelector('.spacer-height').value = bike.spacersHeight;
+        card.querySelector('.stem-height').value = bike.stemHeight;
         
         // Clear results section
         card.querySelector('.handlebar-x').textContent = '-- mm';

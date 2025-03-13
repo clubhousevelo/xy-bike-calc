@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H1TXBTLXDW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-H1TXBTLXDW');
+    </script>
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com https://www.googletagmanager.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.google-analytics.com; connect-src https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://sheets.googleapis.com https://*.googleapis.com;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <title>Privacy Policy - XY Bike Calculator</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .privacy-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .privacy-container h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .privacy-container h2 {
+            color: var(--text-color);
+            font-size: 1.25rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .privacy-container p {
+            color: var(--text-color);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .privacy-container ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .privacy-container li {
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .privacy-container li::before {
+            content: "•";
+            color: var(--primary-color);
+            position: absolute;
+            left: 0.5rem;
+        }
+
+        .privacy-container .last-updated {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .privacy-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="hamburger-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <nav class="mobile-nav">
+        <ul>
+            <li><a href="index.html">X/Y Position Calculator</a></li>
+            <li><a href="hxhy-frame-calculator.html">HX/HY to Frame Calculator</a></li>
+            <li><a href="stem-calculator.html">Stem Calculator</a></li>
+            <li><a href="bike-search.html">Bike Search</a></li>
+        </ul>
+        <div class="flex-spacer"></div>
+        <div class="nav-item">
+            <a href="about.html">About</a>
+        </div>
+        <div class="nav-item-guide">
+            <a href="guide.html">Guide</a>
+        </div>
+        <div class="non-auth-dependent login-container">
+            <button class="login-button" onclick="window.location.href='login.html'">Login</button>
+        </div>
+        <div class="auth-dependent auth-container">
+            <div class="user-container">
+                <span class="user-display"></span>
+                <button id="logout-button-mobile" class="logout-button">Logout</button>
+            </div>
+        </div>
+        <div class="theme-toggle">
+            <button id="mobileDarkModeToggle" class="dark-mode-toggle" onclick="toggleTheme()">
+                <span class="toggle-icon">☀️</span>
+                <span class="toggle-text">Light Mode</span>
+            </button>
+        </div>
+        <div class="footer-links">
+            <a href="tos.html" style="margin-bottom: -10px;">Terms of Service</a>
+            <a href="privacy-policy.html">Privacy Policy</a>
+            <div class="version">
+                <a href="changelog.html">&nbsp;</a>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="main-nav">
+        <div class="nav-header">
+            <h2>XY Bike Calc</h2>
+        </div>
+        <ul>
+            <li><a href="index.html">X/Y Position Calculator</a></li>
+            <li><a href="hxhy-frame-calculator.html">HX/HY to Frame Calculator</a></li>
+            <li><a href="stem-calculator.html">Stem Calculator</a></li>
+            <li><a href="bike-search.html">Bike Search</a></li>
+        </ul>
+        <div class="flex-spacer"></div>
+        <div class="nav-item">
+            <a href="about.html">About</a>
+        </div>
+        <div class="nav-item-guide">
+            <a href="guide.html">Guide</a>
+        </div>
+        <div class="non-auth-dependent login-container">
+            <button class="login-button" onclick="window.location.href='login.html'">Login</button>
+        </div>
+        <div class="auth-dependent auth-container">
+            <div class="user-container">
+                <span class="user-display"></span>
+                <button id="logout-button" class="logout-button">Logout</button>
+            </div>
+        </div>
+        <div class="theme-toggle">
+            <button id="darkModeToggle" class="dark-mode-toggle" onclick="toggleTheme()">
+                <span class="toggle-icon">☀️</span>
+                <span class="toggle-text">Light Mode</span>
+            </button>
+        </div>
+        <div class="footer-links">
+            <a href="tos.html" style="margin-bottom: -10px;">Terms of Service</a>
+            <a href="privacy-policy.html">Privacy Policy</a>
+            <div class="version">
+                <a href="changelog.html">&nbsp;</a>
+            </div>
+        </div>
+    </nav>
+    <div class="calculator-container">
+        <div class="calculator-header">
+            <h1 class="calculator-title">
+                <span class="collapse-indicator">▼</span>
+                Privacy Policy
+            </h1>
+            <p class="calculator-description">Information about how we handle and protect your data.</p>
+        </div>
+        
+        <div class="privacy-container">
+            <p>This Privacy Policy describes how XY Bike Calculator ("we", "our", or "the application") handles information when you use our application. We are committed to protecting your privacy and ensuring you understand how your information is managed.</p>
+
+            <h2>1. Information Collection and Storage</h2>
+            <p>Our application stores all data locally on your device using browser storage mechanisms. We collect and store:</p>
+            <ul>
+                <li>Calculator settings and measurements</li>
+                <li>Client names (when provided)</li>
+                <li>Bike configurations and measurements</li>
+                <li>User preferences (such as dark/light mode settings)</li>
+                <li>Search parameters and results</li>
+            </ul>
+
+            <h2>2. How We Use Your Information</h2>
+            <p>The information stored is used solely for:</p>
+            <ul>
+                <li>Saving your calculator configurations and measurements</li>
+                <li>Maintaining your preferences between sessions</li>
+                <li>Providing a convenient way to access your previous calculations</li>
+                <li>Improving your user experience by remembering your settings</li>
+            </ul>
+
+            <h2>3. Data Storage and Security</h2>
+            <p>We use both local device storage and secure cloud services to store your data:</p>
+            <ul>
+                <li>Local Storage:
+                    <ul style="padding-left: 20px; margin-top: 8px;">
+                        <li>Calculator settings and temporary calculations</li>
+                        <li>User preferences (like dark/light mode)</li>
+                        <li>Session-specific information</li>
+                    </ul>
+                </li>
+                <li>Cloud Storage (Firebase):
+                    <ul style="padding-left: 20px; margin-top: 8px;">
+                        <li>User account information</li>
+                        <li>Saved bike positions and measurements</li>
+                        <li>Client data associated with saved fits</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>All cloud data is stored securely using Firebase's infrastructure, which implements industry-standard security practices and encryption. Your saved data is only accessible through your authenticated account.</p>
+
+            <h2>4. Third-Party Services</h2>
+            <p>We use the following third-party services:</p>
+            <ul>
+                <li>Google Sheets API: Used exclusively for retrieving bike database information</li>
+                <li>Google Analytics: Used to collect anonymous usage data to help us understand how users interact with our application and improve our service. This includes information such as:
+                    <ul style="padding-left: 20px; margin-top: 8px;">
+                        <li>Pages visited and time spent on each page</li>
+                        <li>Your device type and browser information</li>
+                        <li>Geographic location (country/region level)</li>
+                        <li>How you found our website</li>
+                    </ul>
+                </li>
+                <li>Firebase Authentication: Used to manage user accounts and secure access to saved bike positions. This service collects:
+                    <ul style="padding-left: 20px; margin-top: 8px;">
+                        <li>Email addresses for account creation</li>
+                        <li>Authentication timestamps</li>
+                        <li>Basic profile information (if provided)</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h2>5. Data Collection and Processing</h2>
+            <p>Our data collection and processing practices include:</p>
+            <ul>
+                <li>Local Storage: Calculator settings, measurements, and preferences stored on your device</li>
+                <li>Analytics Data: Anonymous usage statistics collected via Google Analytics</li>
+                <li>Authentication Data: Account information processed through Firebase Authentication</li>
+                <li>All data collection adheres to applicable data protection regulations</li>
+            </ul>
+
+            <h2>6. Your Data Control Rights</h2>
+            <p>You have full control over your data. You can:</p>
+            <ul>
+                <li>Clear all stored data using your browser's settings</li>
+                <li>Use the application's reset/clear functions to remove specific data</li>
+                <li>Choose not to save certain information by not using the save features</li>
+            </ul>
+
+            <h2>7. Cookies and Local Storage</h2>
+            <p>Our application uses localStorage and sessionStorage to function properly. These storage mechanisms are necessary for:</p>
+            <ul>
+                <li>Saving your calculator configurations</li>
+                <li>Maintaining your preferences</li>
+                <li>Providing a seamless user experience</li>
+            </ul>
+
+            <h2>8. Changes to This Privacy Policy</h2>
+            <p>We may update this Privacy Policy from time to time. Any changes will be reflected on this page with an updated revision date.</p>
+
+            <h2>9. Contact Us</h2>
+            <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:admin@xybikecalc.com">admin@xybikecalc.com</a>.</p>
+
+            <p class="last-updated">Last updated: March 2, 2024</p>
+        </div>
+    </div>
+
+    <script src="js/version.js"></script>
+    <script src="js/dark-mode.js"></script>
+    <script src="js/mobile-menu.js"></script>
+    <script src="js/calculator-header.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="js/firebase-auth.js"></script>
+</body>
+</html> 

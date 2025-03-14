@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H1TXBTLXDW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-H1TXBTLXDW');
+    </script>
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com https://www.googletagmanager.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.google-analytics.com; connect-src https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://sheets.googleapis.com https://*.googleapis.com https://www.google-analytics.com https://analytics.google.com;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <title>Google Analytics Test - XY Bike Calculator</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+        .test-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .test-result {
+            font-family: monospace;
+            padding: 0.5rem;
+            background-color: var(--input-bg);
+            border-radius: 4px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .success {
+            color: green;
+        }
+        .failure {
+            color: red;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="calculator-header">
+            <h1 class="calculator-title">Google Analytics Diagnostic</h1>
+            <p class="calculator-description">This page tests if Google Analytics is working properly.</p>
+        </div>
+        
+        <div class="test-container">
+            <div class="test-section">
+                <div class="test-title">1. Google Analytics Script Loading</div>
+                <div class="test-result" id="ga-script-result">Testing...</div>
+                <button onclick="testGAScript()">Test Again</button>
+            </div>
+            
+            <div class="test-section">
+                <div class="test-title">2. Google Analytics Object Initialization</div>
+                <div class="test-result" id="ga-object-result">Testing...</div>
+                <button onclick="testGAObject()">Test Again</button>
+            </div>
+            
+            <div class="test-section">
+                <div class="test-title">3. Content Security Policy Check</div>
+                <div class="test-result" id="csp-result">Testing...</div>
+                <button onclick="testCSP()">Test Again</button>
+            </div>
+            
+            <div class="test-section">
+                <div class="test-title">4. Send Test Event</div>
+                <div class="test-result" id="event-result">Not tested yet</div>
+                <button onclick="sendTestEvent()">Send Test Event</button>
+            </div>
+            
+            <div class="test-section">
+                <div class="test-title">5. Ad Blocker Detection</div>
+                <div class="test-result" id="adblocker-result">Testing...</div>
+                <button onclick="testAdBlocker()">Test Again</button>
+            </div>
+            
+            <div class="test-section">
+                <div class="test-title">Browser Information</div>
+                <div class="test-result" id="browser-info">Loading...</div>
+            </div>
+            
+            <p>
+                <strong>Next steps:</strong>
+                <ul>
+                    <li>If all tests pass but you still don't see data in Google Analytics, wait 24-48 hours as data processing can be delayed.</li>
+                    <li>Check your Google Analytics property settings to ensure data collection is enabled.</li>
+                    <li>Try accessing your site from different networks and devices.</li>
+                </ul>
+            </p>
+        </div>
+    </div>
+
+    <script src="js/version.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            testGAScript();
+            testGAObject();
+            testCSP();
+            testAdBlocker();
+            displayBrowserInfo();
+        });
+        
+        function testGAScript() {
+            const result = document.getElementById('ga-script-result');
+            const scripts = document.querySelectorAll('script');
+            let gaScriptFound = false;
+            
+            for (const script of scripts) {
+                if (script.src && script.src.includes('googletagmanager.com/gtag/js')) {
+                    gaScriptFound = true;
+                    break;
+                }
+            }
+            
+            if (gaScriptFound) {
+                result.innerHTML = '<span class="success">✓ Google Analytics script tag found in the page.</span>';
+            } else {
+                result.innerHTML = '<span class="failure">✗ Google Analytics script tag not found. Check if it is being blocked.</span>';
+            }
+        }
+        
+        function testGAObject() {
+            const result = document.getElementById('ga-object-result');
+            
+            if (typeof gtag === 'function' && window.dataLayer) {
+                result.innerHTML = '<span class="success">✓ Google Analytics objects (gtag and dataLayer) are initialized.</span>';
+            } else {
+                result.innerHTML = '<span class="failure">✗ Google Analytics objects not properly initialized. Check for JavaScript errors.</span>';
+            }
+        }
+        
+        function testCSP() {
+            const result = document.getElementById('csp-result');
+            const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+            
+            if (!cspMeta) {
+                result.innerHTML = '<span class="failure">✗ No Content Security Policy meta tag found.</span>';
+                return;
+            }
+            
+            const cspContent = cspMeta.getAttribute('content');
+            let issues = [];
+            
+            if (!cspContent.includes('https://www.googletagmanager.com')) {
+                issues.push('Missing googletagmanager.com in script-src');
+            }
+            
+            if (!cspContent.includes('https://www.google-analytics.com')) {
+                issues.push('Missing google-analytics.com in connect-src or img-src');
+            }
+            
+            if (!cspContent.includes('https://analytics.google.com')) {
+                issues.push('Missing analytics.google.com in connect-src');
+            }
+            
+            if (issues.length === 0) {
+                result.innerHTML = '<span class="success">✓ Content Security Policy appears to allow Google Analytics.</span>';
+            } else {
+                result.innerHTML = '<span class="failure">✗ Content Security Policy issues found:</span><br>' + 
+                                  issues.map(issue => `- ${issue}`).join('<br>') + 
+                                  '<br><br>Current CSP:<br>' + cspContent;
+            }
+        }
+        
+        function sendTestEvent() {
+            const result = document.getElementById('event-result');
+            
+            try {
+                if (typeof gtag === 'function') {
+                    gtag('event', 'test_event', {
+                        'event_category': 'testing',
+                        'event_label': 'analytics_test_page',
+                        'value': Date.now()
+                    });
+                    
+                    result.innerHTML = '<span class="success">✓ Test event sent to Google Analytics. Check your Real-Time reports.</span>';
+                } else {
+                    result.innerHTML = '<span class="failure">✗ Could not send test event. Google Analytics not initialized.</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="failure">✗ Error sending test event: ' + error.message + '</span>';
+            }
+        }
+        
+        function testAdBlocker() {
+            const result = document.getElementById('adblocker-result');
+            
+            // Create a bait element
+            const bait = document.createElement('div');
+            bait.setAttribute('class', 'ad-placement');
+            bait.style.height = '1px';
+            bait.style.width = '1px';
+            bait.style.position = 'absolute';
+            bait.style.left = '-10000px';
+            bait.style.top = '-10000px';
+            document.body.appendChild(bait);
+            
+            // Check if the bait was hidden by an ad blocker
+            setTimeout(function() {
+                if (bait.offsetHeight === 0 || 
+                    bait.offsetLeft === 0 || 
+                    bait.offsetTop === 0 || 
+                    bait.offsetWidth === 0 || 
+                    bait.clientHeight === 0 || 
+                    bait.clientWidth === 0) {
+                    result.innerHTML = '<span class="failure">✗ Ad blocker detected. This might be blocking Google Analytics.</span>';
+                } else {
+                    result.innerHTML = '<span class="success">✓ No ad blocker detected.</span>';
+                }
+                
+                // Clean up
+                document.body.removeChild(bait);
+            }, 100);
+        }
+        
+        function displayBrowserInfo() {
+            const result = document.getElementById('browser-info');
+            
+            const info = {
+                'User Agent': navigator.userAgent,
+                'Browser': navigator.appName,
+                'Browser Version': navigator.appVersion,
+                'Cookies Enabled': navigator.cookieEnabled,
+                'Platform': navigator.platform,
+                'Do Not Track': navigator.doNotTrack || 'Not specified',
+                'Window Size': `${window.innerWidth}x${window.innerHeight}`,
+                'Screen Resolution': `${window.screen.width}x${window.screen.height}`,
+                'Color Depth': window.screen.colorDepth,
+                'Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+                'Language': navigator.language
+            };
+            
+            let infoHtml = '';
+            for (const [key, value] of Object.entries(info)) {
+                infoHtml += `<strong>${key}:</strong> ${value}<br>`;
+            }
+            
+            result.innerHTML = infoHtml;
+        }
+    </script>
+</body>
+</html> 

@@ -5,11 +5,31 @@ const DEFAULT_VALUES = {
     stemLength: 100,
     stemAngle: -6,
     spacerHeight: 20
-};
+}
+
+const DEFAULT_VALUES_ADDTL = {
+    headTubeAngle: 73.0,
+    stemHeight: 40,
+    stemLength: 100,
+    stemAngle: 6,
+    spacerHeight: 20
+}
+;
 
 let stemCount = 1; // Start with one stem
 let baseX = 0;
 let baseY = 0;
+
+// Constants for visualization
+const CANVAS_PADDING = 30;
+const SCALE_FACTOR = 1.5;
+
+// Real-world component dimensions (in mm)
+const STEERER_TUBE_DIAMETER = 28.6; // 1-1/8" steerer tube
+const SPACER_DIAMETER = 30; // Standard spacer diameter
+const STEM_CLAMP_DIAMETER = 31.8; // Standard stem clamp diameter
+const HANDLEBAR_DIAMETER = 31.8; // Standard handlebar diameter (matches stem clamp)
+const FORK_CROWN_HEIGHT = 40; // Approximate height of fork crown
 
 function calculateStemDimensions(stemId) {
     const id = stemId || 0;
@@ -122,6 +142,12 @@ function calculateStemDimensions(stemId) {
         // Highlight differences after calculation
         highlightDifferences(id);
     }
+    
+    // Update the overlay canvas with all stems
+    drawStemOverlay();
+    
+    // Update the realistic visualization
+    drawRealisticStemVisualization();
     
     return { x: totalX, y: totalY };
 }
@@ -350,6 +376,15 @@ function addNewStem(initialData = null) {
     
     // Highlight differences initially
     highlightDifferences(stemId);
+    
+    // Update overlay visualization
+    drawStemOverlay();
+    
+    // Update realistic visualization
+    drawRealisticStemVisualization();
+    
+    // Auto-save
+    autoSaveStemData();
 }
 
 function deleteStem(stemId) {
@@ -358,11 +393,11 @@ function deleteStem(stemId) {
     // If this is Stem 2 (stemId = 1) and there are only 2 stems total, don't delete it
     if (stemId === 1 && stemBoxes.length === 2) {
         // Instead of deleting, just reset it to default values
-        document.getElementById('headTubeAngle-1').value = DEFAULT_VALUES.headTubeAngle;
-        document.getElementById('stemHeight-1').value = DEFAULT_VALUES.stemHeight;
-        document.getElementById('stemLength-1').value = DEFAULT_VALUES.stemLength;
-        document.getElementById('stemAngle-1').value = DEFAULT_VALUES.stemAngle;
-        document.getElementById('spacerHeight-1').value = DEFAULT_VALUES.spacerHeight;
+        document.getElementById('headTubeAngle-1').value = DEFAULT_VALUES_ADDTL.headTubeAngle;
+        document.getElementById('stemHeight-1').value = DEFAULT_VALUES_ADDTL.stemHeight;
+        document.getElementById('stemLength-1').value = DEFAULT_VALUES_ADDTL.stemLength;
+        document.getElementById('stemAngle-1').value = DEFAULT_VALUES_ADDTL.stemAngle;
+        document.getElementById('spacerHeight-1').value = DEFAULT_VALUES_ADDTL.spacerHeight;
         
         // Recalculate and highlight
         calculateStemDimensions(1);
@@ -389,6 +424,12 @@ function deleteStem(stemId) {
                 highlightDifferences(stemId);
             }
         });
+        
+        // Update overlay visualization
+        drawStemOverlay();
+        
+        // Update realistic visualization
+        drawRealisticStemVisualization();
         
         saveStemData(); // Save data after deleting stem
     }
@@ -485,11 +526,11 @@ function resetAllStems() {
     
     // Reset Stem 2 to default values if it exists
     if (document.getElementById('headTubeAngle-1')) {
-        document.getElementById('headTubeAngle-1').value = DEFAULT_VALUES.headTubeAngle;
-        document.getElementById('stemHeight-1').value = DEFAULT_VALUES.stemHeight;
-        document.getElementById('stemLength-1').value = DEFAULT_VALUES.stemLength;
-        document.getElementById('stemAngle-1').value = DEFAULT_VALUES.stemAngle;
-        document.getElementById('spacerHeight-1').value = DEFAULT_VALUES.spacerHeight;
+        document.getElementById('headTubeAngle-1').value = DEFAULT_VALUES_ADDTL.headTubeAngle;
+        document.getElementById('stemHeight-1').value = DEFAULT_VALUES_ADDTL.stemHeight;
+        document.getElementById('stemLength-1').value = DEFAULT_VALUES_ADDTL.stemLength;
+        document.getElementById('stemAngle-1').value = DEFAULT_VALUES_ADDTL.stemAngle;
+        document.getElementById('spacerHeight-1').value = DEFAULT_VALUES_ADDTL.spacerHeight;
     }
     
     // Recalculate all stems
@@ -503,11 +544,294 @@ function resetAllStems() {
     // Update stem count
     stemCount = 2;
     
+    // Update overlay visualization
+    drawStemOverlay();
+    
+    // Update realistic visualization
+    drawRealisticStemVisualization();
+    
     // Save data
     autoSaveStemData();
 }
 
-// Modify the initialization code
+// Function to draw stems on overlay (empty implementation as we're only using the realistic visualization)
+function drawStemOverlay() {
+    // This function is intentionally empty as we're using drawRealisticStemVisualization instead
+    // Kept for compatibility with existing code that calls this function
+}
+
+// Function to draw realistic stem visualization
+function drawRealisticStemVisualization() {
+    const canvas = document.getElementById('stemVisualizationCanvas');
+    if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // New center point with steerer tube more vertical - moved left
+    const originX = width / 2 - 60; // Shifted 100px to the left
+    const originY = height / 2 + 120;
+    
+    // Scale: pixels per mm (adjust as needed)
+    const scale = 1.4;
+    
+    // Check if dark mode is active
+    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    // Draw reference lines (faint grid)
+    ctx.strokeStyle = isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.07)";
+    ctx.lineWidth = 1;
+    
+    // Draw grid for better measurement reference
+    const gridSize = 10 * scale; // 10mm grid (scaled)
+    const gridCount = 20; // Increase grid count to maintain coverage with smaller grid size
+    
+    // Draw horizontal grid lines
+    for (let i = -gridCount; i <= gridCount; i++) {
+        ctx.beginPath();
+        ctx.moveTo(originX - gridSize * gridCount, originY + i * gridSize);
+        ctx.lineTo(originX + gridSize * gridCount, originY + i * gridSize);
+        ctx.stroke();
+    }
+    
+    // Draw vertical grid lines
+    for (let i = -gridCount; i <= gridCount; i++) {
+        ctx.beginPath();
+        ctx.moveTo(originX + i * gridSize, originY - gridSize * gridCount);
+        ctx.lineTo(originX + i * gridSize, originY + gridSize * gridCount);
+        ctx.stroke();
+    }
+    
+    // Draw main reference lines (slightly darker)
+    ctx.strokeStyle = isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)";
+    ctx.lineWidth = 1.5;
+    
+    // Set dashed line style for main reference lines
+    ctx.setLineDash([5, 5]);
+    
+    // Horizontal reference line
+    ctx.beginPath();
+    ctx.moveTo(originX - 250, originY);
+    ctx.lineTo(originX + 350, originY);
+    ctx.stroke();
+    
+    // Vertical reference line
+    ctx.beginPath();
+    ctx.moveTo(originX, originY - 300);
+    ctx.lineTo(originX, originY + 300);
+    ctx.stroke();
+    
+    // Reset to solid line
+    ctx.setLineDash([]);
+    
+    // Add grid size label
+    ctx.fillStyle = isDarkMode ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)";
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText("Grid: 10mm", 10, 20);
+    
+    // Define a palette of distinct colors for different stems
+    const stemColors = [
+        "#0066CC", // Blue
+        "#AA0000", // Red
+        "#009933", // Green
+        "#9900CC", // Purple
+        "#FF6600", // Orange
+        "#007799", // Teal
+        "#CC6699", // Pink
+        "#666633", // Olive
+        "#663399", // Indigo
+        "#FF9900"  // Amber
+    ];
+    
+    // Get all stems
+    const stemBoxes = document.querySelectorAll('.stem-box');
+    if (stemBoxes.length === 0) return;
+    
+    // Extract stem data
+    const stemData = [];
+    
+    stemBoxes.forEach((box) => {
+        const stemId = parseInt(box.dataset.stemId.split('-')[1]);
+        
+        // Get input values
+        const headTubeAngle = parseFloat(document.getElementById(`headTubeAngle-${stemId}`).value);
+        const stemHeight = parseFloat(document.getElementById(`stemHeight-${stemId}`).value);
+        const stemLength = parseFloat(document.getElementById(`stemLength-${stemId}`).value);
+        const stemAngle = parseFloat(document.getElementById(`stemAngle-${stemId}`).value);
+        const spacerHeight = parseFloat(document.getElementById(`spacerHeight-${stemId}`).value);
+        
+        stemData.push({
+            id: stemId,
+            headTubeAngle,
+            stemHeight,
+            stemLength,
+            stemAngle,
+            spacerHeight
+        });
+    });
+    
+    // Reference stem (always the first one)
+    const referenceStem = stemData[0];
+    
+    // Draw each stem configuration
+    stemData.forEach((stem, index) => {
+        // Adjusted angles for 90° CCW rotation
+        // For steerer tube, rotate 90° CCW from how it was before
+        const headTubeAngleRad = (180 - stem.headTubeAngle) * Math.PI / 180;
+        
+        // For stem, adjust angle by 90° CW to make 0° stem perpendicular to steerer tube
+        const stemAngleRad = (180 - stem.headTubeAngle + stem.stemAngle - 90) * Math.PI / 180;
+        
+        // Choose a unique color for this stem
+        const stemColor = stemColors[index % stemColors.length];
+        const lighterColor = getLighterColor(stemColor);
+        
+        // Use dark gray for steerer tube in light mode, white in dark mode
+        const structureColor = isDarkMode ? "#FFFFFF" : "#555555";
+        
+        // Draw steerer tube (more vertical now)
+        const steererLength = 30;
+        const steererEndX = originX + Math.cos(headTubeAngleRad) * steererLength;
+        const steererEndY = originY - Math.sin(headTubeAngleRad) * steererLength;
+        
+        ctx.strokeStyle = structureColor;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(steererEndX, steererEndY);
+        ctx.stroke();
+        
+        // Calculate spacer end position
+        let spacerEndX = steererEndX;
+        let spacerEndY = steererEndY;
+        
+        if (stem.spacerHeight > 0) {
+            spacerEndX = steererEndX + Math.cos(headTubeAngleRad) * stem.spacerHeight * scale;
+            spacerEndY = steererEndY - Math.sin(headTubeAngleRad) * stem.spacerHeight * scale;
+            
+            // Use same color and thickness for spacers
+            ctx.strokeStyle = structureColor;
+            ctx.lineWidth = 3; // Match steerer tube thickness
+            ctx.beginPath();
+            ctx.moveTo(steererEndX, steererEndY);
+            ctx.lineTo(spacerEndX, spacerEndY);
+            ctx.stroke();
+        }
+        
+        // Calculate stem center position (stem clamps at spacer end + stemHeight/2 along steerer tube)
+        const stemCenterX = spacerEndX + Math.cos(headTubeAngleRad) * (stem.stemHeight / 2) * scale;
+        const stemCenterY = spacerEndY - Math.sin(headTubeAngleRad) * (stem.stemHeight / 2) * scale;
+        
+        // Draw stem height with same color and thickness
+        if (stem.stemHeight > 0) {
+            ctx.strokeStyle = structureColor;
+            ctx.lineWidth = 3; // Match steerer tube thickness
+            ctx.beginPath();
+            ctx.moveTo(spacerEndX, spacerEndY);
+            ctx.lineTo(stemCenterX, stemCenterY);
+            ctx.stroke();
+        }
+        
+        // Calculate stem end position (from stem center along stem angle)
+        const stemEndX = stemCenterX + Math.cos(stemAngleRad) * stem.stemLength * scale;
+        const stemEndY = stemCenterY - Math.sin(stemAngleRad) * stem.stemLength * scale;
+        
+        // Define circle radius
+        const circleRadius = 8;
+        
+        // Calculate where the stem line should stop (at the circle's border)
+        const dx = stemEndX - stemCenterX;
+        const dy = stemEndY - stemCenterY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const ratio = (distance - circleRadius) / distance;
+        
+        // Stop the stem line at the circle's border
+        const stemLineEndX = stemCenterX + dx * ratio;
+        const stemLineEndY = stemCenterY + dy * ratio;
+        
+        // Draw stem
+        ctx.strokeStyle = stemColor;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(stemCenterX, stemCenterY);
+        ctx.lineTo(stemLineEndX, stemLineEndY);
+        ctx.stroke();
+        
+        // Draw handlebar position (outlined circle with transparent center)
+        ctx.strokeStyle = stemColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(stemEndX, stemEndY, circleRadius, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Add a dot in the center of the circle
+        ctx.fillStyle = stemColor;
+        ctx.beginPath();
+        ctx.arc(stemEndX, stemEndY, 2, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    
+    // Update the legend with stem data and colors
+    updateStemLegend(stemData, stemColors);
+}
+
+// Function to update the stem legend
+function updateStemLegend(stemData, stemColors) {
+    const legendContainer = document.querySelector('.stem-legend');
+    if (!legendContainer) return;
+    
+    // Clear existing legend items
+    legendContainer.innerHTML = '';
+    
+    // Create legend items for each stem
+    stemData.forEach((stem, index) => {
+        const stemColor = stemColors[index % stemColors.length];
+        
+        // Create legend item
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+        
+        // Create color box
+        const colorBox = document.createElement('span');
+        colorBox.className = 'color-box';
+        colorBox.style.backgroundColor = stemColor;
+        
+        // Create stem label
+        const stemLabel = document.createElement('span');
+        stemLabel.textContent = `Stem ${stem.id + 1}`;
+        
+        // Append elements
+        legendItem.appendChild(colorBox);
+        legendItem.appendChild(stemLabel);
+        legendContainer.appendChild(legendItem);
+    });
+}
+
+// Helper function to get a lighter version of a color
+function getLighterColor(hexColor) {
+    // Convert hex to RGB
+    let r = parseInt(hexColor.substring(1, 3), 16);
+    let g = parseInt(hexColor.substring(3, 5), 16);
+    let b = parseInt(hexColor.substring(5, 7), 16);
+    
+    // Make each component lighter
+    r = Math.min(255, Math.round(r * 1.3));
+    g = Math.min(255, Math.round(g * 1.3));
+    b = Math.min(255, Math.round(b * 1.3));
+    
+    // Convert back to hex
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+// Add this function to the initialization
 document.addEventListener('DOMContentLoaded', function() {
     // Add CSS for highlighting different values
     const style = document.createElement('style');
@@ -515,12 +839,12 @@ document.addEventListener('DOMContentLoaded', function() {
         .highlight-different {
             background-color: rgba(255, 204, 0, 0.2) !important;
             border-left: 3px solid #FFC107 !important;
-            padding-left: 13px !important;
+            padding-left: 3px !important;
         }
         .input-field {
             transition: background-color 0.3s ease, border-left 0.3s ease;
             border-left: 3px solid transparent;
-            padding-left: 16px;
+            padding-left: 0px;
         }
         .reset-all-btn:hover {
             background-color: var(--error-color) !important;
@@ -554,6 +878,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Listen for theme changes using MutationObserver
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'data-theme') {
+                // Redraw visualization when theme changes
+                drawRealisticStemVisualization();
+            }
+        });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+    
     // Try to load auto-saved data first, then fall back to manual saved data
     const autoSavedData = localStorage.getItem('autoSavedStemData');
     if (autoSavedData) {
@@ -575,6 +910,14 @@ document.addEventListener('DOMContentLoaded', function() {
             addNewStem();
         }
     }
+    
+    // Draw the stem visualization
+    setTimeout(() => {
+        // Force recalculation and draw visualization
+        console.log("Explicitly running visualization on page load");
+        calculateStemDimensions(0);
+        drawRealisticStemVisualization();
+    }, 100); // Small delay to ensure DOM is fully ready
 });
 
 // Add window unload handler

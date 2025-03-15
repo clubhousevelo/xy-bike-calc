@@ -32,6 +32,11 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
         updateToggleButtons(newTheme);
+        
+        // Redraw the stem visualization to reflect the new theme
+        if (typeof drawRealisticStemVisualization === 'function') {
+            drawRealisticStemVisualization();
+        }
     }
 
     // Update button appearance based on current theme
@@ -55,6 +60,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const newTheme = e.matches ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', newTheme);
             updateToggleButtons(newTheme);
+            
+            // Redraw the stem visualization to reflect the new theme
+            if (typeof drawRealisticStemVisualization === 'function') {
+                drawRealisticStemVisualization();
+            }
         }
     });
 }); 

@@ -189,6 +189,38 @@
         .dark-mode .google-button:hover {
             background-color: #3d3d41;
         }
+
+        /* Terms checkbox styling */
+        .terms-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 0.5rem;
+        }
+        
+        .terms-checkbox input[type="checkbox"] {
+            margin-top: 0;
+            margin-bottom: 0;
+            flex-shrink: 0;
+        }
+        
+        .terms-checkbox label {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            display: inline-block;
+            word-spacing: normal;
+            white-space: normal;
+        }
+        
+        .terms-checkbox a {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: inline;
+        }
+        
+        .terms-checkbox a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -228,9 +260,10 @@
             </button>
         </div>
         <div class="footer-links">
+            <a href="tos.html" style="margin-bottom: -10px;">Terms of Service</a>
             <a href="privacy-policy.html">Privacy Policy</a>
             <div class="version">
-                <a href="changelog.html">version 1.2.1</a>
+                <a href="changelog.html">&nbsp;</a>
             </div>
         </div>
     </nav>
@@ -268,9 +301,10 @@
             </button>
         </div>
         <div class="footer-links">
+            <a href="tos.html" style="margin-bottom: -10px;">Terms of Service</a>
             <a href="privacy-policy.html">Privacy Policy</a>
             <div class="version">
-                <a href="changelog.html">version 1.2.1</a>
+                <a href="changelog.html">&nbsp;</a>
             </div>
         </div>
     </nav>
@@ -281,7 +315,7 @@
                 <span class="collapse-indicator">▼</span>
                 Account Access
             </h1>
-            <p class="calculator-description">Sign in to access your saved bike positions.</p>
+            <p class="calculator-description">Sign in to access the database in XY Position Calculator and your saved bike configurations.</p>
         </div>
         
         <div class="auth-container">
@@ -323,6 +357,10 @@
                         <label for="signup-confirm-password">Confirm Password</label>
                         <input type="password" id="signup-confirm-password" required minlength="6">
                     </div>
+                    <div class="form-group terms-checkbox">
+                        <input type="checkbox" id="terms-agreement" required>
+                        <label for="terms-agreement">I have read and agree to the <a href="tos.html" target="_blank">Terms of Service</a> and <a href="privacy-policy.html" target="_blank">Privacy Policy</a></label>
+                    </div>
                     <div class="auth-error" id="signup-error"></div>
                     <button type="submit" class="auth-button">Sign Up</button>
                 </form>
@@ -336,6 +374,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <!-- Custom Scripts -->
+    <script src="js/version.js"></script>
     <script src="js/dark-mode.js"></script>
     <script src="js/mobile-menu.js"></script>
     <script src="js/calculator-header.js"></script>
@@ -348,6 +387,7 @@
             const loginFormContainer = document.getElementById('login-form-container');
             const signupFormContainer = document.getElementById('signup-form-container');
             const forgotPasswordLink = document.getElementById('forgot-password-link');
+            const signupForm = document.getElementById('signup-form');
             
             loginTab.addEventListener('click', function() {
                 loginTab.classList.add('active');
@@ -383,6 +423,20 @@
                             errorElement.textContent = error.message;
                             errorElement.style.color = 'var(--error-color)';
                         });
+                });
+            }
+            
+            // Add form submission validation for terms
+            if (signupForm) {
+                signupForm.addEventListener('submit', function(e) {
+                    const termsCheckbox = document.getElementById('terms-agreement');
+                    const errorElement = document.getElementById('signup-error');
+                    
+                    if (!termsCheckbox.checked) {
+                        e.preventDefault();
+                        errorElement.textContent = 'You must agree to the Terms of Service and Privacy Policy';
+                        return false;
+                    }
                 });
             }
         });

@@ -84,42 +84,83 @@ body {
     padding: 1rem 2rem;
     margin-left: 200px;
     overflow-x: hidden;
+    background-color: var(--bg-color);
 }
 
 .top-controls {
     display: flex;
     background-color: var(--card-bg);
-    padding: 8px;
+    padding: 16px;
     border-radius: 8px;
     box-shadow: 0 2px 4px var(--shadow-color);
     margin-bottom: 10px;
-    align-items: center;
-    gap: 5px;
+    align-items: flex-start;
+    gap: 20px;
     margin-left: auto;
     margin-right: auto;
     width: 900px;
     max-width: 900px;
     box-sizing: border-box;
-
 }
 
 .client-info {
     display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 450px;
+}
+
+.client-name-container {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 6px;
-    min-width: 380px;
-    flex-shrink: 0;
-    margin-left: 10px;
+    gap: 10px;
+    width: 100%;
+}
+
+.client-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.client-buttons button {
+    padding: 4px 8px;
+    font-size: 12px;
+    height: auto;
+    min-height: 28px;
 }
 
 .client-info input {
-    flex: 1;
-    min-width: 250px;
-    max-width: 350px;
-    height: 28px;
-    margin-left: 8px;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--card-background);
+    color: var(--text-color);
+}
+
+.client-info textarea {
+    width: 100%;
+    height: 30px;
     opacity: 0.9;
-    text-indent: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 4px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: inherit;
+    resize: vertical;
+}
+
+.client-info div {
+    display: flex;
+    gap: 6px;
+}
+
+.client-name-container input {
+    flex: 1;
+    min-width: 0;  /* Prevents flexbox child from overflowing */
 }
 
 button {
@@ -219,8 +260,9 @@ button:disabled {
     padding-right: 12px;
     box-sizing: border-box;
     scrollbar-width: thin; /* Firefox scrollbar */
+    background-color: var(--bg-color);
 }
-
+/*************************************************************************************/
 #bikes-container {
     gap: 1rem;
     padding: 8px 0;
@@ -229,6 +271,7 @@ button:disabled {
     flex-wrap: nowrap;
     width: max-content;
     min-width: min-content;
+    background-color: var(--bg-color);
 }
 
 /* Styling for webkit scrollbars (Chrome, Safari, Edge) */
@@ -440,6 +483,8 @@ button:disabled {
     display: flex;
     gap: 10px;
     justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .add-buttons button {
@@ -723,7 +768,7 @@ button:disabled {
     }
 
     .client-info input {
-        max-width: none;
+        max-width: 100%;
     }
 }
 
@@ -1452,16 +1497,16 @@ button:disabled {
 
 /* Theme Toggle Styles */
 .theme-toggle {
-    position: absolute;
-    bottom: 20px;
+    position: relative;
+    bottom: 0px;
     left: 0;
     right: 0;
-    padding: 0 20px;
+    padding: 0 40px;
 }
 
 .dark-mode-toggle {
     width: 100%;
-    padding: 10px;
+    padding: 8px;
     border: none;
     border-radius: 8px;
     background-color: var(--button-bg);
@@ -1559,9 +1604,9 @@ button:disabled {
 }
 
 .mobile-nav .theme-toggle {
-    position: static;
+    position: relative;
     margin-top: 1rem;
-    padding: 0 1rem;
+    padding: 0 0rem;
 }
 
 .mobile-nav .privacy-link {
@@ -1911,38 +1956,33 @@ button:disabled {
 /* Add responsive styles for screens under 1136px */
 @media (max-width: 1136px) {
     .top-controls {
-        flex-direction: column;
-        align-items: stretch;
-        margin-left: 10px;
-        margin-right: 10px;
-        width: calc(100% - 20px);
-        max-width: calc(100% - 20px);
-        padding: 16px;
-    }
-
-    .client-info {
-        flex-direction: column;
-        align-items: stretch;
-        min-width: auto;
-        margin-bottom: 0px;
-    }
-
-    .client-info input {
-        max-width: none;
         width: 100%;
-        margin-left: 0;
-        margin-bottom: 8px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
     }
-
-    .client-info > div:last-child {
-        display: flex;
-        gap: 8px;
+    
+    .client-info {
+        width: 450px;
+        max-width: none;
+        margin-left: auto;
+        margin-right: auto;
     }
-
-    .client-info button {
+    
+    .client-name-container {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .client-name-container input {
+        width: auto;
         flex: 1;
     }
-
+    
+    .client-buttons {
+        flex-shrink: 0;
+    }
+    
     .target-positions {
         flex-direction: row;
         flex-wrap: wrap;
@@ -1953,7 +1993,7 @@ button:disabled {
 
     .position-group {
         flex: 0 1 auto;
-        min-width: 180px;
+        min-width: 150px;
         text-align: center;
     }
 
@@ -2009,6 +2049,26 @@ button:disabled {
     .duplicate-button {
         -webkit-tap-highlight-color: transparent;
         transition: background-color 0.05s ease, color 0.05s ease;
+    }
+
+    .client-info {
+        width: 100%;
+        padding: 0 5px;
+    }
+    
+    .client-name-container {
+        width: 100%;
+    }
+    
+    .client-buttons {
+        display: flex;
+        gap: 5px;
+        flex-shrink: 0;
+    }
+    
+    .client-buttons button {
+        padding: 4px 8px;
+        font-size: 12px;
     }
 }
 
@@ -2194,118 +2254,50 @@ button:disabled {
     }
 }
 
-/* Disabled database bike card styles */
+/* Remove disabled-database-bike styles */
 .disabled-database-bike {
-    position: relative;
-    opacity: 0.8;
-    cursor: not-allowed;
-    pointer-events: none;
+    display: none; /* Hide any existing disabled database bikes */
 }
 
-.disabled-database-bike::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.1);
-    z-index: 1;
-    pointer-events: none;
-}
-
-.disabled-database-bike .disabled-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(128, 128, 128, 0.2);
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-}
-
-.disabled-database-bike .login-prompt {
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    text-align: center;
-}
-
+.disabled-database-bike::before,
+.disabled-database-bike .disabled-overlay,
+.disabled-database-bike .login-prompt,
 .disabled-database-bike .drag-handle.disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
+    display: none;
 }
 
-/* Adjusting input elements to look disabled within database bike card */
-.disabled-database-bike input:disabled,
-.disabled-database-bike select:disabled,
-.disabled-database-bike button:disabled {
+/* Make sure that the bike-selector styling for login notice works properly */
+.bike-selector .login-notice {
+    padding: 5px;
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    font-size: 12px;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
+    width: 100%;
+}
+
+/* Update for the login-required bike card - make text field styling more obvious */
+.login-required {
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.02) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .login-required {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.login-required::after {
+    content: "🔒";
+    position: absolute;
+    right: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
     opacity: 0.7;
-    color: #999;
-}
-
-/* Dark mode adjustments for disabled database bike */
-[data-theme="dark"] .disabled-database-bike::before {
-    background-color: rgba(0, 0, 0, 0.25);
-}
-
-[data-theme="dark"] .disabled-database-bike .disabled-overlay {
-    background-color: rgba(0, 0, 0, 0.3);
-}
-
-[data-theme="dark"] .disabled-database-bike .login-prompt {
-    background-color: rgba(50, 50, 50, 0.8);
-}
-
-/* Specific mobile styles for bike cards */
-@media (max-width: 770px) {
-    .bikes-container-wrapper {
-        width: 100%;
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
-        margin: 0;
-        overflow-x: auto;
-        box-sizing: border-box;
-        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-        scrollbar-width: thin; /* Firefox scrollbar */
-    }
-
-    /* Mobile scrollbar styling */
-    .bikes-container-wrapper::-webkit-scrollbar {
-        height: 4px;
-    }
-
-    .bikes-container-wrapper::-webkit-scrollbar-thumb {
-        background-color: var(--border-color);
-        border-radius: 2px;
-    }
-
-    #bikes-container {
-        gap: 1rem;
-        padding: 8px 0;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        width: max-content;
-        min-width: min-content;
-    }
-
-    .bike-card {
-        width: 85vw;
-        min-width: 280px;
-        max-width: 350px;
-        margin: 8px 0.5rem;
-        padding: 12px 16px;
-        box-sizing: border-box;
-        flex: 0 0 auto;
-    }
+    pointer-events: none;
 }
 
 /* Navigation styling for all pages */
@@ -2334,10 +2326,10 @@ button:disabled {
 }
 
 .main-nav .auth-container, .mobile-nav .auth-container {
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     text-align: center;
 }
-
+ 
 .auth-container .user-container {
     display: flex;
     flex-direction: column;
@@ -2355,17 +2347,17 @@ button:disabled {
     justify-content: center;
     align-items: center;
     padding: 0.75rem 1rem;
-    margin-bottom:30px;
+    margin-bottom:10px;
     text-align: center;
 }
 
 .main-nav .theme-toggle, .mobile-nav .theme-toggle {
-    margin-bottom: 55px;
+    margin-bottom: 0px;
 }
 
 .main-nav .footer-links, .mobile-nav .footer-links {
     text-align: center;
-    margin-bottom: 4px;
+    margin-bottom: -4px;
 }
 
 .footer-links a {
@@ -2401,4 +2393,77 @@ button:disabled {
 
 .text-center {
     text-align: center;
+}
+
+/* Ensure buttons resize properly when text wraps on mobile */
+@media (max-width: 768px) {
+    .add-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .add-buttons button {
+        height: auto;
+        min-height: 30px;
+        padding: 8px 12px;
+        white-space: normal;
+        text-align: center;
+        flex: 1 1 auto;
+        min-width: 120px;
+        max-width: 45%;
+    }
+}
+
+/* Style for login prompt in input placeholder */
+.geometry-section input::placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+/* Non-logged-in bike card - shows selectors but geometry is locked */
+.bike-card:not(.disabled-database-bike) .geometry-section input[readonly] {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+/* Login notice in bike selector */
+.bike-selector .login-notice {
+    padding: 5px;
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    font-size: 12px;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
+}
+
+[data-theme="dark"] .bike-selector .login-notice {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Style for login-required fields */
+.login-required {
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.02) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .login-required {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.login-required::after {
+    content: "🔒";
+    position: absolute;
+    right: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    opacity: 0.7;
+    pointer-events: none;
 }

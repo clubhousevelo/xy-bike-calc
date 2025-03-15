@@ -23,6 +23,22 @@
     <title>Stem Calculator - Compare Stem Configurations</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
+        :root {
+            --reference-stem-color: #0078D7;
+            --comparison-stem-color: #E81123;
+            --steerer-tube-color: #505050;
+            --spacer-color: #A0A0A0;
+            --handlebar-color: #333333;
+        }
+        
+        [data-theme="dark"] {
+            --reference-stem-color: #4CC2FF;
+            --comparison-stem-color: #FF7066;
+            --steerer-tube-color: #A0A0A0;
+            --spacer-color: #CCCCCC;
+            --handlebar-color: #EEEEEE;
+        }
+        
         .stem-container {
             display: flex;
             flex-wrap: wrap;
@@ -151,6 +167,62 @@
             justify-content: center;
             margin-top: 10px;
         }
+        .stem-visualization-container {
+            margin-top: 30px;
+            text-align: center;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: var(--card-background);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .stem-visualization-container h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+        
+        .stem-canvas-wrapper {
+            margin-bottom: 15px;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        
+        #stemVisualizationCanvas {
+            background-color: var(--card-background);
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            display: block;
+            margin: 0 auto;
+        }
+        
+        [data-theme="dark"] #stemVisualizationCanvas {
+            background-color: var(--card-background);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .stem-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 10px;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border: 1px solid rgba(0,0,0,0.2);
+            border-radius: 20px;
+        }
     </style>
 </head>
 <body>
@@ -190,9 +262,10 @@
             </button>
         </div>
         <div class="footer-links">
+            <a href="tos.html" style="margin-bottom: -10px;">Terms of Service</a>
             <a href="privacy-policy.html">Privacy Policy</a>
             <div class="version">
-                <a href="changelog.html">version 1.2.1</a>
+                <a href="changelog.html">&nbsp;</a>
             </div>
         </div>
     </nav>
@@ -230,9 +303,10 @@
             </button>
         </div>
         <div class="footer-links">
+            <a href="tos.html" style="margin-bottom: -10px;">Terms of Service</a>
             <a href="privacy-policy.html">Privacy Policy</a>
             <div class="version">
-                <a href="changelog.html">version 1.2.1</a>
+                <a href="changelog.html">&nbsp;</a>
             </div>
         </div>
     </nav>
@@ -298,12 +372,27 @@
             <button id="addStemBtn" class="add-stem-btn">Add Stem</button>
             <button id="resetAllBtn" class="reset-all-btn">Reset All</button>
         </div>
+        
+        <!-- Stem Visualization -->
+        <div class="stem-visualization-container">
+            <h3>Stem Comparison Visualization</h3>
+            <div class="stem-canvas-wrapper">
+                <canvas id="stemVisualizationCanvas" width="400" height="300" 
+                       onload="console.log('Canvas loaded')"
+                       style="min-height: 300px;"></canvas>
+            </div>
+            <div class="stem-legend">
+                <!-- Legend items will be generated dynamically by JavaScript -->
+            </div>
+        </div>
     </div>
 
+    <script src="js/version.js"></script>
     <script src="js/stem-calculator.js"></script>
     <script src="js/dark-mode.js"></script>
     <script src="js/mobile-menu.js"></script>
     <script src="js/calculator-header.js"></script>
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>

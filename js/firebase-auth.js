@@ -100,26 +100,14 @@ function setupAuthUI() {
     loginForm.addEventListener('submit', handleLogin);
   }
   
-  // Google Sign-in button
-  const googleSignInButton = document.getElementById('google-signin');
-  if (googleSignInButton) {
-    googleSignInButton.addEventListener('click', handleGoogleSignIn);
-  }
-  
-  // Google Sign-up button
-  const googleSignUpButton = document.getElementById('google-signup');
-  if (googleSignUpButton) {
-    googleSignUpButton.addEventListener('click', handleGoogleSignIn);
-  }
-  
   // Signup form
   const signupForm = document.getElementById('signup-form');
   if (signupForm) {
     signupForm.addEventListener('submit', handleSignup);
   }
   
-  // Logout buttons
-  const logoutButtons = document.querySelectorAll('#logout-button');
+  // Logout buttons - both desktop and mobile
+  const logoutButtons = document.querySelectorAll('#logout-button, #logout-button-mobile');
   logoutButtons.forEach(button => {
     button.addEventListener('click', handleLogout);
   });
@@ -157,63 +145,6 @@ function handleLogin(e) {
         errorElement.textContent = error.message;
       } else {
         console.error('Login error:', error.message);
-      }
-    });
-}
-
-// Handle Google Sign-in button click
-function handleGoogleSignIn() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  
-  // Determine which form we're dealing with based on active container
-  const isSignupForm = document.getElementById('signup-form-container').classList.contains('active');
-  const errorElement = isSignupForm ? 
-    document.getElementById('signup-error') : 
-    document.getElementById('login-error');
-  
-  // Display loading state
-  if (errorElement) errorElement.textContent = 'Connecting to Google...';
-  
-  firebase.auth().signInWithPopup(provider)
-    .then((result) => {
-      // This gives you a Google Access Token. You can use it to access the Google API.
-      const credential = result.credential;
-      const user = result.user;
-      
-      // Clear any error messages
-      if (errorElement) errorElement.textContent = '';
-      
-      // Check if this is a new user (first sign-in)
-      const isNewUser = result.additionalUserInfo.isNewUser;
-      
-      if (isNewUser && firebase.firestore) {
-        // Create user document in Firestore for new users
-        const db = firebase.firestore();
-        return db.collection('users').doc(user.uid).set({
-          email: user.email,
-          displayName: user.displayName || '',
-          photoURL: user.photoURL || '',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          authProvider: 'google'
-        }).then(() => {
-          // Redirect to the main page
-          window.location.href = 'index.html';
-        });
-      } else {
-        // Existing user, just redirect
-        window.location.href = 'index.html';
-      }
-    })
-    .catch((error) => {
-      // Handle Errors here
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      
-      // Display error message
-      if (errorElement) {
-        errorElement.textContent = errorMessage;
-      } else {
-        console.error('Google Sign-in error:', errorMessage);
       }
     });
 }
@@ -274,6 +205,23 @@ function handleSignup(e) {
 function handleLogout() {
   firebase.auth().signOut()
     .then(() => {
+      // Clear all saved data from localStorage
+      localStorage.removeItem('xyCalculatorData');
+      sessionStorage.removeItem('xyCalculatorSession');
+
+      // You may want to keep certain settings like dark mode preference
+      const darkModePreference = localStorage.getItem('theme');
+      const tosAcknowledged = localStorage.getItem('tosAcknowledged');
+      const upgradeNoticeAcknowledged = localStorage.getItem('upgradeNoticeAcknowledged');
+
+      // Clear all localStorage
+      localStorage.clear();
+
+      // Restore settings that should persist across sessions
+      if (darkModePreference) localStorage.setItem('theme', darkModePreference);
+      if (tosAcknowledged) localStorage.setItem('tosAcknowledged', tosAcknowledged);
+      if (upgradeNoticeAcknowledged) localStorage.setItem('upgradeNoticeAcknowledged', upgradeNoticeAcknowledged);
+
       // Redirect to login page or update UI
       window.location.href = 'login.html';
     })

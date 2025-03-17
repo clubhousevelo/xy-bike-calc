@@ -2341,7 +2341,7 @@ button:disabled {
     
     .client-info-card.active {
         transform: translateX(0);
-        width: 290px;
+        width: 320px;
         border-left: 40px solid var(--card-background);
     }
     

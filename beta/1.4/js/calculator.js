@@ -1502,7 +1502,7 @@ class BikeCalculator {
         const headerSection = document.createElement('div');
         headerSection.innerHTML = `
             <div style="margin-bottom: 0px; text-align: center;">
-                <h1 style="margin-bottom: 0px;margin-top: 0px;">XY Bike Position Calculator</h1>
+                <h1 style="margin-bottom: 0px;margin-top: 0px;">XY Position Calculator</h1>
                 <h4 style="margin-bottom: 20px;margin-top: 0px;">www.xybikecalc.com</h4>
                 <p style="margin-bottom: 20px;">Generated on ${new Date().toLocaleDateString()}${byLine}</p>
             </div>
@@ -1518,7 +1518,7 @@ class BikeCalculator {
         clientInfoBox.style.cssText = 'flex: 1; max-width: 300px; min-width: 250px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #ffffff;';
         
         clientInfoBox.innerHTML = `
-            <h2 style="margin: 0 0 5px 0; text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; color: #333;">Client Info</h2>
+            <h2 style="margin: 0 0 5px 0; text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; color: #333;">Rider Info</h2>
             <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
                 ${clientName !== '' ? `
                 <div>

@@ -171,10 +171,10 @@
             margin-top: 30px;
             text-align: center;
             max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            background-color: var(--card-background);
-            padding: 15px;
+            margin-left: 0px;
+            margin-right: 0px;
+            background-color: var(--bg-color);
+            padding: 0px;
             border-radius: 8px;
         }
         
@@ -336,7 +336,7 @@
                             <span>°</span>
                         </div>
                         <div class="input-field">
-                            <label for="stemHeight-0">Stem Height</label>
+                            <label for="stemHeight-0" class="tooltip">Stem Height<span class="tooltip-text">Measured height of the stem where it clamps the steerer tube. Typically ranges from 38-42mm.</span></label>
                             <input type="number" id="stemHeight-0" class="stem-input" data-stem-id="0" step="1" min="0" value="40">
                             <span>mm</span>
                         </div>
@@ -351,7 +351,7 @@
                             <span>°</span>
                         </div>
                         <div class="input-field">
-                            <label for="spacerHeight-0">Spacer Height</label>
+                            <label for="spacerHeight-0" class="tooltip">Spacer Height<span class="tooltip-text">Typically include everything between the frame and bottom of the stem, such as headset bearing cover</span></label>
                             <input type="number" id="spacerHeight-0" class="stem-input" data-stem-id="0" step="1" min="0" value="20">
                             <span>mm</span>
                         </div>
@@ -374,17 +374,19 @@
         </div>
         
         <!-- Stem Visualization -->
-        <div class="stem-visualization-container">
-            <h3>Stem Comparison Visualization</h3>
+         <center>
+        <div class="stem-visualization-container";>
+            <h3>Stem Comparison Visual</h3>
             <div class="stem-canvas-wrapper">
-                <canvas id="stemVisualizationCanvas" width="400" height="300" 
+                <canvas id="stemVisualizationCanvas" width="350" height="300" 
                        onload="console.log('Canvas loaded')"
-                       style="min-height: 300px;"></canvas>
+                       style="min-height: 300px;min-width: 350px;"></canvas>
             </div>
             <div class="stem-legend">
                 <!-- Legend items will be generated dynamically by JavaScript -->
             </div>
         </div>
+        </center>
     </div>
 
     <script src="js/version.js"></script>

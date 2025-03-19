@@ -1,5 +1,5 @@
 // Central place to manage application version
-const APP_VERSION = "1.3";
+const APP_VERSION = "1.3.1";
 
 // Function to set version number in all navigation footers
 function setVersionNumbers() {

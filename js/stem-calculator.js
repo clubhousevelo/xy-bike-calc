@@ -20,9 +20,6 @@ let stemCount = 1; // Start with one stem
 let baseX = 0;
 let baseY = 0;
 
-// Constants for visualization
-const CANVAS_PADDING = 30;
-const SCALE_FACTOR = 1.5;
 
 // Real-world component dimensions (in mm)
 const STEERER_TUBE_DIAMETER = 28.6; // 1-1/8" steerer tube
@@ -576,11 +573,11 @@ function drawRealisticStemVisualization() {
     ctx.clearRect(0, 0, width, height);
     
     // New center point with steerer tube more vertical - moved left
-    const originX = width / 2 - 60; // Shifted 100px to the left
+    const originX = width / 2 - 70; // Shifted 60px to the left
     const originY = height / 2 + 120;
     
     // Scale: pixels per mm (adjust as needed)
-    const scale = 1.4;
+    const scale = 1.5;
     
     // Check if dark mode is active
     const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -591,7 +588,7 @@ function drawRealisticStemVisualization() {
     
     // Draw grid for better measurement reference
     const gridSize = 10 * scale; // 10mm grid (scaled)
-    const gridCount = 20; // Increase grid count to maintain coverage with smaller grid size
+    const gridCount = 30; // Increase grid count to maintain coverage with smaller grid size
     
     // Draw horizontal grid lines
     for (let i = -gridCount; i <= gridCount; i++) {
@@ -698,7 +695,7 @@ function drawRealisticStemVisualization() {
         const structureColor = isDarkMode ? "#FFFFFF" : "#555555";
         
         // Draw steerer tube (more vertical now)
-        const steererLength = 30;
+        const steererLength = 0;
         const steererEndX = originX + Math.cos(headTubeAngleRad) * steererLength;
         const steererEndY = originY - Math.sin(headTubeAngleRad) * steererLength;
         
@@ -745,7 +742,7 @@ function drawRealisticStemVisualization() {
         const stemEndY = stemCenterY - Math.sin(stemAngleRad) * stem.stemLength * scale;
         
         // Define circle radius
-        const circleRadius = 8;
+        const circleRadius = 15.9;
         
         // Calculate where the stem line should stop (at the circle's border)
         const dx = stemEndX - stemCenterX;

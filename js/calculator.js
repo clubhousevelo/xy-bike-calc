@@ -196,6 +196,19 @@ class BikeCalculator {
                 document.getElementById('targetHandlebarY').value = '';
                 document.getElementById('handlebarReachUsed').value = '';
                 
+                // Clear component notes fields
+                const saddleNotes = document.getElementById('saddleNotes');
+                if (saddleNotes) saddleNotes.value = '';
+                
+                const handlebarNotes = document.getElementById('handlebarNotes');
+                if (handlebarNotes) handlebarNotes.value = '';
+                
+                const crankLengthNotes = document.getElementById('crankLengthNotes');
+                if (crankLengthNotes) crankLengthNotes.value = '';
+                
+                const drivetrainNotes = document.getElementById('drivetrainNotes');
+                if (drivetrainNotes) drivetrainNotes.value = '';
+                
                 // Clear bikes container
                 document.getElementById('bikes-container').innerHTML = '';
                 this.bikes = [];
@@ -244,6 +257,35 @@ class BikeCalculator {
         clientNotesInput.addEventListener('input', () => {
             this.saveData();
         });
+        
+        // Component notes inputs
+        const saddleNotesInput = document.getElementById('saddleNotes');
+        if (saddleNotesInput) {
+            saddleNotesInput.addEventListener('input', () => {
+                this.saveData();
+            });
+        }
+        
+        const handlebarNotesInput = document.getElementById('handlebarNotes');
+        if (handlebarNotesInput) {
+            handlebarNotesInput.addEventListener('input', () => {
+                this.saveData();
+            });
+        }
+        
+        const crankLengthNotesInput = document.getElementById('crankLengthNotes');
+        if (crankLengthNotesInput) {
+            crankLengthNotesInput.addEventListener('input', () => {
+                this.saveData();
+            });
+        }
+        
+        const drivetrainNotesInput = document.getElementById('drivetrainNotes');
+        if (drivetrainNotesInput) {
+            drivetrainNotesInput.addEventListener('input', () => {
+                this.saveData();
+            });
+        }
 
         // Save/Load buttons
         document.getElementById('saveButton').addEventListener('click', () => {
@@ -613,7 +655,7 @@ class BikeCalculator {
             <div class="stem-section">
                 <h4>Stem Configuration</h4>
                 <div class="input-group">
-                    <label>Stem Height:</label>
+                    <label class="tooltip">Stem Height:<span class="tooltip-text">Measured height of the stem where it clamps the steerer tube. Typically ranges from 38-42mm.</span></label>
                     <input type="number" class="stem-height" value="40" min="0">
                     <span>mm</span>
                 </div>
@@ -628,7 +670,7 @@ class BikeCalculator {
                     <span>°</span>
                 </div>
                 <div class="input-group">
-                    <label>Spacer Height:</label>
+                    <label class="tooltip">Spacer Height:<span class="tooltip-text">Typically include everything between the frame and bottom of the stem, such as headset bearing cover</span></label>
                     <input type="number" class="spacer-height" value="20" min="0">
                     <span>mm</span>
                 </div>
@@ -636,31 +678,31 @@ class BikeCalculator {
             <div class="results-section">
                 <h4>Results</h4>
                 <div class="result-group">
-                    <label>Handlebar X:</label>
+                    <label class="tooltip">Handlebar X:<span class="tooltip-text">Horizontal distance from the center of the bottom bracket to center of the handlebar.<p><br>Value in parentheses is the difference from the calculated HX to target HX (if provided).</p></span></label>
                     <span class="handlebar-x">-- mm</span>
                 </div>
                 <div class="result-group">
-                    <label>Handlebar Y:</label>
+                    <label class="tooltip">Handlebar Y:<span class="tooltip-text">Vertical distance from the center of the bottom bracket to center of the handlebar.<p><br>Value in parentheses is the difference from the calculated HY to target HY (if provided).</p></span></label>
                     <span class="handlebar-y">-- mm</span>
                 </div>
                 <div class="result-group with-divider">
-                    <label>Bar Reach Needed:</label>
+                    <label class="tooltip">Bar Reach Needed:<span class="tooltip-text">The handlebar reach value needed to achieve an identical lever position as the target position.</span></label>
                     <span class="bar-reach-needed">-- mm</span>
                 </div>
                 <div class="result-group">
-                    <label>Setback vs STA:</label>
+                    <label class="tooltip">Setback vs STA:<span class="tooltip-text">The horizontal distance between the Saddle Rail Center and the seat tube extended.</span></label>
                     <span class="setback-sta">-- mm</span>
                 </div>
                 <div class="result-group">
-                    <label>Effective STA:</label>
+                    <label class="tooltip">Effective STA:<span class="tooltip-text">The effective seat tube angle, calculated from the center of the bottom bracket to the center of the saddle rail.</span></label>
                     <span class="effective-sta">-- °</span>
                 </div>
                 <div class="result-group">
-                    <label>BB to Rail:</label>
+                    <label class="tooltip">BB to Rail:<span class="tooltip-text">The distance from the center of the bottom bracket to the saddle rail, following the seat tube. Used to determine appropriate integrated seat mast choice.</span></label>
                     <span class="bb-rail">-- mm</span>
                 </div>
                 <div class="result-group">
-                    <label>Exposed Seatpost:</label>
+                    <label class="tooltip">Exposed Seatpost:<span class="tooltip-text">The amount of seatpost extending above the seat tube. This can affect seatpost length selection and can have an effect on seatpost compliance.</span></label>
                     <span class="exposed-seatpost">-- mm</span>
                 </div>
             </div>
@@ -1226,7 +1268,11 @@ class BikeCalculator {
                 card.querySelector('.stl').value = '';
                 
                 // Add placeholder in the first field to prompt login
-                card.querySelector('.reach').placeholder = "Login required";
+                card.querySelector('.reach').placeholder = "Please";
+                card.querySelector('.stack').placeholder = "log in";
+                card.querySelector('.hta').placeholder = "to";
+                card.querySelector('.sta').placeholder = "view";
+                card.querySelector('.stl').placeholder = "geo";
             }
             
             this.updateBikeData(bikeId);
@@ -1238,6 +1284,11 @@ class BikeCalculator {
             sessionTimestamp: sessionStorage.getItem('xyCalculatorSession'),
             clientName: document.getElementById('clientName').value,
             clientNotes: document.getElementById('clientNotes').value,
+            // Add component notes
+            saddleNotes: document.getElementById('saddleNotes')?.value || '',
+            handlebarNotes: document.getElementById('handlebarNotes')?.value || '',
+            crankLengthNotes: document.getElementById('crankLengthNotes')?.value || '',
+            drivetrainNotes: document.getElementById('drivetrainNotes')?.value || '',
             targetSaddleX: document.getElementById('targetSaddleX').value,
             targetSaddleY: document.getElementById('targetSaddleY').value,
             targetHandlebarX: document.getElementById('targetHandlebarX').value,
@@ -1278,6 +1329,19 @@ class BikeCalculator {
                 // Set target positions
                 document.getElementById('clientName').value = data.clientName || '';
                 document.getElementById('clientNotes').value = data.clientNotes || '';
+                // Load component notes
+                if (document.getElementById('saddleNotes')) {
+                    document.getElementById('saddleNotes').value = data.saddleNotes || '';
+                }
+                if (document.getElementById('handlebarNotes')) {
+                    document.getElementById('handlebarNotes').value = data.handlebarNotes || '';
+                }
+                if (document.getElementById('crankLengthNotes')) {
+                    document.getElementById('crankLengthNotes').value = data.crankLengthNotes || '';
+                }
+                if (document.getElementById('drivetrainNotes')) {
+                    document.getElementById('drivetrainNotes').value = data.drivetrainNotes || '';
+                }
                 document.getElementById('targetSaddleX').value = data.targetSaddleX || '';
                 document.getElementById('targetSaddleY').value = data.targetSaddleY || '';
                 document.getElementById('targetHandlebarX').value = data.targetHandlebarX || '';
@@ -1373,16 +1437,22 @@ class BikeCalculator {
             return;
         }
         
-        // Get client name and notes
-        const clientName = document.getElementById('clientName').value.trim() || 'Client';
-        const clientNotes = document.getElementById('clientNotes').value.trim();
+        // Get client information
+        const clientName = document.getElementById('clientName').value.trim() || '&nbsp;';
+        const clientNotes = document.getElementById('clientNotes').value.trim() || '&nbsp;';
         
         // Get target positions
-        const targetSaddleX = document.getElementById('targetSaddleX').value || 'N/A';
-        const targetSaddleY = document.getElementById('targetSaddleY').value || 'N/A';
-        const targetHandlebarX = document.getElementById('targetHandlebarX').value || 'N/A';
-        const targetHandlebarY = document.getElementById('targetHandlebarY').value || 'N/A';
-        const handlebarReachUsed = document.getElementById('handlebarReachUsed').value || 'N/A';
+        const targetSaddleX = document.getElementById('targetSaddleX').value || '&nbsp;';
+        const targetSaddleY = document.getElementById('targetSaddleY').value || '&nbsp;';
+        const targetHandlebarX = document.getElementById('targetHandlebarX').value || '&nbsp;';
+        const targetHandlebarY = document.getElementById('targetHandlebarY').value || '&nbsp;';
+        const handlebarReachUsed = document.getElementById('handlebarReachUsed').value || '&nbsp;';
+        
+        // Get component notes
+        const saddleNotes = document.getElementById('saddleNotes').value.trim() || '&nbsp;';
+        const handlebarNotes = document.getElementById('handlebarNotes').value.trim() || '&nbsp;';
+        const crankLengthNotes = document.getElementById('crankLengthNotes').value.trim() || '&nbsp;';
+        const drivetrainNotes = document.getElementById('drivetrainNotes').value.trim() || '&nbsp;';
         
         // Check if any target positions are provided
         const hasTargetPositions = 
@@ -1391,6 +1461,13 @@ class BikeCalculator {
             targetHandlebarX !== 'N/A' || 
             targetHandlebarY !== 'N/A' || 
             handlebarReachUsed !== 'N/A';
+            
+        // Check if any component notes are provided
+        const hasComponentNotes = 
+            saddleNotes !== 'N/A' || 
+            handlebarNotes !== 'N/A' || 
+            crankLengthNotes !== 'N/A' || 
+            drivetrainNotes !== 'N/A';
         
         // Get user's name from Firebase auth
         const user = firebase.auth().currentUser;
@@ -1401,12 +1478,6 @@ class BikeCalculator {
             byLine = ` by ${user.displayName}`;
         }
         // The byLine will be empty if user is logged in but has no display name
-        
-        // Create a title for the print
-        const title = document.createElement('div');
-        title.innerHTML = `<h1 style="text-align: center; margin-bottom: 5px;">Bike Recommendations for ${clientName}</h1>
-                          <p style="text-align: center; margin-bottom: ${clientNotes ? '20px' : '20px'};">Generated on ${new Date().toLocaleDateString()}${byLine}</p>
-                          ${clientNotes ? `<p style="text-align: center; margin-bottom: 8px; font-style: italic; color: #444;">Notes: ${clientNotes}</p>` : ''}`;
         
         // Create a temporary print container
         const printContainer = document.createElement('div');
@@ -1419,55 +1490,147 @@ class BikeCalculator {
         printStyles.textContent = `
             @media print {
                 .print-container {
-                    width: 80%;
+                    width: 100%;
+                    max-width: 1200px;
+                    margin: 0 auto;
                 }
             }
         `;
         document.head.appendChild(printStyles);
         
-        // Add the title
-        printContainer.appendChild(title);
+        // Create a header section
+        const headerSection = document.createElement('div');
+        headerSection.innerHTML = `
+            <div style="margin-bottom: 0px; text-align: center;">
+                <h1 style="margin-bottom: 0px;margin-top: 0px;">XY Bike Position Calculator</h1>
+                <h4 style="margin-bottom: 20px;margin-top: 0px;">www.xybikecalc.com</h4>
+                <p style="margin-bottom: 20px;">Generated on ${new Date().toLocaleDateString()}${byLine}</p>
+            </div>
+        `;
+        printContainer.appendChild(headerSection);
         
-        // Add target positions section only if any target positions are provided
+        // Create client information section with two columns
+        const clientInfoSection = document.createElement('div');
+        clientInfoSection.style.cssText = 'display: flex; gap: 20px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;';
+        
+        // Client Info box (new left column)
+        const clientInfoBox = document.createElement('div');
+        clientInfoBox.style.cssText = 'flex: 1; max-width: 300px; min-width: 250px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #ffffff;';
+        
+        clientInfoBox.innerHTML = `
+            <h2 style="margin: 0 0 5px 0; text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; color: #333;">Client Info</h2>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                ${clientName !== '' ? `
+                <div>
+                    <div style="font-weight: bold; margin-bottom: 3px;">Name:</div>
+                    <div style="padding: 5px; background-color: #f8f8f8; border-radius: 4px;">${clientName}</div>
+                </div>
+                ` : ''}
+                ${clientNotes !== '' ? `
+                <div>
+                    <div style="font-weight: bold; margin-bottom: 3px;">Fit Notes:</div>
+                    <div style="padding: 5px; background-color: #f8f8f8; border-radius: 4px;">${clientNotes}</div>
+                </div>
+                ` : ''}
+            </div>
+        `;
+        
+        clientInfoSection.appendChild(clientInfoBox);
+        
+        // Target Position box (modified to narrower single-column format)
         if (hasTargetPositions) {
-        const targetSection = document.createElement('div');
-        targetSection.innerHTML = `
-                <center><div style="margin-bottom: 12px; padding: 6px; border: 1px solid #ddd; border-radius: 8px; background-color: #ffffff;width: 450px;">
-                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; text-align: center;">
-                    <div>
-                            <h4 style="margin: 0 0 4px 0;">Target Saddle</h4>
-                            <div style="display: grid; grid-template-columns: 0.5fr 1fr; gap: 2px 2px;">
-                                <div style="text-align: left; font-size: 15px;">X:</div>
-                                <div style="text-align: right; font-size: 15px; font-weight: 500;">${targetSaddleX} mm</div>
-                                <div style="text-align: left; font-size: 15px;">Y:</div>
-                                <div style="text-align: right; font-size: 15px; font-weight: 500;">${targetSaddleY} mm</div>
-                            </div>
-                    </div>
-                    <div>
-                            <h4 style="margin: 0 0 4px 0;">Target Handlebar</h4>
-                            <div style="display: grid; grid-template-columns: 0.5fr 1fr; gap: 2px 2px;">
-                                <div style="text-align: left; font-size: 15px;">X:</div>
-                                <div style="text-align: right; font-size: 15px; font-weight: 500;">${targetHandlebarX} mm</div>
-                                <div style="text-align: left; font-size: 15px;">Y:</div>
-                                <div style="text-align: right; font-size: 15px; font-weight: 500;">${targetHandlebarY} mm</div>
-                            </div>
-                    </div>
-                    <div>
-                            <h4 style="margin: 0 0 4px 0;">Bar Reach Used</h4>
-                            <div style="display: grid; grid-template-columns: 0.5fr 1fr; gap: 2px 2px;">
-                                <div style="text-align: left; font-size: 15px;">Length:</div>
-                                <div style="text-align: right; font-size: 15px; font-weight: 500;">${handlebarReachUsed} mm</div>
-                            </div>
+            const targetPositionBox = document.createElement('div');
+            targetPositionBox.style.cssText = 'flex: 1; max-width: 200px; min-width: 200px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #ffffff;';
+            
+            targetPositionBox.innerHTML = `
+                <h2 style="margin: 0 0 5px 0; text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; color: #333;">Target Position</h2>
+                
+                <div style="margin-bottom: 10px;">
+                    <h3 style="margin: 0 0 5px 0; font-size: 16px; color: #444; text-align: left;">Saddle</h3>
+                    <div style="display: grid; grid-template-columns: 30px 1fr; gap: 0px; margin-left: 15px;">
+                        <div style="text-align: left; font-weight: bold;">X:</div>
+                        <div style="text-align: left;">${targetSaddleX} mm</div>
+                        <div style="text-align: left; font-weight: bold;">Y:</div>
+                        <div style="text-align: left;">${targetSaddleY} mm</div>
                     </div>
                 </div>
-            </div></center>
-        `;
-        printContainer.appendChild(targetSection);
+                
+                <div style="margin-bottom: 10px;">
+                    <h3 style="margin: 0 0 5px 0; font-size: 16px; color: #444; text-align: left;">Handlebar</h3>
+                    <div style="display: grid; grid-template-columns: 30px 1fr; gap: 0px; margin-left: 15px;">
+                        <div style="text-align: left; font-weight: bold;">X:</div>
+                        <div style="text-align: left;">${targetHandlebarX} mm</div>
+                        <div style="text-align: left; font-weight: bold;">Y:</div>
+                        <div style="text-align: left;">${targetHandlebarY} mm</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 5px;">
+                    <div style="font-weight: bold; margin-bottom: 5px;">Bar Reach Used:</div>
+                    <div style="margin-left: 45px;">${handlebarReachUsed} mm</div>
+                </div>
+            `;
+            
+            clientInfoSection.appendChild(targetPositionBox);
         }
+        
+        // Component Notes box
+        if (hasComponentNotes) {
+            const componentNotesBox = document.createElement('div');
+            componentNotesBox.style.cssText = 'flex: 1; max-width: 300px; min-width: 250px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #ffffff;';
+            
+            componentNotesBox.innerHTML = `
+                <h2 style="margin: 0 0 5px 0; text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; color: #333;">Component Notes</h2>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 3px;">
+                    ${saddleNotes !== 'N/A' ? `
+                    <div>
+                        <div style="font-weight: bold;">Saddle:</div>
+                        <div style="padding: 5px; background-color: #f8f8f8; border-radius: 4px;">${saddleNotes}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${handlebarNotes !== 'N/A' ? `
+                    <div>
+                        <div style="font-weight: bold;">Handlebar:</div>
+                        <div style="padding: 5px; background-color: #f8f8f8; border-radius: 4px;">${handlebarNotes}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${crankLengthNotes !== 'N/A' ? `
+                    <div>
+                        <div style="font-weight: bold;">Crank Length:</div>
+                        <div style="padding: 5px; background-color: #f8f8f8; border-radius: 4px;">${crankLengthNotes}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${drivetrainNotes !== 'N/A' ? `
+                    <div>
+                        <div style="font-weight: bold;">Drivetrain:</div>
+                        <div style="padding: 5px; background-color: #f8f8f8; border-radius: 4px;">${drivetrainNotes}</div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            clientInfoSection.appendChild(componentNotesBox);
+        }
+        
+        // Only add the client info section if any information is available
+        printContainer.appendChild(clientInfoSection);
+
+        
+        
+        // Create bike recommendations section
+        const bikesHeader = document.createElement('div');
+        bikesHeader.style.cssText = 'page-break-before: always; break-before: page;'; // Add page break
+        bikesHeader.innerHTML = `
+            <h2 style="margin: 0px 0 15px 0; text-align: center; color: #333;">Bike Recommendations</h2>
+        `;
+        printContainer.appendChild(bikesHeader);
         
         // Add bike data section
         const bikesSection = document.createElement('div');
-        bikesSection.style.cssText = 'display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;';
+        bikesSection.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;';
         
         // Get all bike cards with data
         const bikeCards = document.querySelectorAll('.bike-card');
@@ -1554,6 +1717,20 @@ class BikeCalculator {
                 geometryData += '</div>';
             }
             
+            // Helper function to clean label/value text by removing tooltips
+            const cleanTooltipText = (element) => {
+                if (!element) return '';
+                
+                // For label elements with tooltips
+                if (element.classList && element.classList.contains('tooltip')) {
+                    // Just get the text node, not the tooltip span
+                    return element.childNodes[0].textContent.trim();
+                }
+                
+                // For other elements, just get the text content
+                return element.textContent || '';
+            };
+            
             // Get stem data
             const stemSection = card.querySelector('.stem-section');
             let stemData = '';
@@ -1561,9 +1738,18 @@ class BikeCalculator {
                 stemData = '<div style="display: grid; grid-template-columns: 1fr 0.5fr; gap: 4px 2px;">';
                 const stemInputs = stemSection.querySelectorAll('.input-group');
                 stemInputs.forEach(group => {
-                    const label = group.querySelector('label')?.textContent || '';
-                    const value = group.querySelector('input')?.value || 'N/A';
-                    const unit = group.querySelector('span')?.textContent || '';
+                    // Get the original label element
+                    const labelElement = group.querySelector('label');
+                    
+                    // Create a clean label text without tooltip content
+                    let label = cleanTooltipText(labelElement);
+                    
+                    // Get the value and unit correctly
+                    const inputElement = group.querySelector('input');
+                    const value = inputElement?.value || 'N/A';
+                    const unitElement = group.querySelector('span:not(.tooltip-text)'); // Exclude tooltip spans
+                    const unit = unitElement?.textContent || '';
+                    
                     if (label && value) {
                         stemData += `
                             <div style="text-align: left; font-size: 13px;">${label}</div>
@@ -1578,11 +1764,16 @@ class BikeCalculator {
             const resultsSection = card.querySelector('.results-section');
             let resultsData = '';
             if (resultsSection) {
-                    resultsData = '<div style="display: grid; grid-template-columns: 1fr 0.7fr; gap: 4px 2px;">';
+                    resultsData = '<div style="display: grid; grid-template-columns: 0.95fr 0.8fr; gap: 2px 2px;">';
                 const resultGroups = resultsSection.querySelectorAll('.result-group');
                 resultGroups.forEach(group => {
-                    const label = group.querySelector('label')?.textContent || '';
-                    const valueSpan = group.querySelector('span');
+                    // Get the original label element
+                    const labelElement = group.querySelector('label');
+                    
+                    // Create a clean label text without tooltip content
+                    let label = cleanTooltipText(labelElement);
+                    
+                    const valueSpan = group.querySelector('span:not(.tooltip-text)'); // Exclude tooltip spans
                     const value = valueSpan?.textContent || 'N/A';
                     
                     // Special handling for handlebar X and Y to show differences with arrows
@@ -1601,20 +1792,20 @@ class BikeCalculator {
                                 }
                                 
                                 resultsData += `
-                                    <div style="text-align: left; font-size: 14px;">${label}</div>
-                                    <div style="text-align: right; font-size: 14px; font-weight: 600;">${actualValue} mm</div>
+                                    <div style="text-align: left; font-size: 13px;">${label}</div>
+                                    <div style="text-align: right; font-size: 13px; font-weight: 600;">${actualValue} mm</div>
                                     <div></div>${diffText}
                                 `;
                             } else {
                                 resultsData += `
-                                    <div style="text-align: left; font-size: 14px;">${label}</div>
-                                    <div style="text-align: right; font-size: 14px; font-weight: 600;">${actualValue} mm</div>
+                                    <div style="text-align: left; font-size: 13px;">${label}</div>
+                                    <div style="text-align: right; font-size: 13px; font-weight: 600;">${actualValue} mm</div>
                                 `;
                             }
                         } else {
                             resultsData += `
-                                <div style="text-align: left; font-size: 14px;">${label}</div>
-                                <div style="text-align: right; font-size: 14px; font-weight: 600;">${value}</div>
+                                <div style="text-align: left; font-size: 13px;">${label}</div>
+                                <div style="text-align: right; font-size: 13px; font-weight: 600;">${value}</div>
                             `;
                         }
                     } 
@@ -1633,20 +1824,20 @@ class BikeCalculator {
                                 }
                                 
                                 resultsData += `
-                                    <div style="text-align: left; font-size: 14px;">${label}</div>
-                                    <div style="text-align: right; font-size: 14px; font-weight: 600;">${actualValue} mm</div>
+                                    <div style="text-align: left; font-size: 13px;">${label}</div>
+                                    <div style="text-align: right; font-size: 13px; font-weight: 600;">${actualValue} mm</div>
                                     <div></div>${diffText}
                                 `;
                             } else {
                                 resultsData += `
-                                    <div style="text-align: left; font-size: 14px;">${label}</div>
-                                    <div style="text-align: right; font-size: 14px; font-weight: 600;">${actualValue} mm</div>
+                                    <div style="text-align: left; font-size: 13px;">${label}</div>
+                                    <div style="text-align: right; font-size: 13px; font-weight: 600;">${actualValue} mm</div>
                                 `;
                             }
                         } else {
                             resultsData += `
-                                <div style="text-align: left; font-size: 14px;">${label}</div>
-                                <div style="text-align: right; font-size: 14px; font-weight: 600;">${value}</div>
+                                <div style="text-align: left; font-size: 13px;">${label}</div>
+                                <div style="text-align: right; font-size: 13px; font-weight: 600;">${value}</div>
                             `;
                         }
                     }
@@ -1661,10 +1852,19 @@ class BikeCalculator {
                             fontWeight = '600';
                         }
                         
-                        resultsData += `
-                            <div style="text-align: left; font-size: 13px;">${label}</div>
-                            <div style="text-align: right; font-size: ${fontSize}; font-weight: ${fontWeight};">${value}</div>
-                        `;
+                        // Check if this is Bar Reach Needed (which needs a divider after it)
+                        if (label === 'Bar Reach Needed:') {
+                            resultsData += `
+                                <div style="text-align: left; font-size: 13px;">${label}</div>
+                                <div style="text-align: right; font-size: ${fontSize}; font-weight: ${fontWeight};">${value}</div>
+                                <div style="grid-column: 1 / span 2; height: 4px; border-bottom: 0.5px solid #ddd; margin-bottom: 4px;"></div>
+                            `;
+                        } else {
+                            resultsData += `
+                                <div style="text-align: left; font-size: 13px;">${label}</div>
+                                <div style="text-align: right; font-size: ${fontSize}; font-weight: ${fontWeight};">${value}</div>
+                            `;
+                        }
                     }
                 });
                 resultsData += '</div>';
@@ -1716,6 +1916,9 @@ class BikeCalculator {
         // Create a new window for printing
         const printWindow = window.open('', '_blank');
         
+        // Create the footer content
+        const footerContent = `${clientName} - Saddle X/Y: ${targetSaddleX}/${targetSaddleY} - Handlebar X/Y: ${targetHandlebarX}/${targetHandlebarY} - Bar Reach Used: ${handlebarReachUsed}`;
+        
         // Write content to the new window
         printWindow.document.write(`
             <!DOCTYPE html>
@@ -1726,13 +1929,33 @@ class BikeCalculator {
                     body {
                         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                         line-height: 1.4;
-                        color: #1C1C1E;
-                        padding: 20px;
+                        color: #333;
+                        padding: 0px;
                         max-width: 1200px;
                         margin: 0 auto;
+                        background-color: #f5f5f5;
                     }
-                    h1, h2, h3, h4 {
-                        margin-top: 0;
+                    h1 {
+                        color: #333;
+                        font-size: 28px;
+                        margin-bottom: 10px;
+                    }
+                    h2 {
+                        color: #444;
+                        font-size: 22px;
+                        margin: 0px 0 15px;
+                        padding-bottom: 5px;
+                        border-bottom: 1px solid #ddd;
+                    }
+                    h3 {
+                        color: #555;
+                        font-size: 18px;
+                        margin: 15px 0 10px;
+                    }
+                    h4 {
+                        color: #666;
+                        font-size: 16px;
+                        margin: 0px 0 5px;
                     }
                     p {
                         margin: 5px 0;
@@ -1745,29 +1968,59 @@ class BikeCalculator {
                         padding: 8px 16px;
                         font-size: 14px;
                         cursor: pointer;
-                        margin: 20px auto;
+                        margin: 30px auto;
                         display: block;
                     }
                     .print-button:hover {
                         opacity: 0.9;
                     }
+                    .header-logo {
+                        text-align: center;
+                        font-size: 16px;
+                        color: #777;
+                        margin-bottom: 0px;
+                    }
+                    .footer {
+                        text-align: center;
+                        font-size: 12px;
+                        color: #777;
+                        margin-top: 30px;
+                        padding-top: 10px;
+                        border-top: 1px solid #ddd;
+                    }
                     @media print {
                         body {
-                            padding: 0;
+                            padding: 0.5cm;
                             margin: 0;
                             max-width: none;
+                            background-color: white;
                         }
                         .print-button {
                             display: none;
                         }
                         @page {
                             size: landscape;
-                            margin: 0.5cm;
+                            margin: 1cm 0cm 1cm 0cm; /* Top, Right, Bottom, Left - added space for footer */
                         }
+                        
+                        /* Page footer that appears on every page */
+                        body::after {
+                            content: "${footerContent}";
+                            position: fixed;
+                            bottom: 0cm;
+                            left: 0;
+                            right: 0;
+                            height: 20px;
+                            font-size: 14px;
+                            text-align: center;
+                            z-index: 1000;
+                        }
+                        
                         /* Force background colors to print */
                         * {
                             -webkit-print-color-adjust: exact !important;
                             print-color-adjust: exact !important;
+                            color-adjust: exact !important;
                         }
                     }
                 </style>
@@ -1842,6 +2095,11 @@ class BikeCalculator {
             timestamp: new Date().toISOString(),
             clientName: document.getElementById('clientName').value.trim(),
             clientNotes: document.getElementById('clientNotes').value.trim(),
+            // Add component notes
+            saddleNotes: document.getElementById('saddleNotes')?.value || '',
+            handlebarNotes: document.getElementById('handlebarNotes')?.value || '',
+            crankLengthNotes: document.getElementById('crankLengthNotes')?.value || '',
+            drivetrainNotes: document.getElementById('drivetrainNotes')?.value || '',
             targetSaddleX: document.getElementById('targetSaddleX').value,
             targetSaddleY: document.getElementById('targetSaddleY').value,
             targetHandlebarX: document.getElementById('targetHandlebarX').value,
@@ -2155,13 +2413,12 @@ class BikeCalculator {
             @media (min-width: 768px) {
                 .saved-fit-item {
                     display: grid !important;
-                    grid-template-columns: 30px 2fr 1fr 1fr 1fr 100px !important;
+                    grid-template-columns: 30px 2fr 1fr 1fr 1fr 90px !important;
                     gap: 10px !important;
                     padding: 10px !important;
                     align-items: center !important;
                 }
-                .saved-fit-item .main-row,
-                .saved-fit-item .info-row {
+                .saved-fit-item .main-row {
                     display: contents !important;
                 }
                 .saved-fit-item .info-row {
@@ -2518,7 +2775,6 @@ class BikeCalculator {
                             <span>${bikeCount} bikes</span>
                             <span>•</span>
                             <span>HX: ${targetX}mm, HY: ${targetY}mm</span>
-                            ${fit.clientNotes ? `<div style="width: 100%; display: block; margin-top: 5px; font-style: italic;">${fit.clientNotes}</div>` : ''}
                         </div>
                 </div>
             `;
@@ -2749,6 +3005,12 @@ class BikeCalculator {
     loadSavedInstance(savedData) {
         // Set client name and target positions
         document.getElementById('clientName').value = savedData.clientName;
+        document.getElementById('clientNotes').value = savedData.clientNotes || '';
+        // Load component notes
+        document.getElementById('saddleNotes').value = savedData.saddleNotes || '';
+        document.getElementById('handlebarNotes').value = savedData.handlebarNotes || '';
+        document.getElementById('crankLengthNotes').value = savedData.crankLengthNotes || '';
+        document.getElementById('drivetrainNotes').value = savedData.drivetrainNotes || '';
         document.getElementById('targetSaddleX').value = savedData.targetSaddleX;
         document.getElementById('targetSaddleY').value = savedData.targetSaddleY;
         document.getElementById('targetHandlebarX').value = savedData.targetHandlebarX;
@@ -2810,6 +3072,11 @@ class BikeCalculator {
         // Set client name and target positions
         document.getElementById('clientName').value = savedData.clientName || '';
         document.getElementById('clientNotes').value = savedData.clientNotes || '';
+        // Load component notes
+        document.getElementById('saddleNotes').value = savedData.saddleNotes || '';
+        document.getElementById('handlebarNotes').value = savedData.handlebarNotes || '';
+        document.getElementById('crankLengthNotes').value = savedData.crankLengthNotes || '';
+        document.getElementById('drivetrainNotes').value = savedData.drivetrainNotes || '';
         document.getElementById('targetSaddleX').value = savedData.targetSaddleX || '';
         document.getElementById('targetSaddleY').value = savedData.targetSaddleY || '';
         document.getElementById('targetHandlebarX').value = savedData.targetHandlebarX || '';

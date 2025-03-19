@@ -84,7 +84,7 @@ body {
 .calculator-container {
     width: 100%;
     max-width: 100%;
-    padding: 1rem 2rem;
+    padding: 1rem 1rem 0rem 0.5rem;
     margin-left: 215px; /* Only account for nav by default */
     overflow-x: hidden;
     background-color: var(--bg-color);
@@ -92,7 +92,8 @@ body {
 
 /* Special class for the XY calculator page with client info card */
 .has-client-info-card .calculator-container {
-    margin-left: 425px; /* 215px (nav) + 300px (client card) */
+    margin-left: 435px; /* 215px (nav) + 300px (client card) */
+    padding: 1rem 1rem 0rem 3rem;
 }
 
 .client-buttons {
@@ -206,6 +207,7 @@ button:disabled {
     scrollbar-width: thin; /* Firefox scrollbar */
     background-color: var(--bg-color);
 }
+
 /*************************************************************************************/
 #bikes-container {
     gap: 1rem;
@@ -215,7 +217,7 @@ button:disabled {
     flex-wrap: nowrap;
     width: max-content;
     min-width: min-content;
-    background-color: var(--bg-color);
+    background-color: var(--bg-color);;
 }
 
 /* Styling for webkit scrollbars (Chrome, Safari, Edge) */
@@ -541,39 +543,170 @@ button:disabled {
         background-color: white;
         margin: 0;
         padding: 20px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: black;
     }
     
+    /* Hide non-printable elements */
     .main-nav, 
+    .mobile-nav,
     .add-buttons, 
     .drag-handle, 
     .button-group,
+    .hamburger-menu,
+    .client-info-toggle,
     #bikes-container::-webkit-scrollbar {
         display: none !important;
     }
     
+    /* Reset container margins and layout */
     .calculator-container {
-        margin-left: 0;
-        padding: 0;
+        margin: 0 !important;
+        padding: 0 !important;
         width: 100%;
     }
     
     .bikes-container-wrapper {
         overflow: visible;
+        padding: 0;
+        margin: 0;
     }
     
     #bikes-container {
-        display: block;
-        overflow: visible;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        width: 100%;
     }
     
+    /* Style bike cards for print */
     .bike-card {
         page-break-inside: avoid;
-        margin-bottom: 20px;
+        break-inside: avoid;
         width: 100%;
+        margin: 0 0 20px 0;
+        padding: 15px;
         box-shadow: none;
-        border: 1px solid #ddd;
+        border: 1px solid #ccc;
+        background: white;
     }
-
+    
+    /* Enhance typography for print */
+    .bike-card h3 {
+        font-size: 14px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
+    }
+    
+    .geometry-section,
+    .stem-section,
+    .results-section {
+        padding: 8px;
+        margin-bottom: 8px;
+        border: none;
+        background: white;
+    }
+    
+    .geometry-section h4,
+    .stem-section h4,
+    .results-section h4 {
+        font-size: 12px;
+        margin-bottom: 6px;
+        color: #666;
+    }
+    
+    /* Adjust input fields for print */
+    .input-group {
+        margin-bottom: 3px;
+    }
+    
+    .input-group label {
+        color: #333;
+    }
+    
+    .input-group input {
+        border: none;
+        background: none;
+        padding: 0;
+        color: black;
+    }
+    
+    /* Style results for print */
+    .result-group {
+        margin-bottom: 3px;
+    }
+    
+    .result-group label {
+        color: #666;
+    }
+    
+    .result-group span {
+        color: black;
+        font-weight: normal;
+    }
+    
+    /* Add page header */
+    .calculator-container::before {
+        content: "XY Position Calculator Results";
+        display: block;
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+        color: black;
+    }
+    
+    /* Add date and time footer */
+    .calculator-container::after {
+        content: "Generated on " attr(data-print-date);
+        display: block;
+        font-size: 10px;
+        color: #666;
+        text-align: center;
+        margin-top: 20px;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+    }
+    
+    /* Client info card print styles */
+    .client-info-card {
+        position: static;
+        width: 100%;
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        box-shadow: none;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    .client-info-title {
+        font-size: 16px;
+        color: black;
+        margin-bottom: 15px;
+    }
+    
+    .client-info-section {
+        margin-bottom: 12px;
+    }
+    
+    .client-info-section-title {
+        font-size: 14px;
+        color: #666;
+    }
+    
+    /* Ensure proper page breaks */
+    @page {
+        margin: 0.5cm;
+    }
+    
+    /* Force background colors and images to print */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
 }
 
 @keyframes fadeIn {
@@ -1449,6 +1582,8 @@ button:disabled {
 .mobile-nav a.active {
     background-color: var(--hover-bg);
     color: var(--primary-color);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 0;
 }
 
 .mobile-nav .theme-toggle {
@@ -1657,12 +1792,6 @@ button:disabled {
         margin-bottom: 8px;
     }
 }
-
-
-/* Update the existing mobile styles to inherit from the 1136px breakpoint */
-
-
-
 @media (max-width: 768px) {
     .hamburger-menu {
         display: block;
@@ -2091,6 +2220,7 @@ button:disabled {
     line-height: 1.4;
     pointer-events: none;
     text-wrap: wrap;
+    transition-delay: 0.5s;
 }
 
 .tooltip .tooltip-text::after {
@@ -2137,6 +2267,7 @@ button:disabled {
     line-height: 1.4;
     pointer-events: none;
     text-wrap: wrap;
+    transition-delay: 0.5s;
 }
 
 .tooltip-client-info .tooltip-text::after {
@@ -2237,6 +2368,65 @@ button:disabled {
     background-color: var(--input-bg);
     color: var(--text-color);
     margin-bottom: 0px;
+}
+/*DESKTOP CLIENT INFO TOGGLE*/
+.client-info-toggle {
+    display: block;
+    position: fixed;
+    top: 60px;
+    left: 447px;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 101;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.5s ease;
+}
+
+.client-info-card {
+    transform: translateX(0%);
+    transition: transform 0.5s ease;
+    position: fixed;
+    left: 215px;
+    z-index: 95;
+    border-right: 1px solid var(--border-color);
+    box-shadow: 1px 0 3px var(--shadow-color);
+}
+
+.client-info-card.active {
+    transform: translateX(-100%);
+    width: 290px;
+    border-left: 40px solid var(--card-background);
+}
+
+@media (min-width: 1024px) {
+
+    .client-info-toggle {
+        display: block;
+    }
+
+    .client-info-card {
+        display: block;
+    }
+
+    .client-info-toggle.active {
+        transform: translateX(-252px) rotate(180deg);
+    }
+
+    .calculator-container.active {
+        margin-left: 220px;
+        padding: 1rem 1rem 0rem 1.1rem;
+        transform: translateX(0);
+        transition: transform 0.5s ease;
+    }
 }
 
 /* Remove spinner controls from number inputs */
@@ -2341,15 +2531,15 @@ button:disabled {
     
     .client-info-card.active {
         transform: translateX(0);
-        width: 320px;
-        border-left: 40px solid var(--card-background);
+        width: 290px;
+        border-left: 15px solid var(--card-background);
     }
     
     .client-info-toggle {
         display: block;
         position: fixed;
-        top: 60px;
-        left: 220px;
+        top: 62px;
+        left: 197px;
         background-color: var(--primary-color);
         color: #fff;
         border: none;
@@ -2363,10 +2553,16 @@ button:disabled {
         cursor: pointer;
         z-index: 101;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transform: rotate(180deg);
+    }
+
+    .client-info-toggle.active {
+        transform: rotate(0deg);
     }
     
     .has-client-info-card .calculator-container {
         margin-left: 215px; /* Only account for nav */
+        padding: 1rem 1rem 0rem 1.1rem;
     }
 }
 
@@ -2387,7 +2583,11 @@ button:disabled {
     
     .client-info-card {
         left: 0;
-        width: 320px;
+        width: 250px;
+    }
+
+    .client-info-card.active {
+        border-left: 45px solid var(--card-background);
     }
     
     .client-info-toggle {

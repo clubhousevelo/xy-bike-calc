@@ -1502,7 +1502,7 @@ class BikeCalculator {
         const headerSection = document.createElement('div');
         headerSection.innerHTML = `
             <div style="margin-bottom: 0px; text-align: center;">
-                <h1 style="margin-bottom: 0px;margin-top: 0px;">XY Bike Position Calculator</h1>
+                <h1 style="margin-bottom: 0px;margin-top: 0px;">XY Position Calculator</h1>
                 <h4 style="margin-bottom: 20px;margin-top: 0px;">www.xybikecalc.com</h4>
                 <p style="margin-bottom: 20px;">Generated on ${new Date().toLocaleDateString()}${byLine}</p>
             </div>

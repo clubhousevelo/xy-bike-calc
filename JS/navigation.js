@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <a href="guide.html" ${currentPage === 'guide.html' ? 'class="active"' : ''}>Guide</a>
             </div>
             <div class="non-auth-dependent login-container">
-                <button class="login-button" onclick="window.location.href='login.html'">Login</button>
+                <button class="login-button" onclick="window.location.href='/login/'">Login</button>
             </div>
             <div class="auth-dependent auth-container">
                 <div class="user-container">
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <a href="../guide.html" ${currentPage === 'guide.html' ? 'class="active"' : ''}>Guide</a>
             </div>
             <div class="non-auth-dependent login-container">
-                <button class="login-button" onclick="window.location.href='../login.html'">Login</button>
+                <button class="login-button" onclick="window.location.href='/login/'">Login</button>
             </div>
             <div class="auth-dependent auth-container">
                 <div class="user-container">

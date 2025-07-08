@@ -614,7 +614,7 @@ button:disabled {
     .results-section h4 {
         font-size: 12px;
         margin-bottom: 6px;
-        color: #666;
+        color: #000000;
     }
     
     /* Adjust input fields for print */

@@ -2318,7 +2318,7 @@ button:disabled {
     top: 0;
     left: 215px; /* Width of main-nav */
     bottom: 0;
-    width: 261px;
+    width: 250px;
     background: var(--card-bg);
     border-right: 1px solid var(--border-color);
     z-index: 90;
@@ -2374,7 +2374,7 @@ button:disabled {
     display: block;
     position: fixed;
     top: 60px;
-    left: 456px;
+    left: 447px;
     background-color: var(--primary-color);
     color: #fff;
     border: none;
@@ -2403,7 +2403,7 @@ button:disabled {
 
 .client-info-card.active {
     transform: translateX(-100%);
-    width: 261px;
+    width: 290px;
     border-left: 40px solid var(--card-background);
 }
 
@@ -2418,7 +2418,7 @@ button:disabled {
     }
 
     .client-info-toggle.active {
-        transform: translateX(-260px) rotate(180deg);
+        transform: translateX(-252px) rotate(180deg);
     }
 
     .calculator-container.active {

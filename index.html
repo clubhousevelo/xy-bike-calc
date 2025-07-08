@@ -15,131 +15,163 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
+    <!-- Immediate dark mode setup -->
+    <script>
+      // Set theme immediately to prevent flash
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="XY Bike Calc - A collection of bike geometry tools for calculating handlebar and saddle positions using X/Y coordinates. Stop guessing, set your next bike up with accurate measurements.">
-    <meta name="keywords" content="bike fit, bicycle fitting, XY bike calculator, bike position calculator, bike prescription, bike geometry, bike geometry calculator, saddle position, handlebar position">
-    <meta name="author" content="XY Bike Calc">
-    <meta name="robots" content="index, follow">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com https://www.googletagmanager.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.google-analytics.com; connect-src https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://sheets.googleapis.com https://*.googleapis.com https://www.google-analytics.com https://analytics.google.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
-    <title>Welcome - XY Bike Calculator</title>
+    <title>XY Bike Calculator - Bike Prescription Tool</title>
     <link rel="stylesheet" href="css/styles.css">
+    <!-- Modal Styles -->
     <style>
-        .welcome-container {
-            max-width: 700px;
-            margin: 0rem auto;
-            padding: 0rem;
-            background-color: var(--bg-color);
-            border-radius: 8px;
-            box-shadow: 0 0px 0px var(--shadow-color);
-            border: 0px solid var(--border-color);
-        }
-
-
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.2rem;
-            margin-bottom: 0rem;
-        }
-
-        .tool-card {
-            padding: 1.2rem;
-            background-color: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
+        .upgrade-modal, .tos-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .upgrade-modal.show, .tos-modal.show {
             display: flex;
-            flex-direction: column;
         }
 
-        .tool-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-
-        .tool-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
-
-        .tool-title {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
+        .upgrade-content, .tos-content {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
             color: var(--text-color);
         }
 
-        .tool-description {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            line-height: 1.5;
-            margin-bottom: 1.5rem;
-            flex-grow: 1;
-        }
-
-        .tool-button {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
+        .upgrade-button, .tos-button {
             background-color: var(--primary-color);
             color: white;
-            text-decoration: none;
+            border: none;
+            padding: 4px 16px;
             border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
             font-weight: 500;
-            transition: opacity 0.2s;
-            margin-top: auto;
         }
 
-        .tool-button:hover {
+        .upgrade-button:hover, .tos-button:hover {
             opacity: 0.9;
         }
-
-        .guide-section {
-            text-align: center;
-            margin-top: 1.5rem;
-            padding: 1.2rem;
-            background-color: var(--card-background);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
+        
+        .tos-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
         }
-
-        .guide-title {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            color: var(--text-color);
-        }
-
-        .guide-description {
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-            font-size: 1rem;
+        
+        .tos-content p {
+            margin-bottom: 15px;
             line-height: 1.5;
         }
-
-        .guide-button {
-            display: inline-block;
-            padding: 0.75rem 2rem;
-            background-color: var(--secondary-color);
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: background-color 0.2s;
-            font-size: 1.1rem;
+        
+        .tos-links {
+            margin-bottom: 20px;
         }
-
-        .guide-button:hover {
-            opacity: 0.9;
+        
+        .tos-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .tos-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .tos-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tos-decline {
+            background-color: #777;
+        }
+    </style>
+    <!-- Ensure dark mode styles are applied -->
+    <style>
+        /* Ensure dark mode styles are applied */
+        html[data-theme="dark"] {
+            --primary-color: #0A84FF;
+            --secondary-color: #5E5CE6;
+            --background-color: #1C1C1E;
+            --card-background: #2C2C2E;
+            --border-color: #3C3C3E;
+            --text-color: #FFFFFF;
+            --text-secondary: #98989D;
+            --error-color: #FF453A;
+            --success-color: #32D74B;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --bg-color: #1C1C1E;
+            --nav-bg: #2C2C2E;
+            --card-bg: #2C2C2E;
+            --input-bg: #3C3C3E;
+            --input-border: #48484A;
+            --button-bg: #0A84FF;
+            --button-text: #FFFFFF;
+            --hover-bg: #3C3C3E;
+            --table-bg: #2C2C2E;
+            --table-header-bg: #3C3C3E;
+            --table-hover-bg: rgba(94, 92, 230, 0.1);
+        }
+        
+        html[data-theme="dark"] body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        html[data-theme="dark"] .calculator-container,
+        html[data-theme="dark"] .bike-card,
+        html[data-theme="dark"] input,
+        html[data-theme="dark"] select {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-color: var(--border-color);
         }
     </style>
 </head>
-<body>
+<body class="has-client-info-card">
+    <div class="tos-modal" id="tosModal">
+        <div class="tos-content">
+            <center><h2>Terms of Service Acknowledgment</h2></center>
+            <p style="text-align: center;">
+                By using XY Bike Calculator, you acknowledge and agree to our Terms of Service.
+            </p>
+            <p style="text-align: center;"  >
+                The calculations and measurements provided are for informational purposes only and should not replace professional bike fitting services.
+            </p>
+            <div class="tos-links" style="text-align: center;">
+                <a href="tos.html" target="_blank">Read Full Terms of Service</a>
+            </div>
+            <div class="tos-buttons">
+                <button class="tos-button tos-decline" onclick="declineTos()">Decline</button>
+                <button class="tos-button" onclick="acknowledgeTos()">Accept</button>
+            </div>
+        </div>
+    </div>
+
     <button class="hamburger-menu">
         <span></span>
         <span></span>
@@ -148,20 +180,20 @@
 
     <nav class="mobile-nav">
         <ul>
-            <li><a href="/xy-position-calculator/">X/Y Position Calculator</a></li>
-            <li><a href="/hxhy-frame-calculator/">HX/HY to Frame Calculator</a></li>
-            <li><a href="/stem-calculator/">Stem Calculator</a></li>
-            <li><a href="/bike-search/">Bike Search</a></li>
+            <li><a href="index.html" class="active">X/Y Position Calculator</a></li>
+            <li><a href="hxhy-frame-calculator.html">HX/HY to Frame Calculator</a></li>
+            <li><a href="stem-calculator.html">Stem Calculator</a></li>
+            <li><a href="bike-search.html">Bike Search</a></li>
         </ul>
         <div class="flex-spacer"></div>
         <div class="nav-item">
-            <a href="/about/">About</a>
+            <a href="about.html">About</a>
         </div>
         <div class="nav-item-guide">
-            <a href="/guide/">Guide</a>
+            <a href="guide.html">Guide</a>
         </div>
         <div class="non-auth-dependent login-container">
-            <button class="login-button" onclick="window.location.href='/login/'">Login</button>
+            <button class="login-button" onclick="window.location.href='login.html'">Login</button>
         </div>
         <div class="auth-dependent auth-container">
             <div class="user-container">
@@ -176,32 +208,33 @@
             </button>
         </div>
         <div class="footer-links">
-            <a href="/terms-of-service/" style="margin-bottom: -10px;">Terms of Service</a>
-            <a href="/privacy-policy/">Privacy Policy</a>
+            <a href="tos.html" style="margin-bottom: -10px;">Terms of Service</a>
+            <a href="privacy-policy.html">Privacy Policy</a>
             <div class="version">
-                <a href="/changelog/">&nbsp;</a>
+                <a href="changelog.html">&nbsp;</a>
             </div>
         </div>
     </nav>
+
     <nav class="main-nav">
         <div class="nav-header">
-            <a href="/"><h2>XY Bike Calc</h2></a>
+            <h2>XY Bike Calc</h2>
         </div>
         <ul>
-            <li><a href="/xy-position-calculator/">X/Y Position Calculator</a></li>
-            <li><a href="/hxhy-frame-calculator/">HX/HY to Frame Calculator</a></li>
-            <li><a href="/stem-calculator/">Stem Calculator</a></li>
-            <li><a href="/bike-search/">Bike Search</a></li>
+            <li><a href="index.html" class="active">X/Y Position Calculator</a></li>
+            <li><a href="hxhy-frame-calculator.html">HX/HY to Frame Calculator</a></li>
+            <li><a href="stem-calculator.html">Stem Calculator</a></li>
+            <li><a href="bike-search.html">Bike Search</a></li>
         </ul>
         <div class="flex-spacer"></div>
         <div class="nav-item">
-            <a href="/about/">About</a>
+            <a href="about.html">About</a>
         </div>
         <div class="nav-item-guide">
-            <a href="/guide/">Guide</a>
+            <a href="guide.html">Guide</a>
         </div>
         <div class="non-auth-dependent login-container">
-            <button class="login-button" onclick="window.location.href='/login/'">Login</button>
+            <button class="login-button" onclick="window.location.href='login.html'">Login</button>
         </div>
         <div class="auth-dependent auth-container">
             <div class="user-container">
@@ -216,62 +249,118 @@
             </button>
         </div>
         <div class="footer-links">
-            <a href="/terms-of-service/" style="margin-bottom: -10px;">Terms of Service</a>
-            <a href="/privacy-policy/">Privacy Policy</a>
+            <a href="tos.html" style="margin-bottom: -10px;">Terms of Service</a>
+            <a href="privacy-policy.html">Privacy Policy</a>
             <div class="version">
-                <a href="/changelog/">&nbsp;</a>
+                <a href="changelog.html">&nbsp;</a>
             </div>
         </div>
     </nav>
+    
+    <!-- Client Information Card -->
+    <div class="client-info-card">
+        <h2 class="client-info-title" style="text-align: center;">Rider Information</h2>
+        <div class="client-info-section">
+            <label for="clientName">Name:</label>
+            <input type="text" id="clientName" placeholder="Rider Name">
+        </div>
+        <div class="client-info-section">
+            <label for="clientNotes">Fit Notes:</label>
+            <textarea id="clientNotes" placeholder="Notes here will populate in the 'Open' profile dialog" style="height: 62px;"></textarea>
+        </div>
+        
+        <h3 class="client-info-section-title" style="text-align: center;">Target Position</h3>
+        <div class="client-info-section">
+            <div class="input-row-single">
+                <label for="targetSaddleX">Saddle X:</label>
+                <div class="input-with-unit">
+                    <input type="number" id="targetSaddleX" placeholder="">
+                    <span>mm</span>
+                </div>
+            </div>
 
-    <div class="calculator-container">
+            <div class="input-row-single">
+                <label for="targetSaddleY">Saddle Y:</label>
+                <div class="input-with-unit">
+                    <input type="number" id="targetSaddleY" placeholder="">
+                    <span>mm</span>
+                </div>
+            </div>
+
+            <div class="input-row-single" style="margin-top: 15px;">
+                <label for="targetHandlebarX">Handlebar X:</label>
+                <div class="input-with-unit">
+                    <input type="number" id="targetHandlebarX" placeholder="">
+                    <span>mm</span>
+                </div>
+            </div>
+
+            <div class="input-row-single">
+                <label for="targetHandlebarY">Handlebar Y:</label>
+                <div class="input-with-unit">
+                    <input type="number" id="targetHandlebarY" placeholder="">
+                    <span>mm</span>
+                </div>
+            </div>
+            
+            <div class="input-row-single">
+                <label for="handlebarReachUsed">Bar Reach Used:</label>
+                <div class="input-with-unit">
+                    <input type="number" id="handlebarReachUsed" placeholder="">
+                    <span>mm</span>
+                </div>
+            </div>
+        </div>
+
+        <label class="tooltip-client-info"><h3 class="client-info-section-title" style="text-align: center;">Component Notes<span class="tooltip-text">Notes about the components that were used to plan to be used. These notes have no bearing on the calculations.</span></h3></label>
+        <div class="client-info-section">
+            <label for="saddleNotes">Saddle:</label>
+            <textarea id="saddleNotes" placeholder=""></textarea>
+        </div>
+        <div class="client-info-section">
+            <label for="handlebarNotes">Handlebar:</label>
+            <textarea id="handlebarNotes" placeholder=""></textarea>
+        </div>
+        <div class="client-info-section">
+            <label for="crankLengthNotes">Crank Length:</label>
+            <textarea id="crankLengthNotes" placeholder=""></textarea>
+        </div>
+        <div class="client-info-section">
+            <label for="drivetrainNotes">Drivetrain:</label>
+            <textarea id="drivetrainNotes" placeholder=""></textarea>
+        </div>
+        <div class="client-buttons">
+            <button id="saveButton" disabled>Save</button>
+            <button id="loadButton">Open</button>
+        </div>
+
+    </div>
+    
+    <!-- Client Info Toggle Button -->
+    <button class="client-info-toggle" id="clientInfoToggle"><div style="margin-left:-2px;">◁</div></button>
+    
+    <div class="calculator-container" id="calculatorContainer">
         <div class="calculator-header">
             <h1 class="calculator-title">
                 <span class="collapse-indicator">▼</span>
-                Welcome to XY Bike Calc
+                X/Y Position Calculator
             </h1>
-            <p class="calculator-description">Explore our precision tools for bike fitting, geometry calculations, and component selection. Stop guessing, start calculating.</p>
+            <p class="calculator-description">This tool is designed to help you prescribe and compare bikes by calculating the X/Y coordinate positions of the handlebar and saddle.</p>
         </div>
 
-        <div class="welcome-container">
-            <div class="tools-grid">
-                <div class="tool-card">
-                    <div class="tool-icon">⿹</div>
-                    <h3 class="tool-title">X/Y Position Calculator</h3>
-                    <p class="tool-description">Calculate precise handlebar positions on any bike and compare multiple configurations at the same time.</p>
-                    <a href="/xy-position-calculator/" class="tool-button">Open XY Position Calculator</a>
-                </div>
+        <div class="bikes-container-wrapper">
+            <div id="bikes-container"></div>
+        </div>
 
-                <div class="tool-card">
-                    <div class="tool-icon">📐</div>
-                    <h3 class="tool-title">HX/HY to Frame Calculator</h3>
-                    <p class="tool-description">Convert handlebar X/Y coordinates to frame measurements. Determine stack and reach values needed to achieve your desired position.</p>
-                    <a href="/hxhy-frame-calculator/" class="tool-button">Open HX/HY to Frame Calculator</a>
-                </div>
-
-                <div class="tool-card">
-                    <div class="tool-icon">🔢</div>
-                    <h3 class="tool-title">Stem Calculator</h3>
-                    <p class="tool-description">Calculate and compare the effect of different stem configurations.</p>
-                    <a href="/stem-calculator/" class="tool-button">Open Stem Calculator</a>
-                </div>
-
-                <div class="tool-card">
-                    <div class="tool-icon">🔍</div>
-                    <h3 class="tool-title">Bike Search</h3>
-                    <p class="tool-description">Search our database of bikes based on your desired Stack and Reach figures.</p>
-                    <a href="/bike-search/" class="tool-button">Search Bikes</a>
-                </div>
-            </div>
-
-            <div class="guide-section">
-                <h3 class="guide-title">New to XY Bike Calc?</h3>
-                <p class="guide-description">Our guide will help define what "XY" values mean so you can get the most out of our powerful yet simple XY Position Calculator.</p>
-                <a href="/guide/" class="guide-button">Read the Guide</a>
-            </div>
+        <div class="add-buttons">
+            <button id="addBike">Add Bike</button>
+            <button id="addManualBike">Add Manual Bike</button>
+            <button id="printButton" class="print-button">Print</button>
+            <button id="clearAllData" class="clear-button">Reset All</button>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -279,10 +368,126 @@
     
     <!-- Custom Scripts -->
     <script src="js/version.js"></script>
-    <script src="js/dark-mode.js"></script>
     <script src="js/mobile-menu.js"></script>
     <script src="js/calculator-header.js"></script>
     <script src="js/firebase-auth.js"></script>
-   
+    <script src="js/calculator.js"></script>
+    <script>
+        // Initialize the calculator
+        const calculator = new BikeCalculator();
+        
+        // Global function for dark mode toggle
+        function toggleTheme() {
+            // Toggle theme
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            // Apply theme
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Update all toggle buttons
+            document.querySelectorAll('#darkModeToggle, #mobileDarkModeToggle').forEach(btn => {
+                const icon = btn.querySelector('.toggle-icon');
+                const text = btn.querySelector('.toggle-text');
+                
+                if (icon) icon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+                if (text) text.textContent = newTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+            });
+            
+            return false; // Prevent default action
+        }
+        
+        // Update button appearance on page load
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        document.querySelectorAll('#darkModeToggle, #mobileDarkModeToggle').forEach(btn => {
+            const icon = btn.querySelector('.toggle-icon');
+            const text = btn.querySelector('.toggle-text');
+            
+            if (icon) icon.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+            if (text) text.textContent = currentTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+        });
+    </script>
+    
+    <!-- Client Information Card Sync Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Client info card elements are the same as the calculator elements now
+            const clientName = document.getElementById('clientName');
+            const targetSaddleX = document.getElementById('targetSaddleX');
+            const targetSaddleY = document.getElementById('targetSaddleY');
+            const targetHandlebarX = document.getElementById('targetHandlebarX');
+            const targetHandlebarY = document.getElementById('targetHandlebarY');
+            const handlebarReachUsed = document.getElementById('handlebarReachUsed');
+            const clientNotes = document.getElementById('clientNotes');
+            const saddleNotes = document.getElementById('saddleNotes');
+            const handlebarNotes = document.getElementById('handlebarNotes');
+            const crankLengthNotes = document.getElementById('crankLengthNotes');
+            const drivetrainNotes = document.getElementById('drivetrainNotes');
+            
+            // Client Info Toggle Button
+            const clientInfoToggle = document.getElementById('clientInfoToggle');
+            const clientInfoCard = document.querySelector('.client-info-card');
+            const calculatorContainerWrapper = document.getElementById('calculatorContainer');
+            // Toggle client info card when button is clicked
+            clientInfoToggle.addEventListener('click', function() {
+                clientInfoCard.classList.toggle('active');
+                clientInfoToggle.classList.toggle('active');
+                calculatorContainerWrapper.classList.toggle('active');
+            });
+
+            clientInfoToggleExpand.addEventListener('click', function() {
+                clientInfoCard.classList.toggle('active');
+                clientInfoToggle.classList.toggle('active');
+                calculatorContainerWrapper.classList.toggle('active');
+            });
+            
+            // Enable save button if client name is filled
+            clientName.addEventListener('input', function() {
+                document.getElementById('saveButton').disabled = !clientName.value.trim();
+            });
+            
+            // Trigger calculation events when input changes
+            [targetSaddleX, targetSaddleY, targetHandlebarX, targetHandlebarY, handlebarReachUsed].forEach(el => {
+                el.addEventListener('input', function() {
+                    if (this.value) {
+                        const event = new Event('input', { bubbles: true });
+                        this.dispatchEvent(event);
+                    }
+                });
+            });
+            
+            // Initialize when client is loaded
+            document.getElementById('loadButton').addEventListener('click', function() {
+                // Wait a bit for the client data to load
+                setTimeout(function() {
+                    // Check if client name is filled to enable save button
+                    document.getElementById('saveButton').disabled = !clientName.value.trim();
+                }, 300);
+            });
+        });
+    </script>
+
+    <script>
+        // Terms of Service acknowledgment handling
+        function acknowledgeTos() {
+            localStorage.setItem('tosAcknowledged', 'true');
+            document.getElementById('tosModal').classList.remove('show');
+
+        }
+        
+        function declineTos() {
+            // Redirect to a neutral page or display a message
+            window.location.href = 'about.html';
+        }
+
+        // Show popups in correct order
+        document.addEventListener('DOMContentLoaded', function() {
+            // First check if ToS needs to be shown
+            if (!localStorage.getItem('tosAcknowledged')) {
+                document.getElementById('tosModal').classList.add('show');
+            } 
+        });
+    </script>
 </body>
-</html> 
+</html>

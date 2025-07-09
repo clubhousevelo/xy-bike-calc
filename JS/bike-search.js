@@ -94,7 +94,7 @@ class BikeSearch {
 
     async fetchBikeData() {
         // Update range to include all relevant columns (A through I for all bike data)
-        const range = 'A1:I5000';
+        const range = 'A1:I100';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.SPREADSHEET_ID}/values/${range}?key=${this.API_KEY}`;
         
         try {

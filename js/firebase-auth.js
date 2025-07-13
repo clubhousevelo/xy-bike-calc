@@ -28,12 +28,60 @@ document.addEventListener('DOMContentLoaded', function() {
   auth.onAuthStateChanged(user => {
     updateUIForAuthState(user);
     
+    // Check subscription role and redirect if necessary
+    if (user && window.location.pathname.endsWith('/xy-position-calculator/')) {
+      checkSubscriptionAndRedirect(user.uid);
+    }
+    
     // If user is logged in and we're on the main calculator page, load saved data
-    if (user && window.location.pathname.includes('index.html') && typeof BikeCalculator !== 'undefined') {
+    if (user && window.location.pathname.includes('/xy-position-calculator/') && typeof BikeCalculator !== 'undefined') {
       loadUserData(user.uid);
     }
   });
   
+  /*  DISABLED FREE/BASIC/AUTO FOR NOW **************************
+
+  // Function to check subscription role and redirect
+  function checkSubscriptionAndRedirect(userId) {
+    if (!db) return;
+    
+    // Get the current path
+    const currentPath = window.location.pathname;
+    
+    // If we're already in a role-specific directory, no need to redirect
+    if (currentPath.includes('/xy-position-calculator/free/') || currentPath.includes('/xy-position-calculator/basic/') || currentPath.includes('/xy-position-calculator/pro/')) {
+      return;
+    }
+    
+    db.collection('users').doc(userId).get()
+      .then(doc => {
+        if (!doc.exists) {
+          console.log('No user document found');
+          window.location.href = '/xy-position-calculator/free/';
+          return;
+        }
+        
+        const userData = doc.data();
+        const role = userData.firebaseRole || 'free';
+        
+        // Redirect based on role
+        if (role === 'pro') {
+          window.location.href = '/xy-position-calculator/pro/';
+        } else if (role === 'basic') {
+          window.location.href = '/xy-position-calculator/basic/';
+        } else {
+          // Default to free tier
+          window.location.href = '/xy-position-calculator/free/';
+        }
+      })
+      .catch(error => {
+        console.error('Error checking subscription:', error);
+        // On error, default to free tier
+        window.location.href = '/xy-position-calculator/free/';
+      });
+  }
+  */
+
   // Function to load user data from Firestore
   function loadUserData(userId) {
     if (!db) return;
@@ -116,7 +164,7 @@ function setupAuthUI() {
   const userDisplayElements = document.querySelectorAll('.user-display');
   userDisplayElements.forEach(el => {
     el.addEventListener('click', function() {
-      window.location.href = 'profile.html';
+      window.location.href = '/profile/';
     });
     el.style.cursor = 'pointer';
   });
@@ -136,8 +184,40 @@ function handleLogin(e) {
       e.target.reset();
       if (errorElement) errorElement.textContent = '';
       
-      // Redirect to appropriate page after login
-      window.location.href = 'index.html';
+      
+      // Get the user's role from Firestore and redirect accordingly
+      const user = userCredential.user;
+      if (firebase.firestore) {
+        const db = firebase.firestore();
+        db.collection('users').doc(user.uid).get()
+          .then(doc => {
+            if (doc.exists) {
+              const userData = doc.data();
+              const role = userData.firebaseRole || 'free';
+              
+              // Redirect based on role
+              if (role === 'pro') {
+                window.location.href = '/xy-position-calculator/pro/';
+              } else if (role === 'basic') {
+                window.location.href = '/xy-position-calculator/';
+              } else {
+                window.location.href = '/xy-position-calculator/';
+              }
+            } else {
+              // User document doesn't exist, redirect to free tier
+              window.location.href = '/xy-position-calculator/';
+            }
+          })
+          .catch(error => {
+            console.error('Error getting user document:', error);
+            // Default to free tier on error
+            window.location.href = '/xy-position-calculator/';
+          });
+      } else {
+        // No Firestore, redirect to default index
+        window.location.href = '/xy-position-calculator/';
+      }
+      
     })
     .catch((error) => {
       // Display error message
@@ -171,7 +251,13 @@ function handleSignup(e) {
         const db = firebase.firestore();
         const user = userCredential.user;
         
+        // Update the user profile with the name
+        user.updateProfile({
+          displayName: name
+        });
+        
         return db.collection('users').doc(user.uid).set({
+          displayName: name,
           email: user.email,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
@@ -179,16 +265,16 @@ function handleSignup(e) {
           e.target.reset();
           if (errorElement) errorElement.textContent = '';
           
-          // Redirect to appropriate page after signup
-          window.location.href = 'index.html';
+          // Redirect to free tier after signup
+          window.location.href = '/xy-position-calculator/';
         });
       } else {
         // Clear form and any error messages
         e.target.reset();
         if (errorElement) errorElement.textContent = '';
         
-        // Redirect to appropriate page after signup
-        window.location.href = 'index.html';
+        // Redirect to default index
+        window.location.href = '/xy-position-calculator/';
       }
     })
     .catch((error) => {
@@ -223,7 +309,7 @@ function handleLogout() {
       if (upgradeNoticeAcknowledged) localStorage.setItem('upgradeNoticeAcknowledged', upgradeNoticeAcknowledged);
 
       // Redirect to login page or update UI
-      window.location.href = 'login.html';
+      window.location.href = '/login/';
     })
     .catch((error) => {
       console.error('Logout error:', error);
@@ -247,7 +333,7 @@ function updateUIForAuthState(user) {
     });
     
     // If we're on the calculator page, enable save functionality
-    if (window.location.pathname.includes('index.html') && window.bikeCalculatorInstance) {
+    if (window.location.pathname.includes('/xy-position-calculator/') && window.bikeCalculatorInstance) {
       const saveButton = document.getElementById('saveButton');
       if (saveButton) {
         saveButton.disabled = false;
@@ -288,7 +374,7 @@ function updateUIForAuthState(user) {
     });
     
     // If we're on the calculator page, disable save functionality
-    if (window.location.pathname.includes('index.html')) {
+    if (window.location.pathname.includes('/xy-position-calculator/')) {
       const saveButton = document.getElementById('saveButton');
       if (saveButton) {
         saveButton.disabled = true;

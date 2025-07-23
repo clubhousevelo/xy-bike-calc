@@ -2036,7 +2036,7 @@ button:disabled {
 }
 
 .main-nav .nav-item-guide, .mobile-nav .nav-item-guide {
-    margin-bottom: 8px;
+    margin-bottom: 30px;
     text-align: center;
 }
 
@@ -2044,25 +2044,6 @@ button:disabled {
     color: var(--primary-color);
     border-left: 3px solid var(--primary-color);
     background-color: var(--hover-bg);
-}
-
-/* Donate nav item styling for both main and mobile navs */
-.main-nav .nav-item-donate, .mobile-nav .nav-item-donate {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0px 0 18px 0;
-}
-
-.main-nav .nav-item-donate a, .mobile-nav .nav-item-donate a {
-
-    color: var(--text-color);
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.main-nav .nav-item-donate a:hover, .mobile-nav .nav-item-donate a:hover {
-    color: var(--primary-color);
 }
 
 .main-nav .auth-container, .mobile-nav .auth-container {
@@ -2120,7 +2101,7 @@ button:disabled {
 
 /* Specific mobile nav adjustments */
 .mobile-nav .nav-item-guide {
-    margin-bottom: 8px;
+    margin-bottom: 20px;
 }
 
 .flex-spacer {
@@ -2709,5 +2690,3 @@ button:disabled {
         height: 220px;
     }
 }
-
-

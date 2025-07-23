@@ -15,19 +15,56 @@
     <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
     <link rel="manifest" href="../site.webmanifest">
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SEO Meta Tags -->
-    <meta name="description" content="XY Bike Calc - A collection of bike geometry tools for calculating handlebar and saddle positions using X/Y coordinates. Stop guessing, set your next bike up with accurate measurements.">
-    <meta name="keywords" content="HX HY, bike fit, bicycle fitting, XY bike calculator, bike position calculator, bike prescription, bike geometry, bike geometry calculator, saddle position, handlebar position">
+    <meta name="description" content="Support XY Bike Calc - A collection of bike geometry tools for calculating handlebar and saddle positions using X/Y coordinates. Your donation helps keep these tools free and accessible.">
+    <meta name="keywords" content="bike fit, bicycle fitting, XY bike calculator, bike position calculator, bike prescription, bike geometry, bike geometry calculator, saddle position, handlebar position, donate, support">
     <meta name="author" content="XY Bike Calc">
     <meta name="robots" content="index, follow">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com https://www.googletagmanager.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.google-analytics.com; connect-src https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://sheets.googleapis.com https://*.googleapis.com;">
+    <title>Donate - XY Bike Calc</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com https://www.googletagmanager.com https://js.stripe.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.google-analytics.com https://stripe.com https://*.stripe.com; connect-src https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://sheets.googleapis.com https://*.googleapis.com https://www.google-analytics.com https://analytics.google.com https://api.stripe.com https://*.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
-    <title>HX/HY to Frame Calculator - Find Stack and Reach</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .calculator-container {
+            min-height: 100vh;
+            display: block;
+        }
+        .donate-center-wrapper {
+            min-height: calc(100vh - 150px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .donate-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .donate-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+        .donate-description {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .stripe-container {
+            margin: 2rem 0;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
     <button class="hamburger-menu">
@@ -39,7 +76,7 @@
     <nav class="mobile-nav">
         <ul>
             <li><a href="/xy-position-calculator/">X/Y Position Calculator</a></li>
-            <li><a href="/hxhy-frame-calculator/" class="active">HX/HY to Frame Calculator</a></li>
+            <li><a href="/hxhy-frame-calculator/">HX/HY to Frame Calculator</a></li>
             <li><a href="/stem-calculator/">Stem Calculator</a></li>
             <li><a href="/bike-search/">Bike Search</a></li>
         </ul>
@@ -83,7 +120,7 @@
         </div>
         <ul>
             <li><a href="/xy-position-calculator/">X/Y Position Calculator</a></li>
-            <li><a href="/hxhy-frame-calculator/" class="active">HX/HY to Frame Calculator</a></li>
+            <li><a href="/hxhy-frame-calculator/">HX/HY to Frame Calculator</a></li>
             <li><a href="/stem-calculator/">Stem Calculator</a></li>
             <li><a href="/bike-search/">Bike Search</a></li>
         </ul>
@@ -123,72 +160,50 @@
 
     <div class="calculator-container">
         <div class="calculator-header">
-            <h1 class="calculator-title">
-                <span class="collapse-indicator">▼</span>
-                HX/HY to Frame Calculator
-            </h1>
-            <p class="calculator-description">Use this tool to calculate Frame Stack and Reach from a desired HX/HY and specific stem configuration.</p>
+            <h1 class="calculator-title">Support XY Bike Calc</h1>
         </div>
-        <div class="input-section">
-            <div class="input-group">
-                <div class="input-field">
-                    <label for="handlebarX">Handlebar X:</label>
-                    <input type="number" id="handlebarX" value="">
-                    <span>mm</span>
+        <div class="donate-center-wrapper">
+            <div class="donate-container">
+                <h2 class="donate-title" style="color: var(--primary-color);">Thank You for Your Support! 🙏</h2>
+                <p class="donate-description">
+                    We are committed to providing high-quality tools for bike fitters and cycling enthusiasts. <br><br>
+                    If you find the calculators and tools valuable and would like to support this site, your generosity would be greatly appreciated and will encourage continued development and improvements.
+                </p>
+                
+                <div class="stripe-container">
+                    <script async
+                      src="https://js.stripe.com/v3/buy-button.js">
+                    </script>
+
+                    <stripe-buy-button
+                      buy-button-id="buy_btn_1RnvNB2KCZl5vfz5QKMqlpUu"
+                      publishable-key="pk_live_51R4Q9T2KCZl5vfz5qOn8LzbP80y0vTKgqW2tZwZ12E8pftAEQ1GzNy3MWdx4oSQP4L5ncmsmG1AtMlAc7aVnrg8o00Ou8B9FNO"
+                    >
+                    </stripe-buy-button>
                 </div>
-                <div class="input-field">
-                    <label for="handlebarY">Handlebar Y:</label>
-                    <input type="number" id="handlebarY" value="">
-                    <span>mm</span>
-                </div>
-                <div class="input-field hta-field">
-                    <label for="headTubeAngle">Head Tube Angle:</label>
-                    <input type="number" id="headTubeAngle" value="73" step="0.1">
-                    <span>°</span>
-                </div>
-                <div class="input-field">
-                    <label for="stemHeight" class="tooltip">Stem Height:<span class="tooltip-text">Measured height of the stem where it clamps the steerer tube. Typically ranges from 38-42mm.</span></label>
-                    <input type="number" id="stemHeight" value="40" min="0">
-                    <span>mm</span>
-                </div>
-                <div class="input-field">
-                    <label for="stemLength">Stem Length:</label>
-                    <input type="number" id="stemLength" value="100" min="35">
-                    <span>mm</span>
-                </div>
-                <div class="input-field">
-                    <label for="stemAngle">Stem Angle:</label>
-                    <input type="number" id="stemAngle" value="-6" step="1">
-                    <span>°</span>
-                </div>
-                <div class="input-field">
-                    <label for="spacerHeight" class="tooltip">Spacer Height:<span class="tooltip-text">Typically include everything between the frame and bottom of the stem, such as headset bearing cover</span></label>
-                    <input type="number" id="spacerHeight" value="20" min="0">
-                    <span>mm</span>
-                </div>
-            </div>
-            <div class="results-group">
-                <div class="result-field">
-                    <label>Reach</label>
-                    <span id="frameReach">-- mm</span>
-                </div>
-                <div class="result-field">
-                    <label>Stack</label>
-                    <span id="frameStack">-- mm</span>
-                </div>
+
+                <p class="donate-description">
+                    Every contribution, no matter the size, makes a difference in keeping these tools accessible to the cycling community.
+                </p>
+                
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2rem; opacity: 0.7;">
+                    Payments processed by Stripe
+                </p>
             </div>
         </div>
     </div>
 
-    <script src="../js/version.js"></script>
-    <script src="../js/hxhy-calculator.js"></script>
-    <script src="../js/dark-mode.js"></script>
-    <script src="../js/mobile-menu.js"></script>
-    <script src="../js/calculator-header.js"></script>
-    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Custom Scripts -->
+    <script src="../js/version.js"></script>
+    <script src="../js/dark-mode.js"></script>
+    <script src="../js/mobile-menu.js"></script>
+    <script src="../js/calculator-header.js"></script>
     <script src="../js/firebase-auth.js"></script>
+   
 </body>
 </html> 

@@ -198,9 +198,6 @@
         <div class="nav-item-guide">
             <a href="/guide/">Guide</a>
         </div>
-        <div class="nav-item-donate">
-            <a href="/donate/">Donate</a>
-        </div>
         <div class="non-auth-dependent login-container">
             <button class="login-button" onclick="window.location.href='/login/'">Login</button>
         </div>
@@ -241,9 +238,6 @@
         </div>
         <div class="nav-item-guide">
             <a href="/guide/">Guide</a>
-        </div>
-        <div class="nav-item-donate">
-            <a href="/donate/">Donate</a>
         </div>
         <div class="non-auth-dependent login-container">
             <button class="login-button" onclick="window.location.href='/login/'">Login</button>
@@ -370,12 +364,6 @@
             <button id="printButton" class="print-button">Print</button>
             <button id="clearAllData" class="clear-button">Reset All</button>
         </div>
-        <!-- XY Stem Comparison Visual -->
-        <div class="xy-stem-visualization-section">
-            <h3 class="xy-stem-visualization-title">Handlebar X/Y Visual Comparison</h3>
-            <canvas id="xyStemVisualizationCanvas" width="550" height="400" style="width:100%;max-width:550px;display:block;margin:0 auto 10px auto;background:var(--card-bg);"></canvas>
-            <div class="xy-stem-legend" style="display:flex;justify-content:left;gap:10px;"></div>
-        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
@@ -392,7 +380,7 @@
     <script src="../js/calculator.js"></script>
     <script>
         // Initialize the calculator
-        window.calculator = new BikeCalculator();
+        const calculator = new BikeCalculator();
         
         // Global function for dark mode toggle
         function toggleTheme() {

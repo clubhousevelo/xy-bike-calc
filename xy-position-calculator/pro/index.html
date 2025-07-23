@@ -11,10 +11,10 @@
       gtag('config', 'G-H1TXBTLXDW');
     </script>
     <!-- Favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-    <link rel="manifest" href="../site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16x16.png">
+    <link rel="manifest" href="../../site.webmanifest">
     <!-- Immediate dark mode setup -->
     <script>
       // Set theme immediately to prevent flash
@@ -37,7 +37,7 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <title>XY Bike Calc - Bike Position Calculator</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../../css/styles.css">
     <!-- Modal Styles -->
     <style>
         .upgrade-modal, .tos-modal {
@@ -268,7 +268,7 @@
             </div>
         </div>
     </nav>
-
+    
     <!-- Client Information Card -->
     <div class="client-info-card">
         <h2 class="client-info-title" style="text-align: center;">Rider Information</h2>
@@ -367,14 +367,8 @@
         <div class="add-buttons">
             <button id="addBike">Add Bike</button>
             <button id="addManualBike">Add Manual Bike</button>
-            <button id="printButton" class="print-button">Print</button>
+            <button id="printButton" class="print-button" style="display: none;">Print</button>
             <button id="clearAllData" class="clear-button">Reset All</button>
-        </div>
-        <!-- XY Stem Comparison Visual -->
-        <div class="xy-stem-visualization-section">
-            <h3 class="xy-stem-visualization-title">Handlebar X/Y Visual Comparison</h3>
-            <canvas id="xyStemVisualizationCanvas" width="550" height="400" style="width:100%;max-width:550px;display:block;margin:0 auto 10px auto;background:var(--card-bg);"></canvas>
-            <div class="xy-stem-legend" style="display:flex;justify-content:left;gap:10px;"></div>
         </div>
     </div>
 
@@ -385,14 +379,56 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <!-- Custom Scripts -->
-    <script src="../js/version.js"></script>
-    <script src="../js/mobile-menu.js"></script>
-    <script src="../js/calculator-header.js"></script>
-    <script src="../js/firebase-auth.js"></script>
-    <script src="../js/calculator.js"></script>
+    <script src="../../js/version.js"></script>
+    <script src="../../js/mobile-menu.js"></script>
+    <script src="../../js/calculator-header.js"></script>
+    <script src="../../js/firebase-auth.js"></script>
+    
+    <!-- Subscription role check -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if the user is logged in and has the correct subscription role
+            firebase.auth().onAuthStateChanged(user => {
+                if (user) {
+                    // Get the Firestore instance
+                    const db = firebase.firestore();
+                    
+                    // Check the user's subscription role
+                    db.collection('users').doc(user.uid).get()
+                        .then(doc => {
+                            if (doc.exists) {
+                                const userData = doc.data();
+                                const role = userData.firebaseRole;
+                                
+                                // If the user is not a basic user, redirect them to the appropriate page
+                                if (role === 'free' || !role) {
+                                    window.location.href = '/xy-position-calculator/pro/';
+                                } else if (role === 'pro') {
+                                    window.location.href = '/xy-position-calculator/pro';
+                                }
+                            } else {
+                                // If user document doesn't exist, treat as free tier
+                                window.location.href = '/xy-position-calculator/pro/';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error checking subscription role:', error);
+                            // On error, redirect to free tier
+                            window.location.href = '/xy-position-calculator/pro/';
+                        });
+                } else {
+                    // If not logged in, redirect to free tier
+                    window.location.href = '/xy-position-calculator/pro/';
+                }
+            });
+        });
+    </script>
+    
+    <script src="/../../js/calculator.js"></script>
+
     <script>
         // Initialize the calculator
-        window.calculator = new BikeCalculator();
+        const calculator = new BikeCalculator();
         
         // Global function for dark mode toggle
         function toggleTheme() {
@@ -496,7 +532,7 @@
         
         function declineTos() {
             // Redirect to a neutral page or display a message
-            window.location.href = '../about/';
+            window.location.href = '../../about/';
         }
 
         // Show popups in correct order

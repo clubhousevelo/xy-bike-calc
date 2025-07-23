@@ -305,9 +305,6 @@ class BikeCalculator {
                     // When target positions change, update ALL bike cards
                     this.updateCalculations();
                     this.saveData();
-                    if (id === 'targetHandlebarX' || id === 'targetHandlebarY') {
-                        this.updateXYStemComparisonGraph();
-                    }
                 });
             });
         
@@ -469,6 +466,7 @@ class BikeCalculator {
             document.removeEventListener('mousemove', handleMove);
             document.removeEventListener('mouseup', handleEnd);
             document.body.style.userSelect = '';
+            
             // Replace placeholder with bike card
             bikeCard.classList.remove('dragging');
             bikeCard.style.position = '';
@@ -476,18 +474,19 @@ class BikeCalculator {
             bikeCard.style.width = '';
             bikeCard.style.left = '';
             bikeCard.style.top = '';
+            
             if (placeholder.parentNode) {
                 placeholder.parentNode.insertBefore(bikeCard, placeholder);
                 placeholder.parentNode.removeChild(placeholder);
             }
+            
             // Update the bikes array to match the new DOM order
             const newBikeCards = Array.from(document.querySelectorAll('.bike-card'));
             const newBikes = newBikeCards.map(card => {
                 return this.bikes.find(bike => bike.id === card.id);
             });
+            
             this.bikes = newBikes;
-            // Update the legend and graph order
-            this.updateXYStemComparisonGraph();
         };
         
         // Add event listeners for drag
@@ -524,7 +523,6 @@ class BikeCalculator {
         if (!bikeData.isManual) {
             this.setupBikeSelectors(bikeData.id);
         }
-        this.updateXYStemComparisonGraph();
     }
     
     addDisabledBike() {
@@ -555,7 +553,6 @@ class BikeCalculator {
         this.bikes.push(bikeData);
         this.renderBikeCard(bikeData, this.bikes.length - 1);
         this.updateCalculationsForBike(bikeData.id);
-        this.updateXYStemComparisonGraph();
     }
 
     renderBikeCard(bikeData, index) {
@@ -659,12 +656,12 @@ class BikeCalculator {
                 <h4>Stem Configuration</h4>
                 <div class="input-group">
                     <label class="tooltip">Stem Height:<span class="tooltip-text">Measured height of the stem where it clamps the steerer tube. Typically ranges from 38-42mm.</span></label>
-                    <input type="number" class="stem-height" value="40" min="10">
+                    <input type="number" class="stem-height" value="40" min="0">
                     <span>mm</span>
                 </div>
                 <div class="input-group">
                     <label>Stem Length:</label>
-                    <input type="number" class="stem-length" value="100" min="35" step="5">
+                    <input type="number" class="stem-length" value="100" min="0" step="5">
                     <span>mm</span>
                 </div>
                 <div class="input-group">
@@ -673,7 +670,7 @@ class BikeCalculator {
                     <span>°</span>
                 </div>
                 <div class="input-group">
-                    <label class="tooltip">Spacer Height:<span class="tooltip-text"><i>Typically</i> include everything between the frame and bottom of the stem, such as headset bearing cover</span></label>
+                    <label class="tooltip">Spacer Height:<span class="tooltip-text">Typically include everything between the frame and bottom of the stem, such as headset bearing cover</span></label>
                     <input type="number" class="spacer-height" value="20" min="0">
                     <span>mm</span>
                 </div>
@@ -835,7 +832,6 @@ class BikeCalculator {
             this.updateCalculationsForBike(bikeId);
             this.saveData(); // Save data after any bike update
         }
-        this.updateXYStemComparisonGraph();
     }
 
     updateCalculations() {
@@ -1034,7 +1030,6 @@ class BikeCalculator {
             this.updateCalculationsForBike(bikeId);
             this.saveData(); // Save data after reset
         }
-        this.updateXYStemComparisonGraph();
     }
 
     deleteBike(bikeId) {
@@ -1053,7 +1048,6 @@ class BikeCalculator {
         
         // Adjust container width after removing a bike card
         this.adjustBikesContainerWidth();
-        this.updateXYStemComparisonGraph();
     }
 
     duplicateBike(bikeId) {
@@ -1119,7 +1113,6 @@ class BikeCalculator {
         // Update calculations and save
         this.updateCalculationsForBike(duplicatedBike.id);
         this.saveData();
-        this.updateXYStemComparisonGraph();
     }
 
     async setupBikeSelectors(bikeId) {
@@ -1324,9 +1317,6 @@ class BikeCalculator {
     }
 
     loadSavedData() {
-        // Clear stem selections so all checkboxes are selected by default
-        localStorage.removeItem('xyStemSelections');
-        window.xyStemSelections = {}; // Also clear in-memory selection state
         const savedData = localStorage.getItem('xyCalculatorData');
         if (savedData) {
             try {
@@ -1438,12 +1428,6 @@ class BikeCalculator {
                 this.addManualBike();
             }
         }
-        this.updateXYStemComparisonGraph();
-        // Ensure legend checkboxes reset after DOM updates
-        setTimeout(() => {
-            localStorage.removeItem('xyStemSelections');
-            this.updateXYStemComparisonGraph();
-        }, 0);
     }
 
     printBikeData() {
@@ -3079,7 +3063,6 @@ class BikeCalculator {
         
         // Save the loaded data to localStorage so it persists after page refresh
         this.saveData();
-        this.updateXYStemComparisonGraph();
     }
 
     // Method to load a saved fit from Firebase
@@ -3148,7 +3131,6 @@ class BikeCalculator {
         
         // Save the loaded data to localStorage so it persists after page refresh
         this.saveData();
-        this.updateXYStemComparisonGraph();
     }
 
     refreshBikeCardsAfterLogin() {
@@ -3265,441 +3247,6 @@ class BikeCalculator {
             }, 300);
         }, duration);
     }
-
-    // === XY Position Calculator Stem Comparison Visual ===
-    getLighterColorXY(hexColor) {
-        let r = parseInt(hexColor.substring(1, 3), 16);
-        let g = parseInt(hexColor.substring(3, 5), 16);
-        let b = parseInt(hexColor.substring(5, 7), 16);
-        r = Math.min(255, Math.round(r * 1.3));
-        g = Math.min(255, Math.round(g * 1.3));
-        b = Math.min(255, Math.round(b * 1.3));
-        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-    }
-
-    updateXYStemLegend(stemData, stemColors, allStems) {
-        const legendContainer = document.querySelector('.xy-stem-legend');
-        if (!legendContainer) return;
-        legendContainer.innerHTML = '';
-        // Load selection state from localStorage
-        let stemSelections = {};
-        try {
-            stemSelections = JSON.parse(localStorage.getItem('xyStemSelections') || '{}');
-        } catch (e) {}
-        // Order legend to match this.bikes order
-        const orderedStems = (this.bikes || []).map(bike => {
-            // Find the corresponding allStems entry by id
-            return (allStems || []).find(stem => stem.id === bike.id);
-        }).filter(Boolean);
-        orderedStems.forEach((stem, index) => {
-            const stemColor = stemColors[stem.colorIndex % stemColors.length];
-            const legendItem = document.createElement('div');
-            legendItem.className = 'legend-item';
-            // Checkbox
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.style.marginRight = '6px';
-            checkbox.style.accentColor = stemColor;
-            // Use id as unique key for selection state
-            const selectionKey = `stem_${stem.id}`;
-            checkbox.checked = stemSelections[selectionKey] !== false; // default to checked
-            checkbox.addEventListener('change', () => {
-                stemSelections[selectionKey] = checkbox.checked;
-                localStorage.setItem('xyStemSelections', JSON.stringify(stemSelections));
-                if (window.calculator && typeof window.calculator.updateXYStemComparisonGraph === 'function') {
-                    window.calculator.updateXYStemComparisonGraph();
-                }
-            });
-            // Label
-            const stemLabel = document.createElement('span');
-            stemLabel.textContent = stem.label;
-            legendItem.appendChild(checkbox);
-            legendItem.appendChild(stemLabel);
-            legendContainer.appendChild(legendItem);
-        });
-    }
-
-    drawXYStemVisualization(stemData, allStems) {
-        const canvas = document.getElementById('xyStemVisualizationCanvas');
-        if (!canvas) return;
-        // High-DPI/Retina support
-        const dpr = window.devicePixelRatio || 1;
-        // Get CSS size
-        const cssWidth = canvas.clientWidth;
-        const cssHeight = canvas.clientHeight;
-        // Set actual canvas size in device pixels
-        if (canvas.width !== cssWidth * dpr || canvas.height !== cssHeight * dpr) {
-            canvas.width = cssWidth * dpr;
-            canvas.height = cssHeight * dpr;
-        }
-        const ctx = canvas.getContext('2d');
-        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset any transforms
-        ctx.scale(dpr, dpr); // Scale for high-DPI
-        const width = cssWidth;
-        const height = cssHeight;
-        ctx.clearRect(0, 0, width, height);
-        if (!stemData || stemData.length === 0) return;
-        // --- Calculate bounds for all stems (including handlebar ends) ---
-        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-        const scale = 1.0; // mm to px (will be adjusted)
-        const leftMargin = 10;
-        const rightMargin = 20;
-        const topMargin = 20;
-        const bottomMargin = -20;
-        // First, compute all relevant points
-        const allPoints = [];
-        let targetHandlebarX = null, targetHandlebarY = null; // Declare once for use throughout function
-        stemData.forEach(stem => {
-            const htaRad = (180 - stem.headTubeAngle) * Math.PI / 180;
-            const stemRad = (180 - stem.headTubeAngle + stem.stemAngle - 90) * Math.PI / 180;
-            const reach = stem.reach;
-            const stack = stem.stack;
-            // Steerer tube origin
-            let x0 = reach;
-            let y0 = stack;
-            // Spacer end
-            let x1 = x0 + Math.cos(htaRad) * stem.spacerHeight;
-            let y1 = y0 + Math.sin(htaRad) * stem.spacerHeight;
-            // Stem center
-            let x2 = x1 + Math.cos(htaRad) * (stem.stemHeight / 2);
-            let y2 = y1 + Math.sin(htaRad) * (stem.stemHeight / 2);
-            // Handlebar end
-            let x3 = x2 + Math.cos(stemRad) * stem.stemLength;
-            let y3 = y2 + Math.sin(stemRad) * stem.stemLength;
-            // Handlebar circle
-            let dx = x3 - x2;
-            let dy = y3 - y2;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            let ratio = (dist - 15.9) / dist;
-            let x3b = x2 + dx * ratio;
-            let y3b = y2 + dy * ratio;
-            allPoints.push([x0, y0], [x1, y1], [x2, y2], [x3, y3], [x3b, y3b]);
-        });
-        // --- Include target handlebar position in bounds if present ---
-        try {
-            targetHandlebarX = parseFloat(document.getElementById('targetHandlebarX').value);
-            targetHandlebarY = parseFloat(document.getElementById('targetHandlebarY').value);
-        } catch (e) {}
-        if (Number.isFinite(targetHandlebarX) && Number.isFinite(targetHandlebarY)) {
-            allPoints.push([targetHandlebarX, targetHandlebarY]);
-        }
-        allPoints.forEach(([x, y]) => {
-            if (x < minX) minX = x;
-            if (x > maxX) maxX = x;
-            if (y < minY) minY = y;
-            if (y > maxY) maxY = y;
-        });
-        // --- Compute scale and offset to fit all points ---
-        // Add 0% padding to bounds (user may adjust)
-        const paddingFactor = 0;
-        let plotWidth = maxX - minX;
-        let plotHeight = maxY - minY;
-        let padX = plotWidth * paddingFactor;
-        let padY = plotHeight * paddingFactor;
-        let paddedMinX = minX - padX;
-        let paddedMaxX = maxX + padX;
-        let paddedMinY = minY - padY;
-        let paddedMaxY = maxY + padY;
-        let paddedWidth = paddedMaxX - paddedMinX;
-        let paddedHeight = paddedMaxY - paddedMinY;
-        let pxPerMm = Math.min(
-            (width - leftMargin - rightMargin) / (paddedWidth || 1),
-            (height - topMargin - bottomMargin) / (paddedHeight || 1)
-        ) * 0.7; // Keep the smaller scale, but always square
-        // Center the bounding box in the drawable area (canvas minus margins)
-        const drawableWidth = width - leftMargin - rightMargin;
-        const drawableHeight = height - topMargin - bottomMargin;
-        let offsetX = leftMargin + (drawableWidth - paddedWidth * pxPerMm) / 2 - paddedMinX * pxPerMm;
-        let offsetY = bottomMargin + (drawableHeight - paddedHeight * pxPerMm) / 2 - paddedMinY * pxPerMm;
-        // --- Draw grid every 10mm (FULL CANVAS) ---
-        ctx.save();
-        const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
-        ctx.strokeStyle = isDarkMode ? '#000' : '#ddd';
-        ctx.lineWidth = 0.4;
-        // Compute the mm range that covers the entire canvas
-        // Inverse transform: canvasX = offsetX + mm * pxPerMm => mm = (canvasX - offsetX) / pxPerMm
-        let mmMinX = Math.floor((0 - offsetX) / pxPerMm / 10) * 10;
-        let mmMaxX = Math.ceil((width - offsetX) / pxPerMm / 10) * 10;
-        let mmMinY = Math.floor((0 - offsetY) / pxPerMm / 10) * 10;
-        let mmMaxY = Math.ceil((height - offsetY) / pxPerMm / 10) * 10;
-        // Vertical grid lines (Reach)
-        for (let gx = mmMinX; gx <= mmMaxX; gx += 10) {
-            let cx = offsetX + gx * pxPerMm;
-            ctx.beginPath();
-            ctx.moveTo(cx, 0);
-            ctx.lineTo(cx, height);
-            ctx.stroke();
-        }
-        // Horizontal grid lines (Stack)
-        for (let gy = mmMinY; gy <= mmMaxY; gy += 10) {
-            let cy = height - (offsetY + gy * pxPerMm);
-            ctx.beginPath();
-            ctx.moveTo(0, cy);
-            ctx.lineTo(width, cy);
-            ctx.stroke();
-        }
-        ctx.restore();
-        // --- Draw axes ---
-        ctx.save();
-        ctx.strokeStyle = '#ccc';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([4, 4]);
-        // X axis (Reach)
-        ctx.beginPath();
-        ctx.moveTo(0, height - offsetY);
-        ctx.lineTo(width, height - offsetY);
-        ctx.stroke();
-        // Y axis (Stack)
-        ctx.beginPath();
-        ctx.moveTo(offsetX, 0);
-        ctx.lineTo(offsetX, height);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        // Axis labels
-        ctx.fillStyle = '#333';
-        ctx.font = '15px Arial';
-        ctx.fillText('Reach (mm)', width - 90, height - offsetY - 8);
-        ctx.save();
-        ctx.translate(offsetX + 8, 20);
-        ctx.rotate(-Math.PI / 2);
-        ctx.fillText('Stack (mm)', 0, 0);
-        ctx.restore();
-        ctx.restore();
-        // --- Draw each stem ---
-        const stemColors = [
-            "#0066CC", "#AA0000", "#009933", "#9900CC", "#FF6600",
-            "#007799", "#CC6699", "#666633", "#663399", "#FF9900"
-        ];
-        stemData.forEach((stem) => {
-            const htaRad = (180 - stem.headTubeAngle) * Math.PI / 180;
-            const stemRad = (180 - stem.headTubeAngle + stem.stemAngle - 90) * Math.PI / 180;
-            const reach = stem.reach;
-            const stack = stem.stack;
-            // Steerer tube origin
-            let x0 = reach;
-            let y0 = stack;
-            // Spacer end
-            let x1 = x0 + Math.cos(htaRad) * stem.spacerHeight;
-            let y1 = y0 + Math.sin(htaRad) * stem.spacerHeight;
-            // Stem center
-            let x2 = x1 + Math.cos(htaRad) * (stem.stemHeight / 2);
-            let y2 = y1 + Math.sin(htaRad) * (stem.stemHeight / 2);
-            // Handlebar end
-            let x3 = x2 + Math.cos(stemRad) * stem.stemLength;
-            let y3 = y2 + Math.sin(stemRad) * stem.stemLength;
-            // Handlebar circle
-            let dx = x3 - x2;
-            let dy = y3 - y2;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            let ratio = (dist - 15.9) / dist;
-            let x3b = x2 + dx * ratio;
-            let y3b = y2 + dy * ratio;
-            // Transform to canvas coordinates
-            function tx(x) { return offsetX + x * pxPerMm; }
-            function ty(y) { return height - offsetY - y * pxPerMm; }
-            // Draw steerer tube
-            ctx.strokeStyle = '#555';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(tx(x0), ty(y0));
-            ctx.lineTo(tx(x2), ty(y2));
-            ctx.stroke();
-            // Draw spacer segment if any
-            if (stem.spacerHeight > 0) {
-                ctx.strokeStyle = '#FFC107';
-                ctx.lineWidth = 5;
-                ctx.beginPath();
-                ctx.moveTo(tx(x0), ty(y0));
-                ctx.lineTo(tx(x1), ty(y1));
-                ctx.stroke();
-                
-                // Draw dash marks every 10mm on spacer
-                const dashInterval = 10; // mm
-                const numDashes = Math.floor(stem.spacerHeight / dashInterval);
-                if (numDashes > 0) {
-                    ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 1;
-                    ctx.setLineDash([2, 3]);
-                    for (let i = 1; i <= numDashes; i++) {
-                        const dashDistance = i * dashInterval;
-                        if (dashDistance < stem.spacerHeight) {
-                            const dashX = x0 + Math.cos(htaRad) * dashDistance;
-                            const dashY = y0 + Math.sin(htaRad) * dashDistance;
-                            const perpAngle = htaRad + Math.PI / 2;
-                            const dashLength = 8; // mm
-                            const dashStartX = dashX + Math.cos(perpAngle) * dashLength / 2;
-                            const dashStartY = dashY + Math.sin(perpAngle) * dashLength / 2;
-                            const dashEndX = dashX - Math.cos(perpAngle) * dashLength / 2;
-                            const dashEndY = dashY - Math.sin(perpAngle) * dashLength / 2;
-                            ctx.beginPath();
-                            ctx.moveTo(tx(dashStartX), ty(dashStartY));
-                            ctx.lineTo(tx(dashEndX), ty(dashEndY));
-                            ctx.stroke();
-                        }
-                    }
-                    ctx.setLineDash([]); // Reset dash pattern
-                }
-            }
-            // Draw stem height segment
-            if (stem.stemHeight > 0) {
-                ctx.strokeStyle = '#555';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(tx(x1), ty(y1));
-                ctx.lineTo(tx(x2), ty(y2));
-                ctx.stroke();
-            }
-            // Draw stem
-            const stemColor = stemColors[stem.colorIndex % stemColors.length];
-            ctx.strokeStyle = stemColor;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(tx(x2), ty(y2));
-            ctx.lineTo(tx(x3b), ty(y3b));
-            ctx.stroke();
-            // Draw handlebar circle
-            ctx.strokeStyle = stemColor;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(tx(x3), ty(y3), 15.9 * pxPerMm, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.fillStyle = stemColor;
-            ctx.beginPath();
-            ctx.arc(tx(x3), ty(y3), 2.5 * pxPerMm, 0, Math.PI * 2);
-            ctx.fill();
-            // Draw label
-            ctx.fillStyle = stemColor;
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText(stem.label, tx(x0) + 6, ty(y0) - 10);
-            // Draw head tube top (perpendicular to steerer tube)
-            const headTubeLineLength = 9; // mm
-            const perpAngle = htaRad + Math.PI / 2;
-            const hx1 = x0 + Math.cos(perpAngle) * (headTubeLineLength / 2);
-            const hy1 = y0 + Math.sin(perpAngle) * (headTubeLineLength / 2);
-            const hx2 = x0 - Math.cos(perpAngle) * (headTubeLineLength / 2);
-            const hy2 = y0 - Math.sin(perpAngle) * (headTubeLineLength / 2);
-            ctx.strokeStyle = stemColor;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(tx(hx1), ty(hy1));
-            ctx.lineTo(tx(hx2), ty(hy2));
-            ctx.stroke();
-        });
-        this.updateXYStemLegend(stemData, stemColors, allStems);
-        // --- Draw grid legend ---
-        ctx.save();
-        ctx.fillStyle = '#888';
-        ctx.font = '13px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText('Grid: 10mm', 10, 22);
-        // Draw target handlebar legend if present
-        let legendY = 40;
-        if (Number.isFinite(targetHandlebarX) && Number.isFinite(targetHandlebarY)) {
-            ctx.fillStyle = '#888';
-            ctx.font = '13px Arial';
-            ctx.fillText(`Target HX/HY (⭑): ${targetHandlebarX}/${targetHandlebarY}`, 10, legendY);
-        }
-        ctx.restore();
-        // --- Draw target handlebar star if present ---
-        if (Number.isFinite(targetHandlebarX) && Number.isFinite(targetHandlebarY)) {
-            // Transform to canvas coordinates
-            const starX = offsetX + targetHandlebarX * pxPerMm;
-            const starY = height - (offsetY + targetHandlebarY * pxPerMm);
-            ctx.save();
-            ctx.font = '30px Arial';
-            ctx.fillStyle = isDarkMode ? '#FFAB00' : '#FFAB00';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('⭑', starX, starY);
-            ctx.restore();
-
-            // Draw dashed lines from target HX/HY
-            ctx.save();
-            ctx.setLineDash([6, 6]);
-            ctx.strokeStyle = '#888';
-            ctx.lineWidth = 1.2;
-            // Vertical dashed line (X)
-            ctx.beginPath();
-            ctx.moveTo(starX, 0);
-            ctx.lineTo(starX, height);
-            ctx.stroke();
-            // Horizontal dashed line (Y)
-            ctx.beginPath();
-            ctx.moveTo(0, starY);
-            ctx.lineTo(width, starY);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.restore();
-
-            // Draw axis labels for HX and HY
-            ctx.save();
-            ctx.font = 'bold 13px Arial';
-            ctx.fillStyle = isDarkMode ? '#FFF' : '#000';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'bottom';
-            ctx.fillText(`X: ${targetHandlebarX}`, starX + 6, height - 4); // X axis label
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-            ctx.fillText(`Y: ${targetHandlebarY}`, 4, starY + 6); // Y axis label
-            ctx.restore();
-        }
-    }
-
-    // Extend BikeCalculator with XY stem graph logic
-    updateXYStemComparisonGraph() {
-        // Load selection state from localStorage
-        let stemSelections = {};
-        try {
-            stemSelections = JSON.parse(localStorage.getItem('xyStemSelections') || '{}');
-        } catch (e) {}
-        // Only include bikes with valid Reach, Stack, and HTA
-        const allStems = this.bikes
-        .filter(bike => {
-            const reach = parseFloat(bike.reach);
-            const stack = parseFloat(bike.stack);
-            const hta = parseFloat(bike.hta);
-            return (
-                Number.isFinite(reach) && reach > 0 &&
-                Number.isFinite(stack) && stack > 0 &&
-                Number.isFinite(hta) && hta > 0
-            );
-        })
-        .map((bike, idx) => {
-            const headTubeAngle = parseFloat(bike.hta) || 73;
-            const stemHeight = parseFloat(bike.stemHeight) || 40;
-            const stemLength = parseFloat(bike.stemLength) || 100;
-            const stemAngle = parseFloat(bike.stemAngle) || -6;
-            let spacerHeight = bike.spacersHeight;
-            if (spacerHeight === '' || spacerHeight === null || isNaN(spacerHeight)) {
-                spacerHeight = 20;
-            } else {
-                spacerHeight = parseFloat(spacerHeight);
-            }
-            const reach = parseFloat(bike.reach) || 0;
-            const stack = parseFloat(bike.stack) || 0;
-            const htaRad = (180 - headTubeAngle) * Math.PI / 180;
-            const stemRad = (180 - headTubeAngle + stemAngle - 90) * Math.PI / 180;
-            let x0 = reach;
-            let y0 = stack;
-            let x1 = x0 + Math.cos(htaRad) * spacerHeight;
-            let y1 = y0 + Math.sin(htaRad) * spacerHeight;
-            let x2 = x1 + Math.cos(htaRad) * (stemHeight / 2);
-            let y2 = y1 + Math.sin(htaRad) * (stemHeight / 2);
-            let x3 = x2 + Math.cos(stemRad) * stemLength;
-            let y3 = y2 + Math.sin(stemRad) * stemLength;
-            let label = '';
-            if (bike.isManual) {
-                label = [bike.brand, bike.model, bike.size].filter(Boolean).join(' ');
-            } else {
-                label = [bike.brand, bike.model, bike.size].filter(Boolean).join(' ');
-            }
-            if (!label) label = `Bike ${idx + 1}`;
-            return { id: bike.id, headTubeAngle, stemHeight, stemLength, stemAngle, spacerHeight, reach, stack, label, x3, y3, colorIndex: idx };
-        });
-        // Only show stems that are checked in the legend (use id as key)
-        const stemData = allStems.filter(stem => Number.isFinite(stem.x3) && Number.isFinite(stem.y3) && (stemSelections[`stem_${stem.id}`] !== false));
-        this.drawXYStemVisualization(stemData, allStems);
-    }
 }
 
 class BikeDatabase {
@@ -3802,14 +3349,4 @@ styleSheet.textContent = `
     }
 `;
 document.head.appendChild(styleSheet);
-        
-// Ensure graph updates on theme change
-if (window.MutationObserver) {
-    const observer = new MutationObserver(() => {
-        if (window.calculator && typeof window.calculator.updateXYStemComparisonGraph === 'function') {
-            window.calculator.updateXYStemComparisonGraph();
-        }
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-}
         

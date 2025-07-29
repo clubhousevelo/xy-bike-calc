@@ -199,9 +199,6 @@
         <div class="nav-item-guide">
             <a href="/guide/">Guide</a>
         </div>
-        <div class="nav-item-donate">
-            <a href="/donate/">Donate</a>
-        </div>
         <div class="non-auth-dependent login-container">
             <button class="login-button" onclick="window.location.href='/login/'">Login</button>
         </div>
@@ -243,9 +240,6 @@
         </div>
         <div class="nav-item-guide">
             <a href="/guide/">Guide</a>
-        </div>
-        <div class="nav-item-donate">
-            <a href="/donate/">Donate</a>
         </div>
         <div class="non-auth-dependent login-container">
             <button class="login-button" onclick="window.location.href='/login/'">Login</button>
@@ -404,23 +398,23 @@
                                 
                                 // If the user is not a basic user, redirect them to the appropriate page
                                 if (role === 'free' || !role) {
-                                    window.location.href = '/xy-position-calculator/pro/';
+                                    window.location.href = '/xy-position-calculator/free/';
                                 } else if (role === 'pro') {
                                     window.location.href = '/xy-position-calculator/pro';
                                 }
                             } else {
                                 // If user document doesn't exist, treat as free tier
-                                window.location.href = '/xy-position-calculator/pro/';
+                                window.location.href = '/xy-position-calculator/free/';
                             }
                         })
                         .catch(error => {
                             console.error('Error checking subscription role:', error);
                             // On error, redirect to free tier
-                            window.location.href = '/xy-position-calculator/pro/';
+                            window.location.href = '/xy-position-calculator/free/';
                         });
                 } else {
                     // If not logged in, redirect to free tier
-                    window.location.href = '/xy-position-calculator/pro/';
+                    window.location.href = '/xy-position-calculator/free/';
                 }
             });
         });

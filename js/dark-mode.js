@@ -56,6 +56,11 @@ function initializeTheme() {
     // Update all toggle buttons
     updateThemeToggleButtons(newTheme);
     
+    // Refresh canvas if it exists (for Stack & Reach Calculator)
+    if (window.calculator && typeof window.calculator.updateVisualization === 'function') {
+      window.calculator.updateVisualization();
+    }
+    
     return false; // Prevent default action
   }
   

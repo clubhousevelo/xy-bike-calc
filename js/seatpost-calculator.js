@@ -72,30 +72,6 @@ class SeatpostCalculator {
             });
         }
 
-        // Mobile menu toggle
-        const hamburgerMenu = document.querySelector('.hamburger-menu');
-        const mobileNav = document.querySelector('.mobile-nav');
-        
-        if (hamburgerMenu && mobileNav) {
-            hamburgerMenu.addEventListener('click', () => {
-                hamburgerMenu.classList.toggle('active');
-                mobileNav.classList.toggle('active');
-            });
-        }
-
-        // Close mobile menu when clicking on a link
-        const mobileNavLinks = document.querySelectorAll('.mobile-nav a');
-        mobileNavLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                const hamburgerMenu = document.querySelector('.hamburger-menu');
-                const mobileNav = document.querySelector('.mobile-nav');
-                if (hamburgerMenu && mobileNav) {
-                    hamburgerMenu.classList.remove('active');
-                    mobileNav.classList.remove('active');
-                }
-            });
-        });
-
         // Clear button event listener
         const clearButton = document.getElementById('clearButton');
         if (clearButton) {

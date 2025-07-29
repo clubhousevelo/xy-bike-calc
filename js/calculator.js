@@ -846,7 +846,7 @@ class BikeCalculator {
     }
 
     updateCalculationsForBike(bikeId) {
-        const targetSaddleX = parseFloat(document.getElementById('targetSaddleX').value) || '';
+        const targetSaddleX = Math.abs(parseFloat(document.getElementById('targetSaddleX').value) || '');
         const targetSaddleY = parseFloat(document.getElementById('targetSaddleY').value) || '';
         const targetHandlebarX = parseFloat(document.getElementById('targetHandlebarX').value) || '';
         const targetHandlebarY = parseFloat(document.getElementById('targetHandlebarY').value) || '';

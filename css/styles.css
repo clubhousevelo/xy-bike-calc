@@ -1517,6 +1517,47 @@ button:disabled {
     padding-bottom: 6px;
 }
 
+/* Notes section styling */
+.notes-section {
+    margin-bottom: 1rem;
+}
+
+.notes-section .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.notes-section .input-group label {
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.notes-section .bike-notes {
+    width: 100%;
+    min-height: 65px;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--input-bg);
+    color: var(--text-color);
+    font-size: 0.85rem;
+    font-family: inherit;
+    resize: vertical;
+    line-height: 1.2;
+}
+
+.notes-section .bike-notes:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1);
+}
+
+.notes-section .bike-notes::placeholder {
+    color: var(--text-secondary);
+}
+
 /* Mobile Menu Styles */
 .hamburger-menu {
     display: none;
@@ -1551,10 +1592,30 @@ button:disabled {
     padding: 4rem 1rem 1rem;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .mobile-nav.active {
     transform: translateX(0);
+}
+
+/* Mobile nav scrollbar styling */
+.mobile-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.mobile-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mobile-nav::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.mobile-nav::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
 }
 
 .mobile-nav ul {

@@ -61,6 +61,11 @@ function initializeTheme() {
       window.calculator.updateVisualization();
     }
     
+    // Refresh seatpost calculator canvas if it exists
+    if (window.seatpostCalculator && typeof window.seatpostCalculator.redrawOnThemeChange === 'function') {
+      window.seatpostCalculator.redrawOnThemeChange();
+    }
+    
     return false; // Prevent default action
   }
   

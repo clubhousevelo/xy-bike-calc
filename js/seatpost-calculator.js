@@ -55,22 +55,9 @@ class SeatpostCalculator {
             }
         });
 
-        // Dark mode toggle event listeners
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const mobileDarkModeToggle = document.getElementById('mobileDarkModeToggle');
-        
-        if (darkModeToggle) {
-            darkModeToggle.addEventListener('click', () => {
-                toggleTheme();
-                this.redrawOnThemeChange();
-            });
-        }
-        if (mobileDarkModeToggle) {
-            mobileDarkModeToggle.addEventListener('click', () => {
-                toggleTheme();
-                this.redrawOnThemeChange();
-            });
-        }
+
+
+
 
         // Clear button event listener
         const clearButton = document.getElementById('clearButton');
@@ -867,46 +854,9 @@ class SeatpostCalculator {
 
 // Initialize the calculator when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new SeatpostCalculator();
+    const seatpostCalculator = new SeatpostCalculator();
+    // Expose calculator globally for dark mode toggle
+    window.seatpostCalculator = seatpostCalculator;
 });
 
-// Global function for theme toggle (if not already defined)
-if (typeof toggleTheme === 'undefined') {
-    function toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        
-        // Update toggle button appearance
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const mobileDarkModeToggle = document.getElementById('mobileDarkModeToggle');
-        
-        if (darkModeToggle) {
-            const toggleIcon = darkModeToggle.querySelector('.toggle-icon');
-            const toggleText = darkModeToggle.querySelector('.toggle-text');
-            
-            if (newTheme === 'dark') {
-                toggleIcon.textContent = '🌙';
-                toggleText.textContent = 'Dark Mode';
-            } else {
-                toggleIcon.textContent = '☀️';
-                toggleText.textContent = 'Light Mode';
-            }
-        }
-        
-        if (mobileDarkModeToggle) {
-            const mobileToggleIcon = mobileDarkModeToggle.querySelector('.toggle-icon');
-            const mobileToggleText = mobileDarkModeToggle.querySelector('.toggle-text');
-            
-            if (newTheme === 'dark') {
-                mobileToggleIcon.textContent = '🌙';
-                mobileToggleText.textContent = 'Dark Mode';
-            } else {
-                mobileToggleIcon.textContent = '☀️';
-                mobileToggleText.textContent = 'Light Mode';
-            }
-        }
-    }
-} 
+ 

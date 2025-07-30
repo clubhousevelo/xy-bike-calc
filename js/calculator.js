@@ -513,7 +513,8 @@ class BikeCalculator {
             spacersHeight: 20,
             handlebarReach: 80,
             saddleSetback: 0,
-            saddleHeight: 0
+            saddleHeight: 0,
+            notes: ''
         };
         
         this.bikes.push(bikeData);
@@ -549,7 +550,8 @@ class BikeCalculator {
             spacersHeight: 20,
             handlebarReach: 80,
             saddleSetback: 0,
-            saddleHeight: 0
+            saddleHeight: 0,
+            notes: ''
         };
         
         this.bikes.push(bikeData);
@@ -709,6 +711,11 @@ class BikeCalculator {
                     <span class="exposed-seatpost">-- mm</span>
                 </div>
             </div>
+            <div class="notes-section">
+                <div class="input-group">
+                    <textarea class="bike-notes" placeholder="Add notes about this bike..."></textarea>
+                </div>
+            </div>
             <div class="button-group">
                 <button class="reset-button">RESET</button>
                 <button class="duplicate-button">DUPLICATE</button>
@@ -761,6 +768,14 @@ class BikeCalculator {
                 this.updateBikeData(bikeData.id);
             });
         });
+        
+        // Setup notes textarea listener
+        const notesTextareaListener = card.querySelector('.bike-notes');
+        if (notesTextareaListener) {
+            notesTextareaListener.addEventListener('input', () => {
+                this.updateBikeData(bikeData.id);
+            });
+        }
 
         // Setup manual input listeners if applicable
         if (bikeData.isManual) {
@@ -782,6 +797,12 @@ class BikeCalculator {
             card.querySelector('.stem-length').value = bikeData.stemLength;
             card.querySelector('.stem-angle').value = bikeData.stemAngle;
             card.querySelector('.spacer-height').value = bikeData.spacersHeight;
+        }
+        
+        // Set initial notes value for all bikes
+        const notesTextarea = card.querySelector('.bike-notes');
+        if (notesTextarea) {
+            notesTextarea.value = bikeData.notes || '';
         }
 
         // Setup button listeners
@@ -827,6 +848,12 @@ class BikeCalculator {
             bike.brand = card.querySelector('.brand-input').value || '';
             bike.model = card.querySelector('.model-input').value || '';
             bike.size = card.querySelector('.size-input').value || '';
+        }
+        
+        // Update notes
+        const notesTextarea = card.querySelector('.bike-notes');
+        if (notesTextarea) {
+            bike.notes = notesTextarea.value || '';
         }
         
         // Find the index of the bike in the array
@@ -981,6 +1008,7 @@ class BikeCalculator {
         bike.handlebarReach = 80;
         bike.saddleSetback = 0;
         bike.saddleHeight = 0;
+        bike.notes = '';
         
         // Reset dropdown menus if not a manual bike
         if (!bike.isManual) {
@@ -1018,6 +1046,12 @@ class BikeCalculator {
         card.querySelector('.stem-angle').value = bike.stemAngle;
         card.querySelector('.spacer-height').value = bike.spacersHeight;
         card.querySelector('.stem-height').value = bike.stemHeight;
+        
+        // Clear notes
+        const notesTextarea = card.querySelector('.bike-notes');
+        if (notesTextarea) {
+            notesTextarea.value = '';
+        }
         
         // Clear results section
         card.querySelector('.handlebar-x').textContent = '-- mm';
@@ -1101,6 +1135,12 @@ class BikeCalculator {
             card.querySelector('.stem-length').value = duplicatedBike.stemLength || 100;
             card.querySelector('.stem-angle').value = duplicatedBike.stemAngle || -6;
             card.querySelector('.spacer-height').value = duplicatedBike.spacersHeight || 20;
+            
+            // Set notes
+            const notesTextarea = card.querySelector('.bike-notes');
+            if (notesTextarea) {
+                notesTextarea.value = duplicatedBike.notes || '';
+            }
             
             // For manual bikes, set the brand/model/size
             if (duplicatedBike.isManual) {
@@ -1316,7 +1356,8 @@ class BikeCalculator {
                     spacersHeight: bike.spacersHeight || 20,
                     handlebarReach: bike.handlebarReach || 80,
                     saddleSetback: bike.saddleSetback || 0,
-                    saddleHeight: bike.saddleHeight || 0
+                    saddleHeight: bike.saddleHeight || 0,
+                    notes: bike.notes || ''
                 };
             })
         };
@@ -1454,15 +1495,15 @@ class BikeCalculator {
         }
         
         // Get client information
-        const clientName = document.getElementById('clientName').value.trim() || '&nbsp;';
-        const clientNotes = document.getElementById('clientNotes').value.trim() || '&nbsp;';
+        const clientName = document.getElementById('clientName').value.trim() || '';
+        const clientNotes = document.getElementById('clientNotes').value.trim() || '';
         
         // Get target positions
-        const targetSaddleX = document.getElementById('targetSaddleX').value || '&nbsp;';
-        const targetSaddleY = document.getElementById('targetSaddleY').value || '&nbsp;';
-        const targetHandlebarX = document.getElementById('targetHandlebarX').value || '&nbsp;';
-        const targetHandlebarY = document.getElementById('targetHandlebarY').value || '&nbsp;';
-        const handlebarReachUsed = document.getElementById('handlebarReachUsed').value || '&nbsp;';
+        const targetSaddleX = document.getElementById('targetSaddleX').value || '-';
+        const targetSaddleY = document.getElementById('targetSaddleY').value || '-';
+        const targetHandlebarX = document.getElementById('targetHandlebarX').value || '-';
+        const targetHandlebarY = document.getElementById('targetHandlebarY').value || '-';
+        const handlebarReachUsed = document.getElementById('handlebarReachUsed').value || '-';
         
         // Get component notes
         const saddleNotes = document.getElementById('saddleNotes').value.trim() || '&nbsp;';
@@ -1545,7 +1586,7 @@ class BikeCalculator {
                 ${clientNotes !== '' ? `
                 <div>
                     <div style="font-weight: bold; margin-bottom: 3px;">Fit Notes:</div>
-                    <div style="padding: 5px; background-color: #f8f8f8; border-radius: 4px;">${clientNotes}</div>
+                    <div style="padding: 5px; background-color: #f8f8f8; border-radius: 4px; white-space: pre-wrap; line-height: 1.4; word-wrap: break-word;">${clientNotes}</div>
                 </div>
                 ` : ''}
             </div>
@@ -1776,6 +1817,22 @@ class BikeCalculator {
                 stemData += '</div>';
             }
             
+            // Get notes data
+            const notesSection = card.querySelector('.notes-section');
+            let notesData = '';
+            if (notesSection) {
+                const notesTextarea = notesSection.querySelector('.bike-notes');
+                const notes = notesTextarea?.value?.trim() || '';
+                if (notes) {
+                    notesData = `
+                        <div style="margin-top: 8px; padding: 6px; background-color: #f8f8f8; border-radius: 4px;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 3px; color: #333;text-align: center;border-bottom: 1px solid #ddd;padding-bottom: 3px;">Notes</div>
+                            <div style="font-size: 12px; line-height: 1.4; color: #222; white-space: pre-wrap; min-height: 16px; word-wrap: break-word;">${notes}</div>
+                        </div>
+                    `;
+                }
+            }
+            
             // Get results data
             const resultsSection = card.querySelector('.results-section');
             let resultsData = '';
@@ -1914,6 +1971,12 @@ class BikeCalculator {
                             <div>
                                 <h4 style="margin: 4px 0 4px 0; font-size: 13px; border-bottom: 1px solid #eee; padding-bottom: 2px;text-align: center;">Results</h4>
                                 <div style="line-height: 1.2;">${resultsData}</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${notesData ? `
+                            <div>
+                                <div style="line-height: 1.2;">${notesData}</div>
                             </div>
                         ` : ''}
                     </div>

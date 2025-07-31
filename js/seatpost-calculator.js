@@ -101,7 +101,13 @@ class SeatpostCalculator {
                     
                     const angleFromVerticalResize = Math.atan2(saddleX, saddleY) * 180 / Math.PI;
                     const effectiveSTAResize = (90 - angleFromVerticalResize).toFixed(1);
-                    this.updateVisualization(saddleX, saddleY, seatTubeAngle, seatTubeLength, bbToRail, exposedSeatpost, effectiveSTAResize);
+                    
+                    // Calculate BB to SRC for resize
+                    const dx = saddleX;
+                    const dy = saddleY;
+                    const bbToSRCResize = Math.round(Math.sqrt(dx * dx + dy * dy));
+                    
+                    this.updateVisualization(saddleX, saddleY, seatTubeAngle, seatTubeLength, bbToRail, bbToSRCResize, exposedSeatpost, effectiveSTAResize);
                 } else {
                     this.drawEmptyState();
                 }
@@ -120,6 +126,7 @@ class SeatpostCalculator {
         let setbackVsSTA = '--';
         let effectiveSTA = '--';
         let bbToRail = '--';
+        let bbToSRC = '--';
         let exposedSeatpost = '--';
 
         // Calculate results using the same formulas as the main calculator
@@ -140,6 +147,11 @@ class SeatpostCalculator {
                 bbToRail = Math.round(Math.sqrt(dx * dx + dy * dy));
             }
             
+            // BB to Saddle Rail Center (SRC) calculation - direct distance from BB to saddle X,Y coordinates
+            const dx = saddleX;
+            const dy = saddleY;
+            bbToSRC = Math.round(Math.sqrt(dx * dx + dy * dy));
+            
             if (seatTubeAngle) {
                 // Setback vs STA calculation
                 const seatTubeX = saddleY * Math.tan((90 - seatTubeAngle) * Math.PI / 180);
@@ -153,15 +165,15 @@ class SeatpostCalculator {
         }
 
         // Update display
-        this.updateDisplay(setbackVsSTA, effectiveSTA, bbToRail, exposedSeatpost);
+        this.updateDisplay(setbackVsSTA, effectiveSTA, bbToRail, bbToSRC, exposedSeatpost);
         
         // Update visualization
         const angleFromVerticalCalc = Math.atan2(saddleX, saddleY) * 180 / Math.PI;
         const effectiveSTACalc = (90 - angleFromVerticalCalc).toFixed(1);
-        this.updateVisualization(saddleX, saddleY, seatTubeAngle, seatTubeLength, bbToRail, exposedSeatpost, effectiveSTACalc);
+        this.updateVisualization(saddleX, saddleY, seatTubeAngle, seatTubeLength, bbToRail, bbToSRC, exposedSeatpost, effectiveSTACalc);
     }
 
-    updateDisplay(setbackVsSTA, effectiveSTA, bbToRail, exposedSeatpost) {
+    updateDisplay(setbackVsSTA, effectiveSTA, bbToRail, bbToSRC, exposedSeatpost) {
         // Update Setback vs STA
         const setbackElement = document.getElementById('setbackVsSTA');
         if (setbackElement) {
@@ -179,6 +191,12 @@ class SeatpostCalculator {
         const bbToRailElement = document.getElementById('bbToRail');
         if (bbToRailElement) {
             bbToRailElement.textContent = bbToRail !== '--' ? `${bbToRail} mm` : bbToRail;
+        }
+
+        // Update BB to Saddle Rail Center (SRC)
+        const bbToSRCElement = document.getElementById('bbToSRC');
+        if (bbToSRCElement) {
+            bbToSRCElement.textContent = bbToSRC !== '--' ? `${bbToSRC} mm` : bbToSRC;
         }
 
         // Update Exposed Seatpost
@@ -256,7 +274,7 @@ class SeatpostCalculator {
         localStorage.removeItem('seatpostCalculatorValues');
 
         // Reset results display
-        this.updateDisplay('--', '--', '--', '--');
+        this.updateDisplay('--', '--', '--', '--', '--');
 
         // Clear visualization
         this.drawEmptyState();
@@ -301,7 +319,7 @@ class SeatpostCalculator {
         ctx.fillText('Enter values to see visualization', canvas.width / 2, canvas.height / 2);
     }
 
-    updateVisualization(saddleX, saddleY, seatTubeAngle, seatTubeLength, bbToRail, exposedSeatpost, effectiveSTA) {
+    updateVisualization(saddleX, saddleY, seatTubeAngle, seatTubeLength, bbToRail, bbToSRC, exposedSeatpost, effectiveSTA) {
         if (!this.canvas || !this.ctx) {
             return;
         }
@@ -539,7 +557,7 @@ class SeatpostCalculator {
             
             // If eSTA < STA, move label to the other side of the line
             if (effectiveSTANum < seatTubeAngleNum) {
-                offsetDistance = 50;
+                offsetDistance = 0;
             }
             
             const offsetX = Math.cos(perpAngle) * offsetDistance;
@@ -555,8 +573,8 @@ class SeatpostCalculator {
             // Draw the text
             ctx.fillStyle = colors.text;
             ctx.textAlign = 'center';
-            ctx.font = `${Math.max(14, scale * 2)}px Arial`;
-            ctx.fillText(`${exposedSeatpost} mm`, 0, +30);
+            ctx.font = `${Math.max(15, scale * 2)}px Arial`;
+            ctx.fillText(`${exposedSeatpost} mm`, 0, +5);
             
             // Restore context
             ctx.restore();
@@ -582,8 +600,8 @@ class SeatpostCalculator {
             
             // Position the image so the red "+" aligns with saddle X/Y coordinates
             // The red "+" is at the center of the saddle image
-            const saddleCanvasX = originX - (saddleX - 14) * scale;
-            const saddleCanvasY = originY - (saddleY + 30) * scale;
+            const saddleCanvasX = originX - (saddleX - 8) * scale;
+            const saddleCanvasY = originY - (saddleY + 27) * scale;
             
             // Enable high-quality image rendering
             ctx.imageSmoothingEnabled = true;
@@ -655,6 +673,48 @@ class SeatpostCalculator {
         ctx.stroke();
         ctx.setLineDash([]);
         
+        // Add label for BB to Saddle XY distance
+        if (bbToSRC && bbToSRC !== '--') {
+            // Calculate midpoint of the BB to saddle line
+            const bbToSaddleMidX = (originX + saddleCanvasX) / 2;
+            const bbToSaddleMidY = (originY + saddleCanvasY) / 2;
+            
+            // Calculate angle of the BB to saddle line
+            const bbToSaddleAngle = Math.atan2(saddleCanvasY - originY, saddleCanvasX - originX);
+            
+            // Calculate perpendicular offset to position label
+            const perpAngle = bbToSaddleAngle + Math.PI / 2;
+            const offsetDistance = 30 * scale;
+            const offsetX = Math.cos(perpAngle) * offsetDistance;
+            const offsetY = Math.sin(perpAngle) * offsetDistance;
+            
+            // Determine vertical offset based on eSTA vs STA comparison
+            const effectiveSTANum = parseFloat(effectiveSTA);
+            const seatTubeAngleNum = parseFloat(seatTubeAngle);
+            const seatTubeWidth = 31.8 * scale; // Scaled seat tube width
+            let verticalOffset = seatTubeWidth / 2 + 45 * scale; // Default for eSTA < STA (above seat tube)
+            
+            if (effectiveSTANum > seatTubeAngleNum) {
+                verticalOffset = -(seatTubeWidth / 2 - 28 * scale); // For eSTA > STA (below seat tube)
+            }
+            
+            // Save current context
+            ctx.save();
+            
+            // Move to offset position and rotate
+            ctx.translate(bbToSaddleMidX + offsetX, bbToSaddleMidY + offsetY);
+            ctx.rotate(bbToSaddleAngle + Math.PI); // Add 180 degrees to flip the label
+            
+            // Draw the text
+            ctx.fillStyle = colors.saddle;
+            ctx.textAlign = 'center';
+            ctx.font = `${Math.max(15, scale * 2)}px Arial`;
+            ctx.fillText(`BB to Saddle XY: ${bbToSRC} mm`, 0, verticalOffset);
+            
+            // Restore context
+            ctx.restore();
+        }
+        
        
         
         // Draw effective STA arc from horizontal (only above Y axis)
@@ -714,7 +774,7 @@ class SeatpostCalculator {
         
         // Draw labels
         ctx.fillStyle = colors.text;
-        const fontSize = Math.max(14, scale * 2.5);
+        const fontSize = Math.max(15, scale * 2.5);
         ctx.font = `${fontSize}px Arial`;
         ctx.textAlign = 'left';
         
@@ -747,6 +807,16 @@ class SeatpostCalculator {
             const offsetX = Math.cos(perpAngle) * offsetDistance;
             const offsetY = Math.sin(perpAngle) * offsetDistance;
             
+            // Determine vertical offset based on eSTA vs STA comparison (opposite of BB to Saddle XY)
+            const effectiveSTANum = parseFloat(effectiveSTA);
+            const seatTubeAngleNum = parseFloat(seatTubeAngle);
+            const seatTubeWidth = 31.8 * scale; // Scaled seat tube width
+            let verticalOffset = (seatTubeWidth / 2 - 20 * scale); // Default for eSTA < STA (below seat tube)
+            
+            if (effectiveSTANum > seatTubeAngleNum) {
+                verticalOffset = (seatTubeWidth / 2 + 35 * scale); // For eSTA > STA (above seat tube)
+            }
+            
             // Save current context
             ctx.save();
             
@@ -757,7 +827,7 @@ class SeatpostCalculator {
             // Draw the text
             ctx.fillStyle = colors.text;
             ctx.textAlign = 'center';
-            ctx.fillText(`BB to Rail: ${bbToRail} mm`, 0, 0);
+            ctx.fillText(`BB to Rail: ${bbToRail} mm`, 0, verticalOffset);
             
             // Restore context
             ctx.restore();
@@ -843,8 +913,13 @@ class SeatpostCalculator {
                 const angleFromVertical = Math.atan2(saddleX, saddleY) * 180 / Math.PI;
                 const effectiveSTA = (90 - angleFromVertical).toFixed(1);
                 
+                // Calculate BB to SRC for theme change
+                const dx = saddleX;
+                const dy = saddleY;
+                const bbToSRCTheme = Math.round(Math.sqrt(dx * dx + dy * dy));
+                
                 // Redraw with new theme colors
-                this.updateVisualization(saddleX, saddleY, seatTubeAngle, seatTubeLength, bbToRail, exposedSeatpost, effectiveSTA);
+                this.updateVisualization(saddleX, saddleY, seatTubeAngle, seatTubeLength, bbToRail, bbToSRCTheme, exposedSeatpost, effectiveSTA);
             } else {
                 this.drawEmptyState();
             }

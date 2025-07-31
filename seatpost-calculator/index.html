@@ -207,7 +207,7 @@
 
         #seatpostCanvas {
             width: 100%;
-            height: 670px;
+            height: 705px;
             max-width: 400px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -244,16 +244,15 @@
             }
         }
     </style>
-
-
 </head>
+
+
 <body>
     <button class="hamburger-menu">
         <span></span>
         <span></span>
         <span></span>
     </button>
-
     
     <nav class="mobile-nav">
         <ul>
@@ -283,7 +282,7 @@
             </div>
         </div>
         <div class="theme-toggle">
-            <button id="mobileDarkModeToggle" class="dark-mode-toggle">
+            <button id="mobileDarkModeToggle" class="dark-mode-toggle" onclick="toggleTheme()">
                 <span class="toggle-icon">☀️</span>
                 <span class="toggle-text">Light Mode</span>
             </button>
@@ -328,7 +327,7 @@
             </div>
         </div>
         <div class="theme-toggle">
-            <button id="darkModeToggle" class="dark-mode-toggle">
+            <button id="darkModeToggle" class="dark-mode-toggle" onclick="toggleTheme()">
                 <span class="toggle-icon">☀️</span>
                 <span class="toggle-text">Light Mode</span>
             </button>
@@ -357,19 +356,19 @@
                     <h3 style="text-align: center;color: var(--text-color);margin-bottom: 1.5rem;">Input</h3>
                     <div class="input-row">
                         <label for="saddleX">Saddle X:</label>
-                        <input type="number" id="saddleX" placeholder="0">
+                        <input type="number" id="saddleX" placeholder="210">
                         <span>mm</span>
                     </div>
                     <div class="slider-row">
-                        <input type="range" id="saddleXSlider" min="100" max="275" value="0" step="1">
+                        <input type="range" id="saddleXSlider" min="100" max="275" value="210" step="1" placeholder="210">
                     </div>
                     <div class="input-row">
                         <label for="saddleY">Saddle Y:</label>
-                        <input type="number" id="saddleY" placeholder="0">
+                        <input type="number" id="saddleY" placeholder="650">
                         <span>mm</span>
                     </div>
                     <div class="slider-row" style="margin-bottom: 1rem;">
-                        <input type="range" id="saddleYSlider" min="400" max="900" value="0" step="1">
+                        <input type="range" id="saddleYSlider" min="400" max="900" value="650" step="1">
                     </div>
                     <div class="input-row">
                         <label for="seatTubeAngle">Seat Tube Angle:</label>
@@ -407,6 +406,10 @@
                         <span id="bbToRail">-- mm</span>
                     </div>
                     <div class="result-row">
+                        <label>BB to Saddle XY:</label>
+                        <span id="bbToSRC">-- mm</span>
+                    </div>
+                    <div class="result-row">
                         <label>Exposed Seatpost:</label>
                         <span id="exposedSeatpost">-- mm</span>
                     </div>
@@ -424,22 +427,25 @@
             <p style="line-height: 1.6; margin-bottom: 0.5rem;"><strong>Setback vs STA:</strong> The horizontal distance between the Saddle Rail Center (SRC) and the center of the clamp if you were using a straight / zero offset seatpost. A negative value indicates the SRC is further back than the clamp, and a positive value indicates the SRC is further forward than the clamp. As an example, if the value is -30mm, you'll more than likely require a 15-20mm setback seatpost to achieve that position.</p>
             <p style="line-height: 1.6; margin-bottom: 0.5rem;"><strong>Effective STA (eSTA):</strong> The actual seat tube angle created by drawing a line from the bottom bracket to SRC. This combined with "Setback vs STA" can be useful if building a custom bike when deciding if you want a straight or setback seatpost.</p>
             <p style="line-height: 1.6; margin-bottom: 0.5rem;"><strong>BB to Rail:</strong> The total distance from the bottom bracket to your saddle rails, measured along the seat tube angle. Useful for bikes with Integrated Seat Masts that may require cutting the seat mast, or for determining which seat mast/post length is needed (common situation with Trek bikes)</p>
+            <p style="line-height: 1.6; margin-bottom: 0.5rem;"><strong>BB to Saddle Rail Center (SRC):</strong> The direct distance from the bottom bracket to the saddle rail center coordinates (Saddle X, Saddle Y). This is calculated using the Pythagorean theorem and represents the straight-line distance from BB to SRC position.</p>
             <p style="line-height: 1.6; margin-bottom: 0;"><strong>Exposed Seatpost:</strong> The length of seatpost that extends above the frame's seat tube. This is calculated as BB to Rail minus the frame's specified seat tube length. This has implications on seatpost compliance/flex for comfort as well as determining how long of a seatpost may be needed.</p>
         </div>
     </div>
+
+    <!-- Custom Scripts -->
+    <script src="../js/version.js"></script>
+    <script src="../js/seatpost-calculator.js"></script>
+    <script src="../js/dark-mode.js"></script>
+    <script src="../js/mobile-menu.js"></script>
+    <script src="../js/calculator-header.js"></script>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    
-    <!-- Custom Scripts -->
-    <script src="../js/version.js"></script>
-    <script src="../js/dark-mode.js"></script>
-    <script src="../js/mobile-menu.js"></script>
-    <script src="../js/calculator-header.js"></script>
     <script src="../js/firebase-auth.js"></script>
-    <script src="../js/seatpost-calculator.js"></script>
+    
+
    
 </body>
 </html> 

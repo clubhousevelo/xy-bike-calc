@@ -1134,7 +1134,7 @@ class BikeCalculator {
             // Set stem configuration values
             card.querySelector('.stem-length').value = duplicatedBike.stemLength || 100;
             card.querySelector('.stem-angle').value = duplicatedBike.stemAngle !== undefined && duplicatedBike.stemAngle !== '' ? duplicatedBike.stemAngle : -6;
-            card.querySelector('.spacer-height').value = duplicatedBike.spacersHeight || 20;
+            card.querySelector('.spacer-height').value = duplicatedBike.spacersHeight !== undefined && duplicatedBike.spacersHeight !== '' ? duplicatedBike.spacersHeight : 20;
             
             // Set notes
             const notesTextarea = card.querySelector('.bike-notes');
@@ -1353,7 +1353,7 @@ class BikeCalculator {
                     stl: bike.stl || '',
                     stemLength: bike.stemLength || 100,
                     stemAngle: bike.stemAngle !== undefined && bike.stemAngle !== '' ? bike.stemAngle : -6,
-                    spacersHeight: bike.spacersHeight || 20,
+                    spacersHeight: bike.spacersHeight !== undefined && bike.spacersHeight !== '' ? bike.spacersHeight : 20,
                     handlebarReach: bike.handlebarReach || 80,
                     saddleSetback: bike.saddleSetback || 0,
                     saddleHeight: bike.saddleHeight || 0,
@@ -1445,7 +1445,7 @@ class BikeCalculator {
                                 // Set stem configuration values
                                 card.querySelector('.stem-length').value = bikeData.stemLength || 100;
                                 card.querySelector('.stem-angle').value = bikeData.stemAngle !== undefined && bikeData.stemAngle !== '' ? bikeData.stemAngle : -6;
-                                card.querySelector('.spacer-height').value = bikeData.spacersHeight || 20;
+                                card.querySelector('.spacer-height').value = bikeData.spacersHeight !== undefined && bikeData.spacersHeight !== '' ? bikeData.spacersHeight : 20;
                                 
                                 // For manual bikes, also set the brand/model/size
                                 if (bikeData.isManual) {
@@ -3117,7 +3117,7 @@ class BikeCalculator {
                 // Set stem configuration values
                 card.querySelector('.stem-length').value = bikeData.stemLength || 100;
                 card.querySelector('.stem-angle').value = bikeData.stemAngle !== undefined && bikeData.stemAngle !== '' ? bikeData.stemAngle : -6;
-                card.querySelector('.spacer-height').value = bikeData.spacersHeight || 20;
+                card.querySelector('.spacer-height').value = bikeData.spacersHeight !== undefined && bikeData.spacersHeight !== '' ? bikeData.spacersHeight : 20;
                 
                 // For manual bikes, set the brand/model/size
                 if (bikeData.isManual) {
@@ -3185,7 +3185,7 @@ class BikeCalculator {
                     // Set stem configuration values
                     card.querySelector('.stem-length').value = bikeData.stemLength || 100;
                     card.querySelector('.stem-angle').value = bikeData.stemAngle !== undefined && bikeData.stemAngle !== '' ? bikeData.stemAngle : -6;
-                    card.querySelector('.spacer-height').value = bikeData.spacersHeight || 20;
+                    card.querySelector('.spacer-height').value = bikeData.spacersHeight !== undefined && bikeData.spacersHeight !== '' ? bikeData.spacersHeight : 20;
                     
                     // For manual bikes, set the brand/model/size
                     if (bikeData.isManual) {
